@@ -41,7 +41,9 @@ from app.pipeline import (
     SAMPLE_RATE, MicRecorder, warmup_stt, vad_loop, stream_and_speak, load_silero,
 )
 from app.reachy import kill_stale_camera_holders, connect as connect_reachy
-from app.emotion import EmotionDetector
+from app.emotion import Emotion, EmotionDetector, EmotionResult
+from app.face_tracker import FaceTracker
+from app.movement_manager import MovementManager
 from app.movements import MovementController
 from rich.console import Console
 from rich.panel import Panel
@@ -175,13 +177,28 @@ def main():
 
     emotion_detector = None
     mover = None
+    movement_manager = None
+    face_tracker = None
     if config.emotion.enabled:
         emotion_detector = EmotionDetector()
         if emotion_detector.load():
-            console.print("  ✓ Emotion (distilbert-sst2, CPU)")
+            prov = emotion_detector.provider.replace("ExecutionProvider", "")
+            console.print(f"  ✓ Emotion (YuNet + FER+, {prov})")
             if reachy:
-                mover = MovementController(reachy, config.reachy.antenna_rest_position)
+                movement_manager = MovementManager(reachy)
+                movement_manager.start()
+                console.print("  ✓ Movement manager (100 Hz control loop)")
+
+                mover = MovementController(movement_manager, config.reachy.antenna_rest_position)
                 console.print("  ✓ Emotion movements enabled")
+
+                if config.reachy.face_tracking:
+                    face_tracker = FaceTracker(
+                        cam, emotion_detector, movement_manager,
+                        fps=config.reachy.tracking_fps,
+                    )
+                    face_tracker.start()
+                    console.print(f"  ✓ Face tracking ({config.reachy.tracking_fps:.0f} Hz)")
         else:
             console.print("  ⚠ Emotion detector unavailable")
             emotion_detector = None
@@ -234,8 +251,15 @@ def main():
                 continue
 
             emotion_tag = ""
+            emo = None
+            moved = False
             if emotion_detector:
-                emo = emotion_detector.detect(text)
+                frame_b64 = captured_frames[0] if captured_frames else None
+                emo = emotion_detector.detect(frame_b64) if frame_b64 else EmotionResult(Emotion.NEUTRAL, 0.0, 0.0)
+                if emo.emotion == Emotion.NEUTRAL:
+                    text_emo = emotion_detector.detect_text(text)
+                    if text_emo is not None:
+                        emo = EmotionResult(text_emo, 0.95, 0.0)
                 moved = mover.react(emo.emotion, emo.confidence) if mover else False
                 emotion_tag = (
                     f" | {emo.emotion.value} ({emo.confidence:.0%}, {emo.inference_ms:.0f}ms)"
@@ -243,10 +267,18 @@ def main():
                 )
 
             n_imgs = len(captured_frames)
-            console.print(
-                f'  [green]You:[/green] "{text}" '
-                f'[dim]({n_imgs} frame{"s" if n_imgs != 1 else ""} captured)[/dim]'
-            )
+            if emo and emo.emotion != Emotion.NEUTRAL:
+                console.print(
+                    f'  [green]You:[/green] "{text}" '
+                    f'[dim]({n_imgs} img)[/dim] '
+                    f'[bold yellow][{emo.emotion.value} {emo.confidence:.0%}][/bold yellow]'
+                    f'{"[bold cyan] ↺[/bold cyan]" if moved else ""}'
+                )
+            else:
+                console.print(
+                    f'  [green]You:[/green] "{text}" '
+                    f'[dim]({n_imgs} frame{"s" if n_imgs != 1 else ""} captured)[/dim]'
+                )
 
             console.print("  [magenta]Assistant:[/magenta] ", end="")
             sys.stdout.flush()
@@ -278,8 +310,13 @@ def main():
         pass
 
     _do_cleanup()
+    if face_tracker:
+        face_tracker.stop()
     if mover:
         mover.reset()
+    if movement_manager:
+        time.sleep(0.5)
+        movement_manager.stop()
     try:
         if stt:
             stt.unload()

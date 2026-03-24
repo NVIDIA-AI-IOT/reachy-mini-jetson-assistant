@@ -69,6 +69,27 @@ header{display:flex;align-items:center;justify-content:space-between;
 .live-badge.off{background:var(--border);color:var(--dim)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
 .cam-info{padding:4px 12px;font-size:.7rem;color:var(--dim);text-align:center}
+.cam-overlay{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
+
+/* Emotion */
+.emo-panel{flex-shrink:0}
+.emo-body{padding:10px 12px;display:flex;align-items:center;gap:12px}
+.emo-icon{font-size:1.8rem;line-height:1;flex-shrink:0;width:36px;text-align:center}
+.emo-details{flex:1;min-width:0}
+.emo-label{font-size:.85rem;font-weight:600;text-transform:capitalize}
+.emo-sub{font-size:.7rem;color:var(--dim);margin-top:2px}
+.emo-conf-bar{width:100%;height:4px;background:var(--bg);border-radius:2px;margin-top:4px;overflow:hidden}
+.emo-conf-fill{height:100%;border-radius:2px;transition:width .4s,background .4s}
+.emo-badge{display:inline-flex;align-items:center;gap:3px;font-size:.65rem;padding:1px 7px;
+  border-radius:10px;font-weight:600;vertical-align:middle;margin-left:6px}
+.emo-badge.face{background:#1a3d4e;color:#58a6ff}
+.emo-badge.text{background:#3d2e1a;color:var(--warn)}
+.emo-badge.moved{background:#1a3d00;color:var(--accent)}
+.emo-indicators{display:flex;gap:6px;flex-shrink:0}
+.emo-ind{font-size:.65rem;padding:2px 6px;border-radius:3px;font-weight:600}
+.emo-ind.face-yes{background:#1a3d00;color:var(--accent)}
+.emo-ind.face-no{background:var(--bg);color:var(--dim)}
+.emo-ind.move-yes{background:#1a3d4e;color:#58a6ff}
 
 /* Pipeline */
 .pipe-panel{flex-shrink:0}
@@ -150,9 +171,28 @@ footer{display:flex;align-items:center;gap:16px;padding:6px 20px;background:var(
       </div>
       <div class="cam-wrap">
         <img id="camImg" src="" alt="" style="display:none">
+        <canvas class="cam-overlay" id="faceOverlay"></canvas>
         <div class="cam-placeholder" id="camPlaceholder">Waiting for camera...</div>
       </div>
       <div class="cam-info" id="camInfo">No frames yet</div>
+    </div>
+
+    <!-- Emotion -->
+    <div class="panel emo-panel" id="emoPanel">
+      <div class="panel-hdr">
+        <span>Emotion</span>
+        <div class="emo-indicators">
+          <span class="emo-ind face-no" id="emoFaceInd">No Face</span>
+        </div>
+      </div>
+      <div class="emo-body">
+        <div class="emo-icon" id="emoIcon">--</div>
+        <div class="emo-details">
+          <div class="emo-label" id="emoLabel">Waiting...</div>
+          <div class="emo-sub" id="emoSub">Speak to detect emotion</div>
+          <div class="emo-conf-bar"><div class="emo-conf-fill" id="emoConfBar" style="width:0%;background:var(--dim)"></div></div>
+        </div>
+      </div>
     </div>
 
     <!-- Pipeline -->
@@ -191,6 +231,7 @@ footer{display:flex;align-items:center;gap:16px;padding:6px 20px;background:var(
         <span class="label">Status</span><span class="val" id="robotConn">--</span>
         <span class="label">Motors</span><span class="val" id="robotMotors">--</span>
         <span class="label">Head</span><span class="val" id="robotHead">--</span>
+        <span class="label">Tracking</span><span class="val" id="robotTracking">--</span>
       </div>
     </div>
 
@@ -254,6 +295,19 @@ footer{display:flex;align-items:center;gap:16px;padding:6px 20px;background:var(
   let currentAssistant = null;
   let reconnectTimer = null;
   let pttActive = false;
+  let faceBoxTimer = null;
+  const camNatural = {w:640, h:480};
+
+  const EMOTION_EMOJI = {
+    happy:'\u{1F60A}', sad:'\u{1F622}', surprised:'\u{1F632}', angry:'\u{1F621}',
+    disgusted:'\u{1F922}', scared:'\u{1F628}', contempt:'\u{1F612}',
+    greeting:'\u{1F44B}', farewell:'\u{1F44B}', neutral:'\u{1F610}',
+  };
+  const EMOTION_COLOR = {
+    happy:'#76b900', sad:'#58a6ff', surprised:'#d29922', angry:'#f85149',
+    disgusted:'#a371f7', scared:'#f778ba', contempt:'#8b949e',
+    greeting:'#76b900', farewell:'#76b900', neutral:'#30363d',
+  };
 
   /* ── WebSocket ────────────────────── */
   function connect(){
@@ -301,6 +355,10 @@ footer{display:flex;align-items:center;gap:16px;padding:6px 20px;background:var(
     $('liveBadge').className = 'live-badge on';
     frameCount++;
     $('camInfo').textContent = `Frame #${frameCount}`;
+    if(img.naturalWidth) { camNatural.w = img.naturalWidth; camNatural.h = img.naturalHeight; }
+    const cv = $('faceOverlay');
+    cv.width = cv.offsetWidth;
+    cv.height = cv.offsetHeight;
   }
 
   function onStatus(msg){
@@ -321,15 +379,32 @@ footer{display:flex;align-items:center;gap:16px;padding:6px 20px;background:var(
 
   function onTranscript(msg){
     hideEmpty();
+    const emo = msg.emotion || 'neutral';
+    const emoji = EMOTION_EMOJI[emo] || '';
+    const color = EMOTION_COLOR[emo] || 'var(--dim)';
+    const conf = msg.emotion_confidence != null ? msg.emotion_confidence : 0;
+
+    let emoBadgeHtml = '';
+    if(emo !== 'neutral' && msg.emotion){
+      const src = msg.face_detected ? 'face' : 'text';
+      emoBadgeHtml = `<span class="emo-badge ${src}" style="border:1px solid ${color}">${emoji} ${emo}`
+        + (msg.moved ? ' <span style="color:var(--accent)">moved</span>' : '')
+        + `</span>`;
+    }
+
     const div = document.createElement('div');
     div.className = 'msg user';
-    div.innerHTML = `<div class="content">${esc(msg.text)}</div>`
+    div.innerHTML = `<div class="content">${esc(msg.text)}${emoBadgeHtml}</div>`
       + `<div class="meta">${msg.stt_time ? 'STT ' + msg.stt_time.toFixed(1) + 's' : ''}`
-      + `${msg.duration ? ' &middot; ' + msg.duration.toFixed(1) + 's utterance' : ''}</div>`;
+      + `${msg.duration ? ' &middot; ' + msg.duration.toFixed(1) + 's utterance' : ''}`
+      + `${msg.emotion_ms ? ' &middot; EMO ' + msg.emotion_ms.toFixed(0) + 'ms' : ''}</div>`;
     $('messages').appendChild(div);
     scrollChat();
     msgIdx++;
     updateMsgCount();
+
+    updateEmotionPanel(emo, conf, msg.face_detected, msg.moved, msg.emotion_ms);
+    if(msg.face_box && msg.face_detected) drawFaceBox(msg.face_box);
   }
 
   function onToken(msg){
@@ -385,6 +460,14 @@ footer{display:flex;align-items:center;gap:16px;padding:6px 20px;background:var(
     $('robotConn').style.color = msg.connected ? 'var(--accent)' : 'var(--danger)';
     if(msg.motors != null) $('robotMotors').textContent = msg.motors ? 'Enabled' : 'Disabled';
     if(msg.head != null) $('robotHead').textContent = msg.head;
+    const trackEl = $('robotTracking');
+    if(msg.tracking != null){
+      trackEl.textContent = msg.tracking ? 'Active' : 'Idle';
+      trackEl.style.color = msg.tracking ? 'var(--accent)' : 'var(--dim)';
+    } else {
+      trackEl.textContent = 'Off';
+      trackEl.style.color = 'var(--dim)';
+    }
   }
 
   function onInfo(msg){
@@ -445,6 +528,75 @@ footer{display:flex;align-items:center;gap:16px;padding:6px 20px;background:var(
     if(!ws || ws.readyState !== WebSocket.OPEN) return;
     ws.send(JSON.stringify({type:'ptt', active:!pttActive}));
   });
+
+  /* ── Emotion UI ─────────────────── */
+  function updateEmotionPanel(emo, conf, faceDetected, moved, ms){
+    const emoji = EMOTION_EMOJI[emo] || '--';
+    const color = EMOTION_COLOR[emo] || 'var(--dim)';
+    $('emoIcon').textContent = emoji;
+    $('emoLabel').textContent = emo;
+    $('emoLabel').style.color = color;
+
+    const pct = Math.round(conf * 100);
+    $('emoConfBar').style.width = pct + '%';
+    $('emoConfBar').style.background = color;
+
+    const parts = [pct + '% confidence'];
+    if(ms) parts.push(ms.toFixed(0) + 'ms');
+    $('emoSub').textContent = parts.join(' \u00b7 ');
+
+    const ind = $('emoFaceInd');
+    if(faceDetected){
+      ind.className = 'emo-ind face-yes';
+      ind.textContent = 'Face';
+    } else {
+      ind.className = 'emo-ind face-no';
+      ind.textContent = 'No Face';
+    }
+
+    const indWrap = ind.parentElement;
+    let moveInd = indWrap.querySelector('.move-yes');
+    if(moved){
+      if(!moveInd){
+        moveInd = document.createElement('span');
+        moveInd.className = 'emo-ind move-yes';
+        indWrap.appendChild(moveInd);
+      }
+      moveInd.textContent = 'Moved';
+      moveInd.style.display = '';
+    } else if(moveInd){
+      moveInd.style.display = 'none';
+    }
+  }
+
+  function drawFaceBox(box){
+    const cv = $('faceOverlay');
+    const ctx = cv.getContext('2d');
+    const img = $('camImg');
+
+    const cw = cv.width, ch = cv.height;
+    if(!cw || !ch) return;
+
+    const nw = camNatural.w, nh = camNatural.h;
+    const scale = Math.min(cw / nw, ch / nh);
+    const ox = (cw - nw * scale) / 2;
+    const oy = (ch - nh * scale) / 2;
+
+    const x1 = ox + box[0] * scale;
+    const y1 = oy + box[1] * scale;
+    const x2 = ox + box[2] * scale;
+    const y2 = oy + box[3] * scale;
+
+    ctx.clearRect(0, 0, cw, ch);
+    ctx.strokeStyle = '#76b900';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 3]);
+    ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
+    ctx.setLineDash([]);
+
+    if(faceBoxTimer) clearTimeout(faceBoxTimer);
+    faceBoxTimer = setTimeout(() => { ctx.clearRect(0, 0, cw, ch); }, 3000);
+  }
 
   /* ── Helpers ──────────────────────── */
   function setBar(prefix, pct){

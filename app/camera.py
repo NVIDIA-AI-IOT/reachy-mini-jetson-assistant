@@ -201,6 +201,18 @@ class Camera:
             return None
         return self._encode_frame(frame)
 
+    def read_raw_live(self) -> Optional[np.ndarray]:
+        """Read a fresh raw BGR frame directly from camera hardware.
+
+        Returns the numpy array without JPEG encoding, for use by the
+        face tracker and other consumers that need raw pixel access.
+        """
+        if self._cap is None or not self._cap.isOpened():
+            return None
+        with self._cap_lock:
+            ret, frame = self._cap.read()
+        return frame if ret else None
+
     @property
     def buffer_count(self) -> int:
         with self._lock:

@@ -15,64 +15,83 @@
 
 """Movements — emotion-driven robot behaviors for Reachy Mini.
 
-Executes head poses and antenna movements on a background thread so the
-main pipeline is never blocked. A simple priority system ensures emotion
-reactions override idle tracking.
+Uses the reachy-mini SDK's RecordedMoves library (81 pre-recorded moves
+from pollen-robotics/reachy-mini-emotions-library) queued through the
+MovementManager's 100 Hz control loop for seamless blending with face
+tracking offsets.
 """
 
-import threading
+import random
 import time
 from typing import Optional
 
 import numpy as np
 
-try:
-    from scipy.spatial.transform import Rotation
-    HAS_SCIPY = True
-except ImportError:
-    HAS_SCIPY = False
-
 from app.emotion import Emotion
+from app.movement_manager import MovementManager
 
+try:
+    from reachy_mini.motion.goto import GotoMove
+    from reachy_mini.motion.recorded_move import RecordedMoves
+    from reachy_mini.utils.interpolation import InterpolationTechnique
 
-def _head_pose(roll: float = 0, pitch: float = 0, yaw: float = 0) -> np.ndarray:
-    """Build a 4x4 head pose from Euler angles in degrees."""
-    pose = np.eye(4)
-    if HAS_SCIPY:
-        pose[:3, :3] = Rotation.from_euler(
-            "xyz", [roll, pitch, yaw], degrees=True
-        ).as_matrix()
-    return pose
+    HAS_RECORDED_MOVES = True
+except ImportError:
+    HAS_RECORDED_MOVES = False
+
+_EMOTIONS_DATASET = "pollen-robotics/reachy-mini-emotions-library"
+_GOTO_TRANSITION_SECS = 0.5
+
+EMOTION_MOVES: dict[Emotion, list[str]] = {
+    Emotion.HAPPY: [
+        "cheerful1", "laughing1", "laughing2",
+        "relief1", "relief2", "enthusiastic1", "proud1",
+    ],
+    Emotion.SAD: ["sad1", "sad2", "downcast1", "lonely1", "resigned1"],
+    Emotion.SURPRISED: ["surprised1", "surprised2", "amazed1"],
+    Emotion.ANGRY: [
+        "furious1", "rage1", "irritated1", "irritated2",
+        "displeased1", "displeased2",
+    ],
+    Emotion.DISGUSTED: ["disgusted1", "contempt1", "go_away1"],
+    Emotion.SCARED: ["fear1", "scared1", "anxiety1"],
+    Emotion.CONTEMPT: ["contempt1", "indifferent1", "reprimand1", "boredom1"],
+    Emotion.GREETING: ["welcoming1", "welcoming2", "come1"],
+    Emotion.FAREWELL: ["calming1", "serenity1", "understanding1"],
+}
 
 
 class MovementController:
-    """Non-blocking emotion-driven movement for Reachy Mini.
+    """Emotion-driven movement controller for Reachy Mini.
 
-    All movements execute on a background thread. Calling react() while
-    a previous movement is running will cancel it and start the new one.
-    Duplicate emotions and low-confidence detections are suppressed.
+    Queues GotoMove transitions and RecordedMoves into the
+    MovementManager so movements blend smoothly with face tracking.
+    No background threads — the MovementManager's 100 Hz loop
+    handles execution.
     """
 
     MIN_CONFIDENCE = 0.75
     COOLDOWN_SECS = 8.0
 
-    def __init__(self, reachy, antenna_rest: list[float] | None = None):
-        self._reachy = reachy
-        self._antenna_rest = antenna_rest or [0.0, 0.0]
-        self._lock = threading.Lock()
-        self._cancel = threading.Event()
-        self._thread: Optional[threading.Thread] = None
+    def __init__(self, manager: MovementManager, antenna_rest: list[float] | None = None):
+        self._manager = manager
+        self._antenna_rest = np.array(antenna_rest or [0.0, 0.0], dtype=np.float64)
         self._last_emotion: Optional[Emotion] = None
         self._last_react_time: float = 0.0
+        self._moves: Optional["RecordedMoves"] = None
+
+        if HAS_RECORDED_MOVES:
+            try:
+                self._moves = RecordedMoves(_EMOTIONS_DATASET)
+            except Exception as e:
+                print(f"  RecordedMoves load failed: {e}")
 
     def react(self, emotion: Emotion, confidence: float = 1.0) -> bool:
-        """Trigger a movement sequence for the given emotion (non-blocking).
+        """Queue a recorded move for the given emotion.
 
-        Returns True if a movement was triggered, False if suppressed.
-        Suppressed when: NEUTRAL, confidence too low, same emotion within
-        cooldown, or no reachy connected.
+        Returns True if a movement was queued, False if suppressed.
         """
-        if self._reachy is None:
+        if self._manager is None or self._moves is None:
             return False
 
         if emotion == Emotion.NEUTRAL:
@@ -82,152 +101,65 @@ class MovementController:
             return False
 
         now = time.time()
-        if (emotion == self._last_emotion
-                and (now - self._last_react_time) < self.COOLDOWN_SECS):
+        if (
+            emotion == self._last_emotion
+            and (now - self._last_react_time) < self.COOLDOWN_SECS
+        ):
             return False
 
-        self._cancel.set()
-        if self._thread and self._thread.is_alive():
-            self._thread.join(timeout=0.5)
+        move_names = EMOTION_MOVES.get(emotion)
+        if not move_names:
+            return False
 
-        self._cancel.clear()
+        available = [n for n in move_names if n in self._moves.moves]
+        if not available:
+            return False
+
         self._last_emotion = emotion
         self._last_react_time = now
-        self._thread = threading.Thread(
-            target=self._run_sequence, args=(emotion,), daemon=True
+        move_name = random.choice(available)
+
+        recorded = self._moves.get(move_name)
+
+        start_head, start_ant, start_yaw = self._manager.current_pose
+        target_head, target_ant, target_yaw = recorded.evaluate(0.0)
+
+        goto = GotoMove(
+            start_head_pose=start_head,
+            target_head_pose=target_head,
+            start_antennas=start_ant,
+            target_antennas=np.asarray(target_ant, dtype=np.float64),
+            start_body_yaw=start_yaw,
+            target_body_yaw=float(target_yaw),
+            duration=_GOTO_TRANSITION_SECS,
+            method=InterpolationTechnique.MIN_JERK,
         )
-        self._thread.start()
+
+        self._manager.queue_move(goto)
+        self._manager.queue_move(recorded)
         return True
 
     def reset(self) -> None:
-        """Return head and antennas to neutral position."""
-        if self._reachy is None:
-            return
-        self._cancel.set()
-        if self._thread and self._thread.is_alive():
-            self._thread.join(timeout=0.5)
-        self._cancel.clear()
-        try:
-            self._reachy.goto_target(_head_pose(), duration=0.4)
-            self._reachy.set_target_antenna_joint_positions(self._antenna_rest)
-        except Exception:
-            pass
+        """Clear all queued moves and return to neutral."""
+        self._manager.clear_queue()
 
-    def _run_sequence(self, emotion: Emotion) -> None:
-        try:
-            handler = _SEQUENCES.get(emotion, _seq_neutral)
-            handler(self._reachy, self._cancel, self._antenna_rest)
-        except Exception:
-            pass
+        start_head, start_ant, start_yaw = self._manager.current_pose
+        goto = GotoMove(
+            start_head_pose=start_head,
+            target_head_pose=np.eye(4, dtype=np.float64),
+            start_antennas=start_ant,
+            target_antennas=self._antenna_rest.copy(),
+            start_body_yaw=start_yaw,
+            target_body_yaw=0.0,
+            duration=0.4,
+            method=InterpolationTechnique.MIN_JERK,
+        )
+        self._manager.queue_move(goto)
 
     @property
     def is_moving(self) -> bool:
-        return self._thread is not None and self._thread.is_alive()
+        return self._manager.is_moving
 
     @property
     def last_emotion(self) -> Optional[Emotion]:
         return self._last_emotion
-
-
-def _wait(cancel: threading.Event, secs: float) -> bool:
-    """Sleep that respects cancellation. Returns True if cancelled."""
-    return cancel.wait(timeout=secs)
-
-
-def _seq_happy(reachy, cancel: threading.Event, rest: list[float]) -> None:
-    reachy.goto_target(_head_pose(pitch=-8), duration=0.3)
-    if _wait(cancel, 0.2):
-        return
-    reachy.set_target_antenna_joint_positions([0.4, -0.4])
-    if _wait(cancel, 0.3):
-        return
-    reachy.goto_target(_head_pose(pitch=5), duration=0.2)
-    if _wait(cancel, 0.2):
-        return
-    reachy.goto_target(_head_pose(), duration=0.3)
-    reachy.set_target_antenna_joint_positions(rest)
-
-
-def _seq_sad(reachy, cancel: threading.Event, rest: list[float]) -> None:
-    reachy.goto_target(_head_pose(pitch=12), duration=0.6)
-    reachy.set_target_antenna_joint_positions([-0.3, -0.3])
-    if _wait(cancel, 1.0):
-        return
-    reachy.goto_target(_head_pose(), duration=0.5)
-    reachy.set_target_antenna_joint_positions(rest)
-
-
-def _seq_curious(reachy, cancel: threading.Event, rest: list[float]) -> None:
-    reachy.goto_target(_head_pose(roll=10, pitch=-3), duration=0.4)
-    if _wait(cancel, 0.6):
-        return
-    reachy.goto_target(_head_pose(), duration=0.3)
-    reachy.set_target_antenna_joint_positions(rest)
-
-
-def _seq_excited(reachy, cancel: threading.Event, rest: list[float]) -> None:
-    reachy.goto_target(_head_pose(pitch=-10), duration=0.2)
-    for _ in range(3):
-        if _wait(cancel, 0.15):
-            return
-        reachy.set_target_antenna_joint_positions([0.6, -0.6])
-        if _wait(cancel, 0.15):
-            return
-        reachy.set_target_antenna_joint_positions([-0.6, 0.6])
-    reachy.goto_target(_head_pose(), duration=0.3)
-    reachy.set_target_antenna_joint_positions(rest)
-
-
-def _seq_greeting(reachy, cancel: threading.Event, rest: list[float]) -> None:
-    reachy.goto_target(_head_pose(pitch=-10), duration=0.3)
-    reachy.set_target_antenna_joint_positions([0.5, -0.5])
-    if _wait(cancel, 0.4):
-        return
-    reachy.set_target_antenna_joint_positions([-0.5, 0.5])
-    if _wait(cancel, 0.3):
-        return
-    reachy.goto_target(_head_pose(), duration=0.3)
-    reachy.set_target_antenna_joint_positions(rest)
-
-
-def _seq_farewell(reachy, cancel: threading.Event, rest: list[float]) -> None:
-    reachy.goto_target(_head_pose(pitch=-5), duration=0.4)
-    if _wait(cancel, 0.3):
-        return
-    reachy.goto_target(_head_pose(pitch=5), duration=0.3)
-    if _wait(cancel, 0.3):
-        return
-    reachy.set_target_antenna_joint_positions([-0.2, -0.2])
-    if _wait(cancel, 0.5):
-        return
-    reachy.goto_target(_head_pose(), duration=0.4)
-    reachy.set_target_antenna_joint_positions(rest)
-
-
-def _seq_grateful(reachy, cancel: threading.Event, rest: list[float]) -> None:
-    reachy.goto_target(_head_pose(pitch=-10), duration=0.3)
-    if _wait(cancel, 0.3):
-        return
-    reachy.goto_target(_head_pose(pitch=5), duration=0.2)
-    if _wait(cancel, 0.15):
-        return
-    reachy.goto_target(_head_pose(pitch=-5), duration=0.2)
-    if _wait(cancel, 0.3):
-        return
-    reachy.goto_target(_head_pose(), duration=0.3)
-
-
-def _seq_neutral(reachy, cancel: threading.Event, rest: list[float]) -> None:
-    pass
-
-
-_SEQUENCES = {
-    Emotion.HAPPY: _seq_happy,
-    Emotion.SAD: _seq_sad,
-    Emotion.CURIOUS: _seq_curious,
-    Emotion.EXCITED: _seq_excited,
-    Emotion.GREETING: _seq_greeting,
-    Emotion.FAREWELL: _seq_farewell,
-    Emotion.GRATEFUL: _seq_grateful,
-    Emotion.NEUTRAL: _seq_neutral,
-}

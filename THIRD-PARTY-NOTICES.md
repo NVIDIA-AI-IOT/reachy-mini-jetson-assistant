@@ -15,7 +15,6 @@ This project uses the following third-party open source software.
 | httpx | BSD-3-Clause | https://github.com/encode/httpx |
 | faster-whisper | MIT | https://github.com/SYSTRAN/faster-whisper |
 | kokoro-onnx | MIT | https://github.com/thewh1teagle/kokoro-onnx |
-| tokenizers | Apache-2.0 | https://github.com/huggingface/tokenizers |
 | opencv-python-headless | Apache-2.0 | https://github.com/opencv/opencv-python |
 | ChromaDB | Apache-2.0 | https://github.com/chroma-core/chroma |
 | FastAPI | MIT | https://github.com/fastapi/fastapi |
@@ -70,5 +69,7 @@ The following run as separate Docker containers and communicate via HTTP API:
 | Cosmos-Reason2-2B | Apache-2.0 | https://huggingface.co/nvidia/Cosmos-Reason2-2B |
 | faster-whisper (small.en) | MIT | https://huggingface.co/Systran/faster-whisper-small.en |
 | Kokoro v1.0 | Apache-2.0 | https://huggingface.co/hexgrad/Kokoro-82M |
-| DistilBERT SST-2 | Apache-2.0 | https://huggingface.co/distilbert/distilbert-base-uncased-finetuned-sst-2-english |
+| YuNet face detection | MIT | https://huggingface.co/opencv/face_detection_yunet |
+| FER+ int8 emotion | MIT | https://huggingface.co/onnxmodelzoo/emotion-ferplus-12-int8 |
+| reachy-mini-emotions-library | Apache-2.0 | https://huggingface.co/datasets/pollen-robotics/reachy-mini-emotions-library |
 | bge-small-en-v1.5 | MIT | https://huggingface.co/BAAI/bge-small-en-v1.5 |
