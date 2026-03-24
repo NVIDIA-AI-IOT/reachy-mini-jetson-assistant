@@ -22,8 +22,8 @@ faster-whisper>=1.0.0
 # TTS — Kokoro (GPU via ONNX Runtime, runs in subprocess for GPL isolation)
 kokoro-onnx>=0.4.0
 
-# Emotion — lightweight sentiment classifier (ONNX + fast tokenizer)
-tokenizers>=0.15.0
+# Emotion — face detection (YOLO) + emotion classification (FER+), both via ONNX Runtime
+# No extra pip dependencies; uses opencv + onnxruntime already listed
 
 # Vision — camera capture for VLM
 opencv-python-headless>=4.8.0

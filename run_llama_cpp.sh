@@ -150,16 +150,44 @@ fi
 MODEL_DIR="$(dirname "$LOCAL_MODEL")"
 MODEL_BASE="$(basename "$LOCAL_MODEL")"
 
-# Auto-detect multimodal projector (mmproj) for VLMs
+# Auto-detect multimodal projector (mmproj) for VLMs.
+# Only attach an mmproj whose filename contains part of the model name,
+# so e.g. mmproj-Cosmos-Reason2-2B-F16.gguf matches Cosmos-Reason2-2B-Q4_K_M.gguf
+# but not Qwen3.5-0.8B-Q5_K_M.gguf.
 MMPROJ_ARGS=""
 if [ "${EMBED:-0}" != "1" ]; then
+    # Extract model family from filename (strip quant suffix like -Q4_K_M)
+    MODEL_FAMILY="$(echo "$MODEL_BASE" | sed -E 's/-[QFBqfb][0-9_]+[A-Za-z]*\.gguf$//')"
+
+    # Try mmproj matching the model family first
     for f in "$MODEL_DIR"/mmproj*.gguf; do
         [ -f "$f" ] || continue
-        MMPROJ_BASE="$(basename "$f")"
-        MMPROJ_ARGS="--mmproj /models/$MMPROJ_BASE"
-        echo "Vision: $MMPROJ_BASE (multimodal projector)"
-        break
+        case "$(basename "$f")" in
+            *"$MODEL_FAMILY"*)
+                MMPROJ_BASE="$(basename "$f")"
+                MMPROJ_ARGS="--mmproj /models/$MMPROJ_BASE"
+                echo "Vision: $MMPROJ_BASE (multimodal projector)"
+                break
+                ;;
+        esac
     done
+
+    # Fall back to any generic mmproj (no model name in filename, e.g. mmproj-F16.gguf)
+    if [ -z "$MMPROJ_ARGS" ]; then
+        for f in "$MODEL_DIR"/mmproj*.gguf; do
+            [ -f "$f" ] || continue
+            fname="$(basename "$f")"
+            # Generic mmproj: short name like mmproj-F16.gguf or mmproj-BF16.gguf
+            case "$fname" in
+                mmproj-[FBfb]*.gguf)
+                    MMPROJ_BASE="$fname"
+                    MMPROJ_ARGS="--mmproj /models/$MMPROJ_BASE"
+                    echo "Vision: $MMPROJ_BASE (generic multimodal projector)"
+                    break
+                    ;;
+            esac
+        done
+    fi
 fi
 
 echo "Model : $MODEL_BASE (local)"
