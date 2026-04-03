@@ -68,7 +68,6 @@ class VADConfig:
     chunk_ms: int = 30
     min_utterance_secs: float = 0.3
     min_utterance_rms: float = 0.005
-    use_silero: bool = False
     silero_threshold: float = 0.5
 
 

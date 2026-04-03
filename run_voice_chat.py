@@ -16,7 +16,7 @@
 
 """
 Voice Chat — speak anytime, dynamic recording.
-Mic -> Silero/energy VAD -> STT -> (RAG) -> LLM stream -> TTS stream -> Speaker
+Mic -> Silero VAD -> STT -> (RAG) -> LLM stream -> TTS stream -> Speaker
 
 Usage:
   python3 run_voice_chat.py            # with RAG
@@ -77,11 +77,7 @@ def main():
     console.print("    CUDA warmup...", end=" ")
     console.print(f"done ({warmup_stt(stt):.1f}s)")
 
-    silero_model = None
-    if config.vad.use_silero:
-        silero_model = load_silero(console)
-    else:
-        console.print("  [dim]Silero VAD disabled, using energy-only VAD[/dim]")
+    silero_model = load_silero(console)
 
     llm = LLM(
         model=config.llm.model, base_url=config.llm.base_url,
@@ -121,7 +117,7 @@ def main():
             console.print(f"  ⚠ RAG: {e}")
 
     # ── Start mic ────────────────────────────────────────────────
-    effective_chunk_ms = 32 if silero_model else config.vad.chunk_ms
+    effective_chunk_ms = 32
     mic = MicRecorder(console, chunk_ms=effective_chunk_ms)
     if not mic.start(hw, config.audio.input_device or "Reachy Mini Audio"):
         console.print("[red]Cannot start recording! Check mic.[/red]")

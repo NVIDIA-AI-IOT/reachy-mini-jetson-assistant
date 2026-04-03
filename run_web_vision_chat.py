@@ -16,7 +16,7 @@
 
 """
 Web Vision Chat — browser UI + terminal output simultaneously.
-Mic -> Silero/energy VAD -> [camera] -> STT -> VLM -> TTS -> Speaker
+Mic -> Silero VAD -> [camera] -> STT -> VLM -> TTS -> Speaker
                + WebSocket broadcast to connected browsers.
 
 Usage:
@@ -170,8 +170,6 @@ def main():
     stt = None
     llm = None
     tts = None
-    silero_model = None
-
     # ── Cleanup handler ──────────────────────────────────────────
     _cleanup_done = threading.Event()
 
@@ -222,10 +220,7 @@ def main():
     console.print("    CUDA warmup...", end=" ")
     console.print(f"done ({warmup_stt(stt):.1f}s)")
 
-    if config.vad.use_silero:
-        silero_model = load_silero(console)
-    else:
-        console.print("  [dim]Silero VAD disabled, using energy-only VAD[/dim]")
+    silero_model = load_silero(console)
 
     vision_system_prompt = config.vision.system_prompt
     vision_few_shot = config.vision.few_shot or []
@@ -276,7 +271,7 @@ def main():
             emotion_detector = None
 
     # ── Start mic ────────────────────────────────────────────────
-    effective_chunk_ms = 32 if silero_model else config.vad.chunk_ms
+    effective_chunk_ms = 32
     mic = MicRecorder(console, chunk_ms=effective_chunk_ms)
     if not mic.start(hw, config.audio.input_device or "Reachy Mini Audio"):
         console.print("[red]Cannot start recording! Check mic.[/red]")
@@ -298,7 +293,7 @@ def main():
         "stt": f"faster-whisper ({config.stt.model})",
         "vlm": llm.model,
         "tts": f"{tts.backend_name} ({tts.voice})" if tts else "unavailable",
-        "vad": "Silero" if silero_model else "Energy",
+        "vad": "Silero",
     }
 
     threading.Thread(
@@ -316,7 +311,7 @@ def main():
         "ui_fps": config.web.ui_fps,
         "jpeg_quality": config.vision.jpeg_quality,
         "resolution": f"{config.vision.width}x{config.vision.height}",
-        "silero_threshold": config.vad.silero_threshold if config.vad.use_silero else None,
+        "silero_threshold": config.vad.silero_threshold,
         "beam_size": config.stt.beam_size,
     }
     broadcaster.send({

@@ -16,7 +16,7 @@
 
 """
 Vision Chat — speak + see, the VLM describes what it sees.
-Mic -> Silero/energy VAD -> [camera capture] -> STT -> VLM (text + images) -> TTS -> Speaker
+Mic -> Silero VAD -> [camera capture] -> STT -> VLM (text + images) -> TTS -> Speaker
 
 Usage:
   python3 run_vision_chat.py
@@ -98,8 +98,6 @@ def main():
     stt = None
     llm = None
     tts = None
-    silero_model = None
-
     # ── Cleanup handler ──────────────────────────────────────────
     _cleanup_done = threading.Event()
 
@@ -150,10 +148,7 @@ def main():
     console.print("    CUDA warmup...", end=" ")
     console.print(f"done ({warmup_stt(stt):.1f}s)")
 
-    if config.vad.use_silero:
-        silero_model = load_silero(console)
-    else:
-        console.print("  [dim]Silero VAD disabled, using energy-only VAD[/dim]")
+    silero_model = load_silero(console)
 
     vision_system_prompt = config.vision.system_prompt
     vision_few_shot = config.vision.few_shot or []
@@ -204,7 +199,7 @@ def main():
             emotion_detector = None
 
     # ── Start mic ────────────────────────────────────────────────
-    effective_chunk_ms = 32 if silero_model else config.vad.chunk_ms
+    effective_chunk_ms = 32
     mic = MicRecorder(console, chunk_ms=effective_chunk_ms)
     if not mic.start(hw, config.audio.input_device or "Reachy Mini Audio"):
         console.print("[red]Cannot start recording! Check mic.[/red]")

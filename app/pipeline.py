@@ -173,23 +173,14 @@ class SileroVAD:
         self._model.reset_states()
 
 
-def load_silero(console: Optional[Console] = None) -> Optional[SileroVAD]:
-    """Try to load Silero VAD. Returns wrapper or None on failure."""
-    try:
-        t0 = time.perf_counter()
-        vad = SileroVAD()
-        dt = time.perf_counter() - t0
-        if console:
-            console.print(f"  ✓ Silero VAD (ONNX, loaded in {dt:.1f}s)")
-        return vad
-    except ImportError:
-        if console:
-            console.print("  [yellow]⚠ silero-vad not installed (pip install silero-vad), using energy VAD[/yellow]")
-        return None
-    except Exception as e:
-        if console:
-            console.print(f"  [yellow]⚠ Silero VAD failed to load: {e}, using energy VAD[/yellow]")
-        return None
+def load_silero(console: Optional[Console] = None) -> SileroVAD:
+    """Load Silero VAD. Raises if unavailable (silero-vad is required)."""
+    t0 = time.perf_counter()
+    vad = SileroVAD()
+    dt = time.perf_counter() - t0
+    if console:
+        console.print(f"  ✓ Silero VAD (ONNX, loaded in {dt:.1f}s)")
+    return vad
 
 
 # ── Speech segment ────────────────────────────────────────────────
@@ -324,23 +315,23 @@ def vad_loop(
 ) -> Iterator[SpeechSegment]:
     """Yields SpeechSegment each time a complete utterance is detected.
 
-    When *silero* is provided, speech detection uses the neural model's
-    probability (much better at rejecting non-speech sounds like coughs,
-    keyboard clicks, and ambient noise).  RMS is still used as a cheap
-    pre-filter to skip dead silence without invoking the model.
+    Uses Silero VAD for speech detection with RMS as a cheap pre-filter
+    to skip dead silence without invoking the model.
 
     The caller is responsible for calling mic.resume() after processing
     each segment (so audio stays paused during STT/LLM/TTS).
     """
+    if silero is None:
+        raise RuntimeError("Silero VAD is required (pip install silero-vad)")
+
     cfg = vad_cfg or VADConfig()
     chunk_ms = cfg.chunk_ms
     silence_chunks = int(cfg.silence_duration_ms / chunk_ms)
     lookback_chunks = int(cfg.lookback_ms / chunk_ms)
     max_chunks = int(cfg.max_speech_secs * 1000 / chunk_ms)
 
-    use_silero = silero is not None
     silero_thresh = cfg.silero_threshold
-    rms_silence_floor = 0.002  # below this, skip Silero inference entirely
+    rms_silence_floor = 0.002
 
     lookback: deque[bytes] = deque(maxlen=lookback_chunks)
     speech_raw: list[bytes] = []
@@ -356,13 +347,10 @@ def vad_loop(
 
         rms = chunk_rms(raw)
 
-        if use_silero:
-            if rms < rms_silence_floor:
-                is_speech = False
-            else:
-                is_speech = silero(raw) > silero_thresh
+        if rms < rms_silence_floor:
+            is_speech = False
         else:
-            is_speech = rms > cfg.speech_threshold
+            is_speech = silero(raw) > silero_thresh
 
         if is_speech:
             silence_count = 0
@@ -392,8 +380,7 @@ def vad_loop(
         lookback.clear()
         speech_end_t = time.monotonic()
 
-        if use_silero:
-            silero.reset()
+        silero.reset()
 
         dur_s = len(captured) * chunk_ms / 1000
         cap_rms = chunk_rms(b"".join(captured))

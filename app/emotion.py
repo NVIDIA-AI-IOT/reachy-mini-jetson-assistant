@@ -16,7 +16,7 @@
 """Emotion detection — vision-based face emotion recognition.
 
 Two-stage pipeline:
-  1. YuNet (MIT, OpenCV Zoo) — face detection via cv2.FaceDetectorYN
+  1. YuNet (MIT, OpenCV Zoo) — face detection via cv2.FaceDetectorYN (CPU)
   2. FER+ int8 (MIT, ONNX Model Zoo) — emotion classification via ONNX Runtime
 
 Reacts to facial expressions captured by the camera, with text-based
@@ -200,11 +200,8 @@ def _pick_best_face(faces: np.ndarray) -> Optional[tuple[int, int, int, int]]:
 class EmotionDetector:
     """Vision-based face emotion detector.
 
-    Stage 1: YuNet (MIT, OpenCV Zoo) — face detection via cv2.FaceDetectorYN.
+    Stage 1: YuNet (MIT, OpenCV Zoo) — face detection via cv2.FaceDetectorYN (CPU).
     Stage 2: FER+ int8 (MIT, ONNX Model Zoo) — emotion classification via ONNX Runtime.
-
-    YuNet runs on CPU via OpenCV DNN (~2 ms for 233 KB model).
-    FER+ runs on GPU (CUDA/TensorRT) or CPU via ONNX Runtime.
     """
 
     def __init__(self):
