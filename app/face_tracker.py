@@ -20,7 +20,6 @@ Runs YuNet face detection at ~30 Hz and feeds proportional yaw/pitch
 offsets into MovementManager as a secondary additive layer.
 """
 
-import math
 import threading
 import time
 from typing import Optional
@@ -33,10 +32,12 @@ from app.camera import Camera
 from app.emotion import EmotionDetector
 from app.movement_manager import MovementManager
 
-MAX_YAW_DEG = 25.0
-MAX_PITCH_DEG = 15.0
-GAIN = 0.6
+MAX_YAW_DEG = 15.0
+MAX_PITCH_DEG = 8.0
+GAIN = 0.3
 
+_EMA_ALPHA = 0.05
+_DEAD_ZONE_DEG = 0.3
 _FACE_LOST_DELAY = 2.0
 _FACE_LOST_BLEND_SECS = 1.0
 
@@ -51,6 +52,9 @@ class FaceTracker:
     proportional yaw/pitch offsets fed into the MovementManager's
     secondary offset layer.
 
+    An EMA (exponential moving average) filter on yaw/pitch prevents
+    frame-to-frame bbox jitter from translating into motor vibration.
+
     Visual servoing converges naturally because the camera rides on
     the head — no camera intrinsics needed.
 
@@ -63,7 +67,7 @@ class FaceTracker:
         camera: Camera,
         detector: EmotionDetector,
         manager: MovementManager,
-        fps: float = 30.0,
+        fps: float = 10.0,
     ):
         self._camera = camera
         self._detector = detector
@@ -77,6 +81,13 @@ class FaceTracker:
         self._last_offset = _IDENTITY_4x4.copy()
         self._face_lost_time: Optional[float] = None
         self._tracking_active = False
+
+        self._smooth_yaw = 0.0
+        self._smooth_pitch = 0.0
+
+        self._last_face_box: Optional[tuple[int, int, int, int]] = None
+        self._face_detected = False
+        self._face_state_lock = threading.Lock()
 
     # ── lifecycle ─────────────────────────────────────────────────
 
@@ -103,6 +114,16 @@ class FaceTracker:
     def is_tracking(self) -> bool:
         return self._tracking_active
 
+    @property
+    def face_detected(self) -> bool:
+        with self._face_state_lock:
+            return self._face_detected
+
+    @property
+    def last_face_box(self) -> Optional[tuple[int, int, int, int]]:
+        with self._face_state_lock:
+            return self._last_face_box
+
     # ── main loop ─────────────────────────────────────────────────
 
     def _loop(self) -> None:
@@ -125,6 +146,10 @@ class FaceTracker:
         box = self._detector.detect_face(frame)
         now = time.monotonic()
 
+        with self._face_state_lock:
+            self._face_detected = box is not None
+            self._last_face_box = box
+
         if box is not None:
             self._face_lost_time = None
             self._tracking_active = True
@@ -137,11 +162,22 @@ class FaceTracker:
             offset_x = (face_cx - w / 2.0) / (w / 2.0)
             offset_y = (face_cy - h / 2.0) / (h / 2.0)
 
-            yaw_deg = -offset_x * MAX_YAW_DEG * GAIN
-            pitch_deg = -offset_y * MAX_PITCH_DEG * GAIN
+            raw_yaw = -offset_x * MAX_YAW_DEG * GAIN
+            raw_pitch = -offset_y * MAX_PITCH_DEG * GAIN
+
+            new_yaw = self._smooth_yaw + _EMA_ALPHA * (raw_yaw - self._smooth_yaw)
+            new_pitch = self._smooth_pitch + _EMA_ALPHA * (raw_pitch - self._smooth_pitch)
+
+            dy = abs(new_yaw - self._smooth_yaw)
+            dp = abs(new_pitch - self._smooth_pitch)
+            if dy < _DEAD_ZONE_DEG and dp < _DEAD_ZONE_DEG:
+                return
+
+            self._smooth_yaw = new_yaw
+            self._smooth_pitch = new_pitch
 
             offset_mat = create_head_pose(
-                yaw=yaw_deg, pitch=pitch_deg, degrees=True,
+                yaw=self._smooth_yaw, pitch=self._smooth_pitch, degrees=True,
             )
             self._last_offset = offset_mat
             self._manager.set_face_offsets(offset_mat)
@@ -168,6 +204,8 @@ class FaceTracker:
         if blend_t >= 1.0:
             self._last_offset = _IDENTITY_4x4.copy()
             self._tracking_active = False
+            self._smooth_yaw = 0.0
+            self._smooth_pitch = 0.0
 
 
 def _blend_offset_to_identity(

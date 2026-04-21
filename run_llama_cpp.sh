@@ -157,7 +157,7 @@ MODEL_BASE="$(basename "$LOCAL_MODEL")"
 MMPROJ_ARGS=""
 if [ "${EMBED:-0}" != "1" ]; then
     # Extract model family from filename (strip quant suffix like -Q4_K_M)
-    MODEL_FAMILY="$(echo "$MODEL_BASE" | sed -E 's/-[QFBqfb][0-9_]+[A-Za-z]*\.gguf$//')"
+    MODEL_FAMILY="$(echo "$MODEL_BASE" | sed -E 's/-[QFBqfb][0-9_A-Za-z]+\.gguf$//')"
 
     # Try mmproj matching the model family first
     for f in "$MODEL_DIR"/mmproj*.gguf; do

@@ -40,7 +40,7 @@ from reachy_mini.utils.interpolation import (
 
 _TICK_HZ = 100
 _TICK_PERIOD = 1.0 / _TICK_HZ
-_IDLE_BEFORE_BREATHING = 0.3
+_IDLE_BEFORE_BREATHING = float("inf")
 
 _NEUTRAL_HEAD = np.eye(4, dtype=np.float64)
 _NEUTRAL_ANTENNAS = np.array([0.0, 0.0], dtype=np.float64)
@@ -109,11 +109,13 @@ class MovementManager:
         self._last_body_yaw: float = _NEUTRAL_BODY_YAW
 
         self._face_offsets: npt.NDArray[np.float64] = _IDENTITY_4x4.copy()
+        self._face_offsets_dirty: bool = False
         self._face_lock = threading.Lock()
 
         self._lock = threading.Lock()
         self._running = False
         self._thread: Optional[threading.Thread] = None
+        self._sent_idle: bool = False
 
     # ── lifecycle ─────────────────────────────────────────────────
 
@@ -142,22 +144,26 @@ class MovementManager:
                 self._queue.clear()
                 self._is_breathing = False
             self._queue.append(move)
+            self._sent_idle = False
 
     def clear_queue(self) -> None:
-        """Stop all primary motion. Idle timer restarts (→ breathing)."""
+        """Stop all primary motion."""
         with self._lock:
             self._queue.clear()
             self._current_move = None
             self._is_breathing = False
             self._idle_since = time.monotonic()
+            self._sent_idle = False
 
     def set_face_offsets(self, head_offset: npt.NDArray[np.float64]) -> None:
         with self._face_lock:
             self._face_offsets = head_offset.copy()
+            self._face_offsets_dirty = True
 
     def clear_face_offsets(self) -> None:
         with self._face_lock:
             self._face_offsets = _IDENTITY_4x4.copy()
+            self._face_offsets_dirty = True
 
     @property
     def current_pose(
@@ -198,6 +204,7 @@ class MovementManager:
     def _tick(self) -> None:
         now = time.monotonic()
 
+        has_move = False
         with self._lock:
             if self._current_move is not None:
                 t = now - self._move_start
@@ -210,14 +217,8 @@ class MovementManager:
                 self._current_move = self._queue.popleft()
                 self._move_start = now
 
-            if (
-                self._current_move is None
-                and self._idle_since > 0
-                and (now - self._idle_since) >= _IDLE_BEFORE_BREATHING
-            ):
-                self._start_breathing(now)
-
             if self._current_move is not None:
+                has_move = True
                 t = now - self._move_start
                 t = min(t, self._current_move.duration - 1e-6)
                 head, antennas, body_yaw = self._current_move.evaluate(t)
@@ -233,7 +234,13 @@ class MovementManager:
             snapshot_body_yaw = self._last_body_yaw
 
         with self._face_lock:
+            face_dirty = self._face_offsets_dirty
+            self._face_offsets_dirty = False
             face_offset = self._face_offsets.copy()
+
+        need_send = has_move or face_dirty or not self._sent_idle
+        if not need_send:
+            return
 
         final_head = compose_world_offset(snapshot_head, face_offset)
 
@@ -243,6 +250,8 @@ class MovementManager:
                 antennas=snapshot_antennas,
                 body_yaw=snapshot_body_yaw,
             )
+            if not has_move and not face_dirty:
+                self._sent_idle = True
         except Exception:
             pass
 

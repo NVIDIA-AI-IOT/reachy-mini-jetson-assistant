@@ -98,7 +98,7 @@ class ReachyConfig:
     daemon_retry_attempts: int = 3
     daemon_startup_wait: float = 15.0
     face_tracking: bool = True
-    tracking_fps: float = 30.0
+    tracking_fps: float = 10.0
 
 
 @dataclass

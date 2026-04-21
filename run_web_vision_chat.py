@@ -61,18 +61,64 @@ console = Console()
 
 # ── Background threads ───────────────────────────────────────────
 
-def _frame_broadcast_thread(cam: Camera, broadcaster: Broadcaster, fps: float = 10.0):
+def _frame_broadcast_thread(
+    cam: Camera,
+    broadcaster: Broadcaster,
+    fps: float = 10.0,
+    tracker=None,
+):
     """Stream camera frames to browsers at UI fps via direct hardware reads.
 
     Uses cam.read_live() (bypasses the 3fps VLM ring buffer) so the browser
     gets a smooth video feed without affecting VLM frame selection.
+    Includes live face detection status from the tracker when available.
     """
     interval = 1.0 / fps
     while cam.health_check():
         if broadcaster.client_count > 0:
             b64 = cam.read_live()
             if b64:
-                broadcaster.send({"type": "frame", "data": b64})
+                msg = {"type": "frame", "data": b64}
+                if tracker is not None:
+                    msg["face_detected"] = tracker.face_detected
+                    box = tracker.last_face_box
+                    if box is not None:
+                        msg["face_box"] = list(box)
+                broadcaster.send(msg)
+        time.sleep(interval)
+
+
+def _emotion_broadcast_thread(
+    cam: Camera,
+    emotion_detector,
+    broadcaster: Broadcaster,
+    interval: float = 2.0,
+):
+    """Run continuous emotion detection and broadcast results to the UI.
+
+    Grabs a live camera frame every ~interval seconds, runs full face
+    detection + FER+ emotion classification, and sends the result as
+    an 'emotion_live' WebSocket message so the UI updates in near
+    real-time regardless of whether the user is speaking.
+    """
+    from app.emotion import EmotionResult, Emotion
+
+    while cam.health_check():
+        if broadcaster.client_count > 0 and emotion_detector:
+            b64 = cam.read_live()
+            if b64:
+                try:
+                    emo = emotion_detector.detect(b64)
+                    broadcaster.send({
+                        "type": "emotion_live",
+                        "emotion": emo.emotion.value,
+                        "confidence": round(emo.confidence, 2),
+                        "inference_ms": round(emo.inference_ms, 1),
+                        "face_detected": emo.face_detected,
+                        "face_box": list(emo.face_box) if emo.face_box else None,
+                    })
+                except Exception:
+                    pass
         time.sleep(interval)
 
 
@@ -285,9 +331,16 @@ def main():
 
     threading.Thread(
         target=_frame_broadcast_thread,
-        args=(cam, broadcaster, config.web.ui_fps),
+        args=(cam, broadcaster, config.web.ui_fps, face_tracker),
         daemon=True, name="frame-broadcaster",
     ).start()
+
+    if emotion_detector:
+        threading.Thread(
+            target=_emotion_broadcast_thread,
+            args=(cam, emotion_detector, broadcaster),
+            daemon=True, name="emotion-broadcaster",
+        ).start()
 
     model_info = {
         "stt": f"faster-whisper ({config.stt.model})",
