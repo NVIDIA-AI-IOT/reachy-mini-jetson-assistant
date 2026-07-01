@@ -75,7 +75,7 @@ vision:
   height: 480
   jpeg_quality: 80                    # JPEG compression (lower = smaller payload)
   frames: 1                           # max frames to send per utterance
-  capture_fps: 3.0                    # background capture rate (frames/sec)
+  capture_fps: 10.0                   # shared camera capture rate (frames/sec)
   system_prompt: |
     You are Reachy Mini, a friendly robot made by Pollen Robotics, running on an NVIDIA Jetson Orin Nano.
     You use the Cosmos Reason2 vision-language model for understanding what you see.
@@ -96,9 +96,6 @@ vision:
     - role: "assistant"
       content: "Goodbye, see you later!"
 
-emotion:
-  enabled: true                       # enable sentiment-based emotion detection + reactive movements
-
 reachy:
   enabled: true                       # set false to skip robot connection entirely
   spawn_daemon: true
@@ -109,6 +106,35 @@ reachy:
   antenna_rest_position: [0.0, 0.0]   # antenna target after wake-up
   daemon_retry_attempts: 3            # connection retries
   daemon_startup_wait: 15.0           # seconds to wait before retry
+  # Face tracking — quickly frame a face, then hold still for stable VLM images.
+  face_tracking: true                 # set false to disable face tracking
+  tracking_fps: 5.0                   # detection + control rate (Hz)
+  tracking_dead_zone: 0.12            # normalized error below which the face is near center
+  tracking_lock_zone: 0.40            # freeze pose once face is reasonably framed
+  tracking_reacquire_zone: 0.55       # use body assist when face is far from center
+  tracking_good_frame_zone: 0.40      # actively center until face is within this offset
+  tracking_min_face_size: 0.06        # min face width/height fraction for a stable frame
+  tracking_stable_frames: 2           # consecutive good frames before capture is considered stable
+  tracking_face_lost_delay: 3.0       # seconds to hold before neutral return (if enabled)
+  tracking_head_yaw_max_deg: 35.0     # max head yaw used for tracking (degrees)
+  tracking_head_yaw_gain: 32.0        # head yaw correction per normalized horizontal error
+  tracking_head_yaw_step: 2.0         # max head yaw change per tracker update (degrees)
+  tracking_soft_center_head_yaw_max_deg: 20.0 # max head yaw while gently centering inside frame
+  tracking_soft_center_head_yaw_step: 0.8 # max gentle head yaw change per tracker update (degrees)
+  tracking_pose_smoothing: 0.18       # SDK look-at pose interpolation fraction per control tick
+  tracking_pose_max_step_deg: 6.0     # max rotation step per control tick for SDK look-at poses
+  tracking_body_max_deg: 90.0         # max optional body rotation to face the person (degrees)
+  tracking_body_gain: 20.0            # body yaw target per normalized horizontal error
+  tracking_body_step: 1.5             # max body yaw change per tracker update (degrees)
+  tracking_invert_body: true          # measured: face at right edge needs negative body_yaw to center
+  tracking_body_enabled: true         # body-yaw assist for large errors; head yaw remains primary
+  tracking_vertical: false            # also track vertically with head pitch (off: avoids head bobbing)
+  tracking_return_to_neutral: false   # ease back to neutral after losing the face (off: hold heading)
+  tracking_scan_enabled: false        # scan surroundings when no face is detected (off: no startup scan)
+  tracking_scan_body_range_deg: 90.0  # left/right body range used during scan
+  tracking_scan_speed_deg_per_sec: 35.0 # scan sweep speed
+  tracking_capture_settle_secs: 0.35  # freeze motion this long before VLM image capture
+  tracking_capture_acquire_timeout_secs: 0.4 # max wait for a stable face before VLM capture
 
 web:
   ui_fps: 10.0                        # camera FPS for browser UI (independent of VLM ring buffer)

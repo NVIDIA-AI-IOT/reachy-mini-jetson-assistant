@@ -49,7 +49,7 @@ Speak to Reachy Mini and it responds using a vision-language model that sees thr
 | **STT** | faster-whisper | GPU (CUDA) | CTranslate2 with CUDA, small.en default |
 | **TTS** | Kokoro ONNX | GPU (CUDA) | Natural voices, subprocess-isolated (see [License Notes](#license-notes)) |
 | **VAD** | Silero VAD | CPU | Neural VAD, far better than energy-only |
-| **Camera** | OpenCV V4L2 | CPU | 3 fps ring buffer, configurable resolution |
+| **Camera** | OpenCV V4L2 | CPU | Shared latest-frame buffer, configurable resolution/FPS |
 | **Robot** | Reachy Mini SDK | USB | Head pose, antennas, wake/sleep |
 | **RAG** | ChromaDB + llama.cpp | GPU | bge-small-en-v1.5 embeddings (voice chat only) |
 | **Web UI** | FastAPI + WebSocket | CPU | Live video, conversation stream, system stats |
@@ -145,7 +145,7 @@ docker stop assistant-embed
 
 The web UI (`run_web_vision_chat.py`) provides a real-time dashboard accessible from any browser on the same network:
 
-- **Live camera feed** at 10 fps (independent of the 3 fps VLM ring buffer)
+- **Live camera feed** from the shared camera buffer, with VLM capture using the latest stable frame
 - **Conversation log** with streaming VLM responses
 - **Push-to-talk** button (starts muted, click to unmute)
 - **System stats** — CPU, GPU, RAM usage

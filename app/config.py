@@ -78,7 +78,7 @@ class VisionConfig:
     height: int = 480
     jpeg_quality: int = 80
     frames: int = 3
-    capture_fps: float = 3.0
+    capture_fps: float = 10.0
     system_prompt: str = (
         "You are a vision assistant on an NVIDIA Jetson device with a live camera. "
         "Answer in one to two sentences. Be direct and concise."
@@ -98,12 +98,33 @@ class ReachyConfig:
     daemon_retry_attempts: int = 3
     daemon_startup_wait: float = 15.0
     face_tracking: bool = True
-    tracking_fps: float = 10.0
-
-
-@dataclass
-class EmotionConfig:
-    enabled: bool = True
+    tracking_fps: float = 5.0
+    tracking_dead_zone: float = 0.12
+    tracking_lock_zone: float = 0.40
+    tracking_reacquire_zone: float = 0.55
+    tracking_good_frame_zone: float = 0.40
+    tracking_min_face_size: float = 0.06
+    tracking_stable_frames: int = 2
+    tracking_face_lost_delay: float = 3.0
+    tracking_head_yaw_max_deg: float = 35.0
+    tracking_head_yaw_gain: float = 32.0
+    tracking_head_yaw_step: float = 2.0
+    tracking_soft_center_head_yaw_max_deg: float = 20.0
+    tracking_soft_center_head_yaw_step: float = 0.8
+    tracking_pose_smoothing: float = 0.18
+    tracking_pose_max_step_deg: float = 6.0
+    tracking_body_max_deg: float = 90.0
+    tracking_body_gain: float = 20.0
+    tracking_body_step: float = 1.5
+    tracking_invert_body: bool = True
+    tracking_body_enabled: bool = True
+    tracking_vertical: bool = False
+    tracking_return_to_neutral: bool = False
+    tracking_scan_enabled: bool = False
+    tracking_scan_body_range_deg: float = 90.0
+    tracking_scan_speed_deg_per_sec: float = 35.0
+    tracking_capture_settle_secs: float = 0.35
+    tracking_capture_acquire_timeout_secs: float = 0.4
 
 
 @dataclass
@@ -135,7 +156,6 @@ _SECTIONS = [
     ("vad", "vad", VADConfig),
     ("vision", "vision", VisionConfig),
     ("reachy", "reachy", ReachyConfig),
-    ("emotion", "emotion", EmotionConfig),
     ("rag", "rag", RAGConfig),
     ("web", "web", WebConfig),
 ]
@@ -150,7 +170,6 @@ class Config:
     vad: VADConfig = field(default_factory=VADConfig)
     vision: VisionConfig = field(default_factory=VisionConfig)
     reachy: ReachyConfig = field(default_factory=ReachyConfig)
-    emotion: EmotionConfig = field(default_factory=EmotionConfig)
     rag: RAGConfig = field(default_factory=RAGConfig)
     web: WebConfig = field(default_factory=WebConfig)
 
