@@ -76,6 +76,28 @@ class Broadcaster:
             self._ptt.clear()
         self.send({"type": "ptt_state", "active": active})
 
+    @staticmethod
+    def _enqueue_latest(q: asyncio.Queue, msg: dict):
+        """Keep a slow client's queue current without leaking payloads to logs."""
+        try:
+            q.put_nowait(msg)
+            return
+        except asyncio.QueueFull:
+            pass
+
+        # Camera frames are large and quickly become stale. Drop one queued
+        # message and retry instead of letting QueueFull escape from the event
+        # loop callback, where asyncio would log the complete base64 payload.
+        try:
+            q.get_nowait()
+        except asyncio.QueueEmpty:
+            pass
+
+        try:
+            q.put_nowait(msg)
+        except asyncio.QueueFull:
+            pass
+
     def send(self, msg: dict):
         """Enqueue *msg* for every connected client (thread-safe)."""
         loop = self._loop
@@ -84,9 +106,7 @@ class Broadcaster:
         with self._lock:
             for q in self._clients:
                 try:
-                    loop.call_soon_threadsafe(q.put_nowait, msg)
-                except asyncio.QueueFull:
-                    pass
+                    loop.call_soon_threadsafe(self._enqueue_latest, q, msg)
                 except Exception:
                     pass
 

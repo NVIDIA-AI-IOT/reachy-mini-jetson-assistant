@@ -120,6 +120,7 @@ def connect(config, console: Console) -> Optional["ReachyMini"]:
                 use_sim=False,
                 timeout=rcfg.timeout,
                 media_backend=rcfg.media_backend,
+                automatic_body_yaw=rcfg.automatic_body_yaw,
             )
 
             reachy.enable_motors()

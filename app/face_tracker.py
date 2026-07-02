@@ -102,16 +102,16 @@ class FaceTracker:
         min_face_size: float = 0.06,
         stable_frames: int = 2,
         face_lost_delay: float = 3.0,
-        head_yaw_max_deg: float = 35.0,
-        head_yaw_gain: float = 32.0,
-        head_yaw_step: float = 2.0,
-        soft_center_head_yaw_max_deg: float = 20.0,
-        soft_center_head_yaw_step: float = 0.8,
-        body_max_deg: float = 90.0,
-        body_gain: float = 20.0,
-        body_step: float = 1.5,
+        head_yaw_max_deg: float = 20.0,
+        head_yaw_gain: float = 18.0,
+        head_yaw_step: float = 1.0,
+        soft_center_head_yaw_max_deg: float = 12.0,
+        soft_center_head_yaw_step: float = 0.5,
+        body_max_deg: float = 30.0,
+        body_gain: float = 12.0,
+        body_step: float = 0.75,
         invert_body: bool = True,
-        body_enabled: bool = True,
+        body_enabled: bool = False,
         vertical: bool = False,
         return_to_neutral: bool = False,
         scan_enabled: bool = True,
@@ -153,9 +153,9 @@ class FaceTracker:
         self._running = False
         self._thread: Optional[threading.Thread] = None
 
-        # Targets (degrees). Horizontal tracking uses direct visual-servo
-        # mapping from face offset to target angles rather than slow
-        # accumulated nudges, so large offsets immediately request large range.
+        # Targets (degrees). Horizontal tracking accumulates small bounded
+        # corrections. Each detector update closes more of the remaining image
+        # error until the face enters the good-frame zone.
         self._body = 0.0
         self._pitch = 0.0
         self._yaw = 0.0
@@ -165,6 +165,7 @@ class FaceTracker:
         self._last_face_time: Optional[float] = None
         self._tracking_active = False
         self._pose_locked = False
+        self._reacquiring = False
         self._scanning = False
         self._scan_direction = 1.0
         self._scan_body_direction = 1.0
@@ -322,39 +323,63 @@ class FaceTracker:
 
         action_needed = face_large_enough and not frame_good
 
-        if self._pose_locked and reacquire:
+        # Hysteresis: once a far-edge face starts wide reacquisition, keep
+        # head/body assistance active until the face reaches the good-frame
+        # zone. Dropping back at the reacquire threshold can strand the face
+        # between the 0.18 good zone and the 0.45 entry threshold.
+        if reacquire:
+            self._reacquiring = True
+        elif frame_good:
+            self._reacquiring = False
+
+        if self._pose_locked and self._reacquiring:
             self._pose_locked = False
 
+        rebalanced = False
         if not action_needed:
             apply_motion = False
             self._pose_locked = True
             if not self._motion_frozen:
-                self._manager.hold_current()
+                rebalanced = self._rebalance_head_into_body()
+                if not rebalanced:
+                    self._manager.hold_current()
 
         # Horizontal: after the face is detected, actively center until it is
         # inside the expanded good-frame zone. Use yaw/body targets only:
         # SDK look-at matrices can include roll, which makes the head look
         # diagonal even when the face is only horizontally offset.
         if apply_motion and action_needed:
-            yaw_limit = self._head_yaw_max if reacquire else min(self._head_yaw_max, self._soft_center_head_yaw_max)
-            yaw_step = self._head_yaw_step if reacquire else min(self._head_yaw_step, self._soft_center_head_yaw_step)
-            target_yaw = _clamp(
-                -self._head_yaw_gain * err_x,
-                -yaw_limit,
-                yaw_limit,
-            )
-            self._yaw += _clamp(target_yaw - self._yaw, -yaw_step, yaw_step)
+            yaw_limit = self._head_yaw_max if self._reacquiring else min(self._head_yaw_max, self._soft_center_head_yaw_max)
+            yaw_step = self._head_yaw_step if self._reacquiring else min(self._head_yaw_step, self._soft_center_head_yaw_step)
+            yaw_delta = _clamp(-self._head_yaw_gain * err_x, -yaw_step, yaw_step)
+            self._yaw = _clamp(self._yaw + yaw_delta, -yaw_limit, yaw_limit)
 
-            if reacquire and self._body_enabled:
-                target_body = _clamp(
+            if self._reacquiring and self._body_enabled:
+                # Keep turning while the face remains near an edge. An
+                # absolute body target (gain * error) stalls before centering
+                # when the head has already reached its yaw limit.
+                body_delta = _clamp(
                     self._body_sign * self._body_gain * err_x,
+                    -self._body_step,
+                    self._body_step,
+                )
+                self._body = _clamp(
+                    self._body + body_delta,
                     -self._body_max,
                     self._body_max,
                 )
-                self._body += _clamp(target_body - self._body, -self._body_step, self._body_step)
             self._manager.set_targets(self._body, self._pitch, self._yaw)
             self._log_tracking(
-                err_x, err_y, face_size, frame_good, reacquire, "yaw-only",
+                err_x,
+                err_y,
+                face_size,
+                frame_good,
+                reacquire,
+                "yaw+body" if self._reacquiring and self._body_enabled else "yaw-only",
+            )
+        elif rebalanced:
+            self._log_tracking(
+                err_x, err_y, face_size, frame_good, reacquire, "rebalance",
             )
         elif box is not None:
             self._log_tracking(
@@ -388,6 +413,32 @@ class FaceTracker:
             self._stable = self._stable_count >= self._stable_frames_required
             self._centered = frame_good or (centered_x and (centered_y or not self._vertical))
 
+    def _rebalance_head_into_body(self) -> bool:
+        """Move yaw trim into body yaw without changing camera direction.
+
+        Head world yaw is body + yaw in MovementManager. Applying the same
+        signed amount to body and removing it from head yaw preserves that
+        sum, so a centered face stays centered while the head returns toward
+        a natural forward pose.
+        """
+        if not self._body_enabled or abs(self._yaw) < 1e-6:
+            return False
+
+        transfer = _clamp(self._yaw, -self._body_step, self._body_step)
+        next_body = _clamp(
+            self._body + transfer,
+            -self._body_max,
+            self._body_max,
+        )
+        applied = next_body - self._body
+        if abs(applied) < 1e-6:
+            return False
+
+        self._body = next_body
+        self._yaw -= applied
+        self._manager.set_targets(self._body, self._pitch, self._yaw)
+        return True
+
     def _log_tracking(
         self,
         err_x: float,
@@ -405,7 +456,8 @@ class FaceTracker:
             "FaceTracker: "
             f"action={action} err=({err_x:+.2f},{err_y:+.2f}) "
             f"face_size={face_size:.2f} good={frame_good} "
-            f"reacquire={reacquire} locked={self._pose_locked}"
+            f"reacquire={reacquire} locked={self._pose_locked} "
+            f"target=(body={self._body:+.1f},pitch={self._pitch:+.1f},yaw={self._yaw:+.1f})deg"
         )
 
     def _handle_face_lost(self, now: float) -> None:
@@ -415,6 +467,7 @@ class FaceTracker:
         if self._scan_enabled:
             if self._last_face_time is None or now - self._last_face_time >= self._face_lost_delay:
                 self._pose_locked = False
+                self._reacquiring = False
                 self._scan_for_face()
             return
 
@@ -475,6 +528,7 @@ class FaceTracker:
         self._pitch = 0.0
         self._yaw = 0.0
         self._pose_locked = False
+        self._reacquiring = False
         self._scanning = False
         self._stable_count = 0
         with self._state_lock:

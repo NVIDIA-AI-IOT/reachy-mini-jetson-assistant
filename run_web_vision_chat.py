@@ -181,7 +181,7 @@ def main():
         console.print(
             f"  ✓ Camera /dev/video{config.vision.camera_device} "
             f"({config.vision.width}x{config.vision.height}, "
-            f"{config.vision.capture_fps} fps ring buffer)"
+            f"{config.vision.capture_fps} fps compressed ring buffer)"
         )
     else:
         console.print("[red]  ✗ Camera not found! Check USB webcam.[/red]")
