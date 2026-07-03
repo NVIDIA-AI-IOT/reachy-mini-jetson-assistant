@@ -32,7 +32,7 @@ opencv-python-headless>=4.8.0
 chromadb>=0.4.0
 
 # Web UI (optional — only needed for run_web_vision_chat.py)
-fastapi>=0.104.0
+fastapi>=0.109.1  # excludes Content-Type header ReDoS-affected releases
 uvicorn>=0.24.0
 
 # Reachy Mini SDK (robot control)
