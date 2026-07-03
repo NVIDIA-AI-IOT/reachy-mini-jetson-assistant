@@ -129,13 +129,16 @@ reachy:
   tracking_body_step: 0.7             # bounded body change per update (5.6 deg/sec at 8 Hz)
   tracking_invert_body: true          # measured: face at right edge needs negative body_yaw to center
   tracking_body_enabled: true         # head-first tracking; body assists only beyond the reacquire zone
-  tracking_vertical: false            # also track vertically with head pitch (off: avoids head bobbing)
+  tracking_vertical: true             # center faces above/below frame using bounded head pitch
   tracking_return_to_neutral: false   # ease back to neutral after losing the face (off: hold heading)
   tracking_scan_enabled: true         # after a brief face-loss delay, slowly search for a person
   tracking_scan_body_range_deg: 20.0  # bounded body range during search; never use the old +/-90 degrees
   tracking_scan_speed_deg_per_sec: 5.0 # slow head sweep; body scans at 35% of this speed
   tracking_capture_settle_secs: 0.35  # freeze motion this long before VLM image capture
   tracking_capture_acquire_timeout_secs: 0.4 # max wait for a stable face before VLM capture
+  # Speaking personality — one short official Pollen gesture per TTS reply.
+  speaking_movements_enabled: true    # starts only when the first playable TTS audio begins
+  speaking_movement_excitement_probability: 0.4 # 40% energetic, 60% friendly/interactive
 
 web:
   ui_fps: 10.0                        # camera FPS for browser UI (independent of VLM ring buffer)

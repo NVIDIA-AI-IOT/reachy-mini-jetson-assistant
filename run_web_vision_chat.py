@@ -51,6 +51,7 @@ from app.reachy import kill_stale_camera_holders, connect as connect_reachy
 from app.face_detector import FaceDetector
 from app.face_tracker import FaceTracker
 from app.movement_manager import MovementManager
+from app.speaking_movements import SpeakingMovementController
 from app.vision_capture import capture_frames_for_vlm
 from app.web import Broadcaster, start_web_server
 from rich.console import Console
@@ -267,6 +268,7 @@ def main():
     face_detector = None
     movement_manager = None
     face_tracker = None
+    speaking_mover = None
     if reachy and config.reachy.face_tracking:
         face_detector = FaceDetector()
         if face_detector.load():
@@ -278,6 +280,19 @@ def main():
             )
             movement_manager.start()
             console.print("  ✓ Head controller (100 Hz)")
+
+            if config.reachy.speaking_movements_enabled:
+                speaking_mover = SpeakingMovementController(
+                    movement_manager,
+                    excitement_probability=(
+                        config.reachy.speaking_movement_excitement_probability
+                    ),
+                )
+                if speaking_mover.available:
+                    console.print("  ✓ Official Pollen speaking movements")
+                else:
+                    console.print("  ⚠ Speaking movement library unavailable")
+                    speaking_mover = None
 
             face_tracker = FaceTracker(
                 cam, face_detector, movement_manager, reachy,
@@ -443,7 +458,18 @@ def main():
             if tts:
                 tts_q = queue.Queue()
                 tts_thread = threading.Thread(
-                    target=tts_player, args=(tts, tts_q, mic.pa_sink), daemon=True,
+                    target=tts_player,
+                    args=(tts, tts_q),
+                    kwargs={
+                        "sink": mic.pa_sink,
+                        "on_audio_start": (
+                            speaking_mover.start_response if speaking_mover else None
+                        ),
+                        "on_audio_end": (
+                            speaking_mover.stop_response if speaking_mover else None
+                        ),
+                    },
+                    daemon=True,
                 )
                 tts_thread.start()
 
@@ -518,6 +544,8 @@ def main():
     if face_tracker:
         face_tracker.stop()
     if movement_manager:
+        if speaking_mover:
+            speaking_mover.stop_response()
         time.sleep(0.5)
         movement_manager.stop()
     try:

@@ -10,6 +10,8 @@ MODERATE_LEFT_FACE = (552, 390, 792, 690)
 FAR_LEFT_FACE = (0, 390, 240, 690)
 FAR_RIGHT_FACE = (1680, 390, 1920, 690)
 MID_RIGHT_FACE = (1224, 390, 1464, 690)
+FAR_TOP_FACE = (840, 0, 1080, 300)
+FAR_BOTTOM_FACE = (840, 780, 1080, 1080)
 
 
 class FakeMovementManager:
@@ -132,6 +134,43 @@ class FaceTrackerScenarioTests(unittest.TestCase):
 
         self.assertEqual(tracker.target_yaw_deg, -20.0)
         self.assertEqual(tracker.target_body_yaw_deg, -30.0)
+
+    def test_face_above_center_tilts_head_up_without_rotating_body(self):
+        tracker, manager = make_tracker(vertical=True)
+
+        tracker._servo(FAR_TOP_FACE, FRAME_SHAPE)
+
+        self.assertEqual(manager.targets[-1], (0.0, -1.2, 0.0))
+        self.assertTrue(tracker._reacquiring_y)
+        self.assertFalse(tracker._reacquiring_x)
+
+    def test_face_below_center_tilts_head_down_without_rotating_body(self):
+        tracker, manager = make_tracker(vertical=True)
+
+        tracker._servo(FAR_BOTTOM_FACE, FRAME_SHAPE)
+
+        self.assertEqual(manager.targets[-1], (0.0, 1.2, 0.0))
+        self.assertTrue(tracker._reacquiring_y)
+        self.assertFalse(tracker._reacquiring_x)
+
+    def test_vertical_pitch_accumulates_but_remains_bounded(self):
+        tracker, manager = make_tracker(vertical=True)
+
+        for _ in range(100):
+            tracker._servo(FAR_TOP_FACE, FRAME_SHAPE)
+
+        self.assertEqual(manager.targets[-1], (0.0, -18.0, 0.0))
+        self.assertTrue(all(body == 0.0 for body, _, _ in manager.targets))
+        self.assertTrue(all(yaw == 0.0 for _, _, yaw in manager.targets))
+        self.assertTrue(all(abs(pitch) <= 18.0 for _, pitch, _ in manager.targets))
+
+    def test_horizontal_search_preserves_last_vertical_angle(self):
+        tracker, manager = make_tracker(vertical=True)
+        tracker._pitch = -7.0
+
+        tracker._scan_for_face()
+
+        self.assertEqual(manager.targets[-1][1], -7.0)
 
     def test_reacquisition_continues_below_entry_threshold_until_centered(self):
         tracker, manager = make_tracker()

@@ -27,7 +27,7 @@ import threading
 import queue
 from collections import deque
 from dataclasses import dataclass
-from typing import Optional, Iterator
+from typing import Callable, Optional, Iterator
 
 import numpy as np
 from pathlib import Path
@@ -141,15 +141,36 @@ def play_audio(audio: np.ndarray, sample_rate: int, sink: Optional[str] = None):
         pass
 
 
-def tts_player(tts_obj, tts_q: queue.Queue, sink: Optional[str] = None):
-    """Background thread target: synthesize + play each sentence as it arrives."""
-    while True:
-        text = tts_q.get()
-        if text is None:
-            return
-        r = tts_obj.synthesize(text)
-        if r.get("audio") is not None:
-            play_audio(r["audio"], r["sample_rate"], sink=sink)
+def tts_player(
+    tts_obj,
+    tts_q: queue.Queue,
+    sink: Optional[str] = None,
+    on_audio_start: Optional[Callable[[], None]] = None,
+    on_audio_end: Optional[Callable[[], None]] = None,
+):
+    """Synthesize queued text and expose the true first/last audio events."""
+    audio_started = False
+    try:
+        while True:
+            text = tts_q.get()
+            if text is None:
+                return
+            r = tts_obj.synthesize(text)
+            if r.get("audio") is not None:
+                if not audio_started:
+                    audio_started = True
+                    if on_audio_start:
+                        try:
+                            on_audio_start()
+                        except Exception as exc:
+                            print(f"TTS start callback failed: {exc}")
+                play_audio(r["audio"], r["sample_rate"], sink=sink)
+    finally:
+        if audio_started and on_audio_end:
+            try:
+                on_audio_end()
+            except Exception as exc:
+                print(f"TTS end callback failed: {exc}")
 
 
 # ── Silero VAD ────────────────────────────────────────────────────

@@ -119,13 +119,15 @@ class ReachyConfig:
     tracking_body_step: float = 0.7
     tracking_invert_body: bool = True
     tracking_body_enabled: bool = True
-    tracking_vertical: bool = False
+    tracking_vertical: bool = True
     tracking_return_to_neutral: bool = False
     tracking_scan_enabled: bool = True
     tracking_scan_body_range_deg: float = 20.0
     tracking_scan_speed_deg_per_sec: float = 5.0
     tracking_capture_settle_secs: float = 0.35
     tracking_capture_acquire_timeout_secs: float = 0.4
+    speaking_movements_enabled: bool = True
+    speaking_movement_excitement_probability: float = 0.4
 
 
 @dataclass
