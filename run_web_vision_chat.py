@@ -329,10 +329,17 @@ def main():
     # ── Start mic ────────────────────────────────────────────────
     effective_chunk_ms = 32
     mic = MicRecorder(console, chunk_ms=effective_chunk_ms)
-    if not mic.start(hw, config.audio.input_device or "Reachy Mini Audio"):
+    if not mic.start(
+        hw,
+        config.audio.input_device or "Reachy Mini Audio",
+        config.audio.output_device,
+        config.audio.echo_cancellation,
+    ):
         console.print("[red]Cannot start recording! Check mic.[/red]")
         cam.close()
         return
+
+    broadcaster.configure_speakers(mic.speaker_state, mic.select_speaker)
 
     # ── Start web server + background threads ────────────────────
     web_thread = start_web_server(broadcaster, host=web_host, port=web_port)
@@ -461,7 +468,7 @@ def main():
                     target=tts_player,
                     args=(tts, tts_q),
                     kwargs={
-                        "sink": mic.pa_sink,
+                        "sink": mic.get_pa_sink,
                         "on_audio_start": (
                             speaking_mover.start_response if speaking_mover else None
                         ),

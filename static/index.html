@@ -107,6 +107,14 @@ header{display:flex;align-items:center;justify-content:space-between;
 .ptt-btn.muted{background:#21262d;border-color:var(--border);color:var(--dim)}
 .ptt-btn.muted:hover{background:#30363d;color:var(--text)}
 .ptt-btn.live{background:#1a4a6e;border-color:#58a6ff;color:#fff}
+.audio-route{display:flex;align-items:center;gap:8px;padding:0 12px 7px;font-size:.7rem}
+.audio-route label{color:var(--dim);white-space:nowrap}
+.speaker-select{min-width:0;flex:1;background:var(--bg);color:var(--text);border:1px solid var(--border);
+  border-radius:5px;padding:4px 7px;font:inherit;outline:none}
+.speaker-select:focus{border-color:#58a6ff}
+.speaker-select:disabled{color:var(--dim);opacity:.7}
+.speaker-status{color:var(--accent);font-size:.65rem;white-space:nowrap}
+.speaker-status.err{color:var(--danger)}
 
 /* System compact */
 .sys-panel{flex-shrink:0}
@@ -125,7 +133,7 @@ header{display:flex;align-items:center;justify-content:space-between;
 .cursor-blink::after{content:'';display:inline-block;width:7px;height:13px;background:var(--accent);
   margin-left:2px;vertical-align:text-bottom;animation:blink .7s step-end infinite}
 @keyframes blink{50%{opacity:0}}
-.empty-state{flex:1;display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:.85rem;text-align:center;padding:16px}
+.empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--dim);font-size:.85rem;text-align:center;padding:16px}
 
 
 /* Config */
@@ -195,6 +203,13 @@ footer{display:flex;align-items:center;gap:14px;padding:5px 20px;background:var(
           <svg id="micIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/><line id="micSlash" x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="2.5"/></svg>
           <span id="pttLabel">Unmute</span>
         </button>
+      </div>
+      <div class="audio-route">
+        <label for="speakerSelect">Speaker</label>
+        <select class="speaker-select" id="speakerSelect" disabled>
+          <option>Detecting outputs...</option>
+        </select>
+        <span class="speaker-status" id="speakerStatus"></span>
       </div>
     </div>
 
@@ -308,6 +323,8 @@ footer{display:flex;align-items:center;gap:14px;padding:5px 20px;background:var(
       $('connStatus').className = 'conn-status err';
       $('connStatus').innerHTML = '<span class="conn-dot"></span> Disconnected';
       $('liveBadge').className = 'live-badge off';
+      $('speakerSelect').disabled = true;
+      $('speakerStatus').textContent = 'Offline';
       reconnectTimer = setTimeout(connect, 3000);
     };
     ws.onerror = () => ws.close();
@@ -324,6 +341,7 @@ footer{display:flex;align-items:center;gap:14px;padding:5px 20px;background:var(
         case 'robot':        onRobot(msg); break;
         case 'info':         onInfo(msg); break;
         case 'ptt_state':    onPttState(msg); break;
+        case 'speaker_state':onSpeakerState(msg); break;
       }
     };
   }
@@ -566,9 +584,44 @@ footer{display:flex;align-items:center;gap:14px;padding:5px 20px;background:var(
     else { btn.className='ptt-btn muted'; lbl.textContent='Unmute'; slash.style.display=''; }
   }
 
+  function onSpeakerState(msg){
+    const select=$('speakerSelect'), status=$('speakerStatus');
+    const speakers=Array.isArray(msg.speakers) ? msg.speakers : [];
+    select.replaceChildren();
+
+    if(!speakers.length){
+      const option=document.createElement('option');
+      option.textContent='No speaker outputs found';
+      select.appendChild(option);
+      select.disabled=true;
+      status.textContent=msg.error || '';
+      status.className='speaker-status err';
+      return;
+    }
+
+    for(const speaker of speakers){
+      const option=document.createElement('option');
+      option.value=speaker.id;
+      option.textContent=speaker.label || speaker.id;
+      option.selected=speaker.id===msg.selected;
+      select.appendChild(option);
+    }
+    select.disabled=false;
+    status.textContent=msg.error || (msg.aec_enabled ? 'AEC Active' : 'Direct');
+    status.className='speaker-status' + (msg.error ? ' err' : '');
+  }
+
   $('pttBtn').addEventListener('click', function(){
     if(!ws || ws.readyState !== WebSocket.OPEN) return;
     ws.send(JSON.stringify({type:'ptt', active:!pttActive}));
+  });
+
+  $('speakerSelect').addEventListener('change', function(){
+    if(!ws || ws.readyState !== WebSocket.OPEN) return;
+    this.disabled=true;
+    $('speakerStatus').textContent='Switching...';
+    $('speakerStatus').className='speaker-status';
+    ws.send(JSON.stringify({type:'set_speaker', sink:this.value}));
   });
 
   /* ── Drawing helpers ───────────── */

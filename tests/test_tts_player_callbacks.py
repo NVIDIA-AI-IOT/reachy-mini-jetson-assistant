@@ -56,3 +56,22 @@ def test_no_callbacks_when_tts_produces_no_audio(monkeypatch):
     )
 
     assert events == []
+
+
+def test_tts_resolves_live_speaker_for_each_audio_chunk(monkeypatch):
+    played_sinks = []
+    selected = {"sink": "external-speaker"}
+
+    def fake_play(audio, sample_rate, sink=None):
+        played_sinks.append(sink)
+        selected["sink"] = "reachy-speaker"
+
+    monkeypatch.setattr(pipeline, "play_audio", fake_play)
+    q = queue.Queue()
+    q.put("first sentence")
+    q.put("second sentence")
+    q.put(None)
+
+    pipeline.tts_player(FakeTTS(), q, sink=lambda: selected["sink"])
+
+    assert played_sinks == ["external-speaker", "reachy-speaker"]

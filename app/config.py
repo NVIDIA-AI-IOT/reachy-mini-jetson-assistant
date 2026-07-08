@@ -57,6 +57,8 @@ class AudioConfig:
     sample_rate: int = 16000
     channels: int = 2
     input_device: Optional[str] = "Reachy Mini Audio"
+    output_device: Optional[str] = None
+    echo_cancellation: bool = True
 
 
 @dataclass
@@ -67,7 +69,7 @@ class VADConfig:
     max_speech_secs: int = 15
     chunk_ms: int = 30
     min_utterance_secs: float = 0.3
-    min_utterance_rms: float = 0.005
+    min_utterance_rms: float = 0.001
     silero_threshold: float = 0.5
 
 

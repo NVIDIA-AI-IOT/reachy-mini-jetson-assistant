@@ -57,6 +57,8 @@ audio:
   sample_rate: 16000
   channels: 2
   input_device: "Reachy Mini Audio"
+  output_device: "Anker PowerConf"       # preferred TTS speaker; switchable live in the web UI
+  echo_cancellation: true                 # WebRTC AEC: Reachy mic + currently selected speaker
 
 vad:
   use_silero: true                    # true = Silero neural VAD (much better), false = energy-only
@@ -67,7 +69,7 @@ vad:
   max_speech_secs: 15                 # max single utterance length
   chunk_ms: 32                        # audio chunk size (32ms required for Silero, 30ms for energy-only)
   min_utterance_secs: 0.8             # reject utterances shorter than this (filters coughs/bumps)
-  min_utterance_rms: 0.025            # reject utterances quieter than this (filters background chatter)
+  min_utterance_rms: 0.001            # AEC output is quieter; Silero remains the primary speech classifier
 
 vision:
   camera_device: 1                    # /dev/video1
