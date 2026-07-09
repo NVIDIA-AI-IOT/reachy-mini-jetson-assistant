@@ -34,20 +34,11 @@ The recommended Web Vision Chat mode combines face tracking and speaking gesture
 
 ### Face Tracking
 
-- **15 Hz face detection and control** using YuNet through OpenCV on the CPU
-- **Horizontal tracking** with head yaw first and bounded body-yaw assistance for faces near the edge of the frame
-- **Vertical tracking** with calibrated, bounded head pitch for faces moving above or below the camera center
-- **Search and reacquisition** using a slow, bounded horizontal sweep when no face is visible
-- **Stable-frame hysteresis** that holds position once the face is well framed, reducing detector jitter and protecting VLM image quality
-- **Capture settling** that briefly freezes motion before selecting the image sent to the VLM
+YuNet-based face tracking gently frames the user with bounded head/body motion, searches when no face is visible, and holds still once the face is good enough for stable VLM capture.
 
 ### Speaking Movements
 
-- Uses a curated set of positive and conversational movements from the official 81-move Pollen Robotics emotion library
-- Selects one non-repeating movement for each spoken response, weighted between energetic and interactive gestures
-- Starts movement only when the first playable TTS audio begins, after VLM capture and reasoning
-- Blends recorded head, body, and antenna motion with live face tracking so Reachy continues attending to the user while speaking
-- Reduces gesture intensity when tracking approaches its limits and returns smoothly to normal tracking when speech ends
+Speaking gestures use curated Pollen Robotics movements, synced with TTS playback and blended with live face tracking so Reachy keeps attending to the user.
 
 Face tracking and speaking movements are configurable under the `reachy` section of `config/settings.yaml`.
 
