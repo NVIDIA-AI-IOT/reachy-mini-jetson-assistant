@@ -14,7 +14,7 @@ A low-latency, fully on-device voice and vision assistant for [Reachy Mini Lite]
 
 ## What It Does
 
-Speak to Reachy Mini and it responds using a vision-language model that sees through its camera. The robot moves its head and antennas while it talks, and you can watch everything live through a browser-based UI.
+Speak to Reachy Mini and it responds using a vision-language model that sees through its camera. Reachy tracks and centers the person speaking, then adds expressive head, body, and antenna gestures while it talks. Everything is visible through a browser-based UI with live video, conversation state, and system telemetry.
 
 ```
 [Mic] → [Silero VAD] → [faster-whisper STT] ──┐
@@ -28,7 +28,28 @@ Speak to Reachy Mini and it responds using a vision-language model that sees thr
   <img src="docs/images/reachy-mini-jetson.png" alt="Reachy Mini Jetson Assistant — Web UI" width="100%"/>
 </p>
 
- 
+## Expressive Robot Behavior
+
+The recommended Web Vision Chat mode combines face tracking and speaking gestures through a single 100 Hz motion controller, ensuring that only one component writes motor targets at a time.
+
+### Face Tracking
+
+- **15 Hz face detection and control** using YuNet through OpenCV on the CPU
+- **Horizontal tracking** with head yaw first and bounded body-yaw assistance for faces near the edge of the frame
+- **Vertical tracking** with calibrated, bounded head pitch for faces moving above or below the camera center
+- **Search and reacquisition** using a slow, bounded horizontal sweep when no face is visible
+- **Stable-frame hysteresis** that holds position once the face is well framed, reducing detector jitter and protecting VLM image quality
+- **Capture settling** that briefly freezes motion before selecting the image sent to the VLM
+
+### Speaking Movements
+
+- Uses a curated set of positive and conversational movements from the official 81-move Pollen Robotics emotion library
+- Selects one non-repeating movement for each spoken response, weighted between energetic and interactive gestures
+- Starts movement only when the first playable TTS audio begins, after VLM capture and reasoning
+- Blends recorded head, body, and antenna motion with live face tracking so Reachy continues attending to the user while speaking
+- Reduces gesture intensity when tracking approaches its limits and returns smoothly to normal tracking when speech ends
+
+Face tracking and speaking movements are configurable under the `reachy` section of `config/settings.yaml`.
 
 ## Supported Modes
 
@@ -49,8 +70,8 @@ Speak to Reachy Mini and it responds using a vision-language model that sees thr
 | **STT** | faster-whisper | GPU (CUDA) | CTranslate2 with CUDA, small.en default |
 | **TTS** | Kokoro ONNX | GPU (CUDA) | Natural voices, subprocess-isolated (see [License Notes](#license-notes)) |
 | **VAD** | Silero VAD | CPU | Neural VAD, far better than energy-only |
-| **Camera** | OpenCV V4L2 | CPU | 3 fps ring buffer, configurable resolution |
-| **Robot** | Reachy Mini SDK | USB | Head pose, antennas, wake/sleep |
+| **Camera** | OpenCV V4L2 | CPU | Shared latest-frame buffer, configurable resolution/FPS |
+| **Robot** | Reachy Mini SDK + Pollen recorded moves | USB | 100 Hz layered motion, 15 Hz face tracking, expressive TTS gestures |
 | **RAG** | ChromaDB + llama.cpp | GPU | bge-small-en-v1.5 embeddings (voice chat only) |
 | **Web UI** | FastAPI + WebSocket | CPU | Live video, conversation stream, system stats |
 
@@ -145,7 +166,7 @@ docker stop assistant-embed
 
 The web UI (`run_web_vision_chat.py`) provides a real-time dashboard accessible from any browser on the same network:
 
-- **Live camera feed** at 10 fps (independent of the 3 fps VLM ring buffer)
+- **Live camera feed** from the shared camera buffer, including face-detection and tracking state, with VLM capture using the latest stable frame
 - **Conversation log** with streaming VLM responses
 - **Push-to-talk** button (starts muted, click to unmute)
 - **System stats** — CPU, GPU, RAM usage
@@ -166,7 +187,7 @@ All settings live in `config/settings.yaml`. Edit this file to tune behavior:
 | `audio` | Sample rate, input device |
 | `vad` | Silero threshold, silence duration, utterance filters |
 | `vision` | Camera resolution, capture FPS, frames per query, VLM system prompt, few-shot examples |
-| `reachy` | Robot connection, daemon behavior, wake/sleep on start/exit |
+| `reachy` | Robot connection, daemon behavior, horizontal/vertical tracking, scan/reacquisition, capture settling, and speaking movements |
 | `web` | UI FPS, host, port |
 | `rag` | Embedding backend, knowledge directory, retrieval settings |
 
@@ -184,6 +205,11 @@ reachy-mini-jetson-assistant/
 │   ├── tts.py               # TTS client (spawns subprocess worker)
 │   ├── tts_worker.py        # TTS subprocess (Kokoro + GPL deps, isolated)
 │   ├── camera.py            # USB webcam ring buffer (OpenCV, V4L2)
+│   ├── face_detector.py     # YuNet face detection (OpenCV CPU)
+│   ├── face_tracker.py      # 15 Hz horizontal/vertical visual tracking
+│   ├── movement_manager.py  # Single-writer 100 Hz layered motion controller
+│   ├── speaking_movements.py # Curated official Pollen TTS gestures
+│   ├── vision_capture.py    # Stable-frame acquisition and motion settling
 │   ├── reachy.py            # Reachy Mini connection, daemon management
 │   ├── web.py               # FastAPI + WebSocket server for browser UI
 │   ├── monitor.py           # System resource monitoring (CPU/GPU/RAM)
@@ -223,6 +249,14 @@ reachy-mini-jetson-assistant/
 
 The VLM vision encoder prefill is the primary bottleneck on Orin Nano. Flash attention (`-fa on`) and KV cache prefix reuse (`--cache-reuse 256`) are enabled in `run_llama_cpp.sh` to minimize repeated work across queries.
 
+## Development and Validation
+
+This project was developed and validated on the [NVIDIA Jetson platform](https://developer.nvidia.com/embedded-computing) with assistance from [Jetson Device Skills](https://github.com/NVIDIA-AI-IOT/jetson-device-skills), a collection of foundational agent skills for working with Jetson devices.
+
+Jetson Device Skills supported hardware inspection, [JetPack](https://developer.nvidia.com/embedded/jetpack) and CUDA environment validation, dependency verification, performance diagnostics, and device-level troubleshooting during development and bring-up.
+
+Jetson Device Skills are development and validation tools only. They are not packaged with this application and are not required to install or run the Reachy Mini assistant.
+
 ## Roadmap
 
 - [x] Orin Nano 8GB — full pipeline validated
@@ -230,11 +264,11 @@ The VLM vision encoder prefill is the primary bottleneck on Orin Nano. Flash att
 - [x] Kokoro TTS GPU acceleration
 - [x] Silero VAD for robust speech detection
 - [x] KV cache reuse + flash attention for faster VLM TTFT
+- [x] 15 Hz horizontal and vertical face tracking with bounded search and reacquisition
+- [x] TTS-synchronized head, body, and antenna movements from the official Pollen library
 - [ ] **AGX Orin** — larger models (Cosmos-Reason2-7B, Gemma 3 4B), higher resolution, multi-turn context
 - [ ] **Thor** — real-time VLM, multi-camera, extended context windows
 - [ ] Multi-turn conversation memory
-- [ ] Wake word detection (hands-free activation)
-- [ ] Gesture recognition via camera
 - [ ] Multi-language support
 
 Contributions for AGX Orin and Thor testing are welcome.

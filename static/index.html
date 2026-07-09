@@ -34,9 +34,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
   background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden}
 a{color:var(--accent)}
 
-/* ── Header ──────────────────────────────── */
 header{display:flex;align-items:center;justify-content:space-between;
-  padding:10px 20px;background:var(--card);border-bottom:1px solid var(--border);flex-shrink:0}
+  padding:8px 20px;background:var(--card);border-bottom:1px solid var(--border);flex-shrink:0}
 .logo{font-size:1.1rem;font-weight:700;display:flex;align-items:center;gap:8px}
 .logo span{color:var(--accent)}
 .conn-status{font-size:.8rem;padding:3px 10px;border-radius:12px;display:flex;align-items:center;gap:5px}
@@ -49,14 +48,12 @@ header{display:flex;align-items:center;justify-content:space-between;
 .badge{font-size:.75rem;padding:2px 8px;border-radius:4px;background:var(--border);color:var(--dim)}
 .client-count{font-size:.75rem;color:var(--dim)}
 
-/* ── Main layout ─────────────────────────── */
 .main{display:flex;flex:1;overflow:hidden}
-.left{width:38%;min-width:300px;display:flex;flex-direction:column;gap:10px;padding:10px;overflow-y:auto;border-right:1px solid var(--border)}
-.right{flex:1;display:flex;flex-direction:column;padding:10px;overflow:hidden}
+.left{width:40%;min-width:300px;display:flex;flex-direction:column;gap:8px;padding:8px;overflow-y:auto;border-right:1px solid var(--border)}
+.right{flex:1;display:flex;flex-direction:column;padding:8px;overflow:hidden;gap:8px}
 
-/* ── Panels ──────────────────────────────── */
 .panel{background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden}
-.panel-hdr{padding:8px 12px;font-size:.8rem;font-weight:600;color:var(--dim);
+.panel-hdr{padding:6px 12px;font-size:.8rem;font-weight:600;color:var(--dim);
   display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
 
 /* Camera */
@@ -64,67 +61,105 @@ header{display:flex;align-items:center;justify-content:space-between;
 .cam-wrap{position:relative;background:#000;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center}
 .cam-wrap img{width:100%;height:100%;object-fit:contain;display:block}
 .cam-placeholder{color:var(--dim);font-size:.9rem}
-.live-badge{font-size:.65rem;padding:2px 6px;border-radius:3px;font-weight:700;letter-spacing:.5px}
+.live-badge{font-size:.6rem;padding:2px 6px;border-radius:3px;font-weight:700;letter-spacing:.5px}
 .live-badge.on{background:#c00;color:#fff;animation:pulse 2s infinite}
 .live-badge.off{background:var(--border);color:var(--dim)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-.cam-info{padding:4px 12px;font-size:.7rem;color:var(--dim);text-align:center}
+.cam-info{padding:3px 12px;font-size:.65rem;color:var(--dim);text-align:center}
+.cam-overlay{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
 
-/* Pipeline */
+/* Face tracking panel (right top) */
+.face-panel{flex-shrink:0}
+.face-body{display:flex;gap:14px;padding:10px 12px;min-height:120px}
+.face-crop-wrap{width:120px;height:120px;flex-shrink:0;background:#000;border-radius:6px;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;border:1px solid var(--border)}
+.face-crop-wrap canvas{width:100%;height:100%;object-fit:contain}
+.face-crop-placeholder{color:var(--dim);font-size:.7rem;text-align:center;padding:8px}
+.face-info{flex:1;display:flex;flex-direction:column;gap:8px;min-width:0;justify-content:center}
+.track-badge{font-size:.6rem;padding:2px 7px;border-radius:10px;font-weight:700;letter-spacing:.5px}
+.track-badge.on{background:#1a3d00;color:var(--accent)}
+.track-badge.off{background:var(--border);color:var(--dim)}
+.track-status-row{display:flex;align-items:center;gap:8px}
+.track-dot{width:10px;height:10px;border-radius:50%;background:var(--dim);flex-shrink:0;transition:background .3s}
+.track-dot.searching{background:var(--warn);animation:pulse 1.2s infinite}
+.track-dot.tracking{background:#58a6ff}
+.track-dot.centered{background:var(--accent);box-shadow:0 0 6px var(--accent)}
+.track-label{font-size:1rem;font-weight:700}
+.track-stats{font-size:.7rem;color:var(--dim)}
+.track-axes{display:flex;flex-direction:column;gap:5px}
+.axis-row{display:flex;align-items:center;gap:6px;font-size:.62rem;color:var(--dim)}
+.axis-cap{width:14px;flex-shrink:0;text-transform:uppercase}
+.axis-bar{position:relative;flex:1;height:5px;background:var(--bg);border-radius:3px;overflow:hidden}
+.axis-bar::before{content:'';position:absolute;left:50%;top:0;width:1px;height:100%;background:var(--border)}
+.axis-fill{position:absolute;top:0;height:100%;background:#58a6ff;border-radius:3px;transition:left .15s,width .15s}
+.axis-fill.centered{background:var(--accent)}
+
+/* Pipeline compact */
 .pipe-panel{flex-shrink:0}
-.pipe-stages{display:flex;gap:4px;padding:10px 12px;justify-content:center}
-.stage{font-size:.75rem;padding:4px 10px;border-radius:14px;background:var(--bg);color:var(--dim);
-  transition:all .3s;white-space:nowrap}
+.pipe-row{display:flex;align-items:center;gap:6px;padding:6px 12px}
+.pipe-stages{display:flex;gap:3px;flex:1}
+.stage{font-size:.7rem;padding:3px 8px;border-radius:12px;background:var(--bg);color:var(--dim);transition:all .3s;white-space:nowrap}
 .stage.active{background:var(--accent-dim);color:var(--accent);font-weight:600}
-.pipe-status{padding:4px 12px 8px;font-size:.75rem;color:var(--dim);text-align:center}
-.ptt-wrap{display:flex;justify-content:center;padding:8px 12px 12px}
-.ptt-btn{display:flex;align-items:center;gap:6px;padding:8px 18px;border-radius:6px;
-  border:1px solid;cursor:pointer;font-size:.8rem;font-weight:600;font-family:inherit;
-  transition:all .2s;outline:none;letter-spacing:.3px}
-.ptt-btn svg{width:16px;height:16px;flex-shrink:0}
+.pipe-status{font-size:.7rem;color:var(--dim);white-space:nowrap}
+.ptt-btn{display:flex;align-items:center;gap:4px;padding:4px 12px;border-radius:5px;
+  border:1px solid;cursor:pointer;font-size:.7rem;font-weight:600;font-family:inherit;transition:all .2s;outline:none;flex-shrink:0}
+.ptt-btn svg{width:13px;height:13px;flex-shrink:0}
 .ptt-btn.muted{background:#21262d;border-color:var(--border);color:var(--dim)}
 .ptt-btn.muted:hover{background:#30363d;color:var(--text)}
 .ptt-btn.live{background:#1a4a6e;border-color:#58a6ff;color:#fff}
-.ptt-btn.live:hover{background:#1d5a85}
+.audio-route{display:flex;align-items:center;gap:8px;padding:0 12px 7px;font-size:.7rem}
+.audio-route label{color:var(--dim);white-space:nowrap}
+.speaker-select{min-width:0;flex:1;background:var(--bg);color:var(--text);border:1px solid var(--border);
+  border-radius:5px;padding:4px 7px;font:inherit;outline:none}
+.speaker-select:focus{border-color:#58a6ff}
+.speaker-select:disabled{color:var(--dim);opacity:.7}
+.speaker-status{color:var(--accent);font-size:.65rem;white-space:nowrap}
+.speaker-status.err{color:var(--danger)}
 
-/* Robot */
-.robot-panel{flex-shrink:0}
-.robot-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;padding:8px 12px;font-size:.75rem}
-.robot-grid .label{color:var(--dim)}
-.robot-grid .val{text-align:right}
+/* System compact */
+.sys-panel{flex-shrink:0}
+.sys-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:2px 8px;padding:6px 10px;font-size:.7rem}
+.sys-grid .label{color:var(--dim)}
+.sys-grid .val{text-align:right}
 
 /* Conversation */
 .conv-panel{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
-.msg{padding:10px 14px;border-radius:10px;max-width:92%;font-size:.9rem;line-height:1.5;word-wrap:break-word}
+.messages{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px}
+.msg{padding:8px 12px;border-radius:8px;max-width:95%;font-size:.85rem;line-height:1.45;word-wrap:break-word}
 .msg.user{background:var(--user-bg);align-self:flex-start;border-left:3px solid var(--accent)}
 .msg.assistant{background:var(--assist-bg);align-self:flex-end;border-right:3px solid var(--assist-border)}
-.msg .meta{font-size:.65rem;color:var(--dim);margin-top:4px}
+.msg .meta{font-size:.6rem;color:var(--dim);margin-top:3px}
 .msg .content{white-space:pre-wrap}
-.cursor-blink::after{content:'';display:inline-block;width:8px;height:14px;background:var(--accent);
+.cursor-blink::after{content:'';display:inline-block;width:7px;height:13px;background:var(--accent);
   margin-left:2px;vertical-align:text-bottom;animation:blink .7s step-end infinite}
 @keyframes blink{50%{opacity:0}}
-.empty-state{flex:1;display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:.9rem;text-align:center;padding:20px}
+.empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--dim);font-size:.85rem;text-align:center;padding:16px}
 
-/* ── Footer / stats ──────────────────────── */
-footer{display:flex;align-items:center;gap:16px;padding:6px 20px;background:var(--card);
+
+/* Config */
+.config-panel{flex-shrink:0}
+.config-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px 8px;padding:6px 10px;font-size:.7rem}
+.config-grid .label{color:var(--dim)}
+.config-grid .val{text-align:right}
+
+/* Footer */
+footer{display:flex;align-items:center;gap:14px;padding:5px 20px;background:var(--card);
   border-top:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
-.stat{font-size:.75rem;color:var(--dim);display:flex;align-items:center;gap:6px;white-space:nowrap}
+.stat{font-size:.7rem;color:var(--dim);display:flex;align-items:center;gap:5px;white-space:nowrap}
 .stat-label{color:var(--dim)}
 .stat-val{color:var(--text);font-weight:500}
-.stat-bar{width:60px;height:6px;background:var(--bg);border-radius:3px;overflow:hidden;flex-shrink:0}
+.stat-bar{width:50px;height:5px;background:var(--bg);border-radius:3px;overflow:hidden;flex-shrink:0}
 .stat-bar-fill{height:100%;border-radius:3px;transition:width .5s}
 .stat-bar-fill.green{background:var(--accent)}
 .stat-bar-fill.amber{background:var(--warn)}
 .stat-bar-fill.red{background:var(--danger)}
-.stat-sep{width:1px;height:16px;background:var(--border)}
-.model-badge{font-size:.7rem;padding:2px 8px;border-radius:4px;background:var(--accent-dim);color:var(--accent)}
+.stat-sep{width:1px;height:14px;background:var(--border)}
+.model-badge{font-size:.65rem;padding:2px 6px;border-radius:4px;background:var(--accent-dim);color:var(--accent)}
 
-/* ── Responsive ──────────────────────────── */
 @media(max-width:768px){
   .main{flex-direction:column}
-  .left{width:100%;min-width:0;border-right:none;border-bottom:1px solid var(--border);max-height:45vh}
-  .right{min-height:40vh}
+  .left{width:100%;min-width:0;border-right:none;border-bottom:1px solid var(--border);max-height:50vh}
+  .right{min-height:35vh}
 }
 </style>
 </head>
@@ -140,69 +175,90 @@ footer{display:flex;align-items:center;gap:16px;padding:6px 20px;background:var(
 </header>
 
 <div class="main">
-  <!-- Left column -->
+  <!-- Left: camera + pipeline + system -->
   <div class="left">
-    <!-- Camera -->
     <div class="panel cam-panel">
       <div class="panel-hdr">
         <span>Robot View</span>
         <span class="live-badge off" id="liveBadge">LIVE</span>
       </div>
       <div class="cam-wrap">
-        <img id="camImg" src="" alt="" style="display:none">
+        <img id="camImg" src="" alt="" style="display:none" crossorigin="anonymous">
+        <canvas class="cam-overlay" id="faceOverlay"></canvas>
         <div class="cam-placeholder" id="camPlaceholder">Waiting for camera...</div>
       </div>
       <div class="cam-info" id="camInfo">No frames yet</div>
     </div>
 
-    <!-- Pipeline -->
     <div class="panel pipe-panel">
-      <div class="panel-hdr"><span>Pipeline</span></div>
-      <div class="pipe-stages" id="pipeStages">
-        <div class="stage active" data-stage="listening">&#127908; Listen</div>
-        <div class="stage" data-stage="transcribing">&#128221; STT</div>
-        <div class="stage" data-stage="thinking">&#129504; VLM</div>
-        <div class="stage" data-stage="speaking">&#128266; TTS</div>
-      </div>
-      <div class="pipe-status" id="pipeStatus">Muted</div>
-      <div class="ptt-wrap">
+      <div class="pipe-row">
+        <div class="pipe-stages" id="pipeStages">
+          <div class="stage active" data-stage="listening">&#127908; Listen</div>
+          <div class="stage" data-stage="transcribing">&#128221; STT</div>
+          <div class="stage" data-stage="thinking">&#129504; VLM</div>
+          <div class="stage" data-stage="speaking">&#128266; TTS</div>
+        </div>
+        <span class="pipe-status" id="pipeStatus">Muted</span>
         <button class="ptt-btn muted" id="pttBtn" title="Toggle microphone">
           <svg id="micIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/><line id="micSlash" x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="2.5"/></svg>
           <span id="pttLabel">Unmute</span>
         </button>
       </div>
+      <div class="audio-route">
+        <label for="speakerSelect">Speaker</label>
+        <select class="speaker-select" id="speakerSelect" disabled>
+          <option>Detecting outputs...</option>
+        </select>
+        <span class="speaker-status" id="speakerStatus"></span>
+      </div>
     </div>
 
-    <!-- Models -->
-    <div class="panel robot-panel">
-      <div class="panel-hdr"><span>Models</span></div>
-      <div class="robot-grid" id="modelsGrid">
+    <div class="panel sys-panel">
+      <div class="panel-hdr"><span>System</span></div>
+      <div class="sys-grid">
         <span class="label">STT</span><span class="val" id="modelSTT">--</span>
-        <span class="label">VLM</span><span class="val" id="modelVLM">--</span>
-        <span class="label">TTS</span><span class="val" id="modelTTS">--</span>
-        <span class="label">VAD</span><span class="val" id="modelVAD">--</span>
-      </div>
-    </div>
-
-    <!-- Robot -->
-    <div class="panel robot-panel">
-      <div class="panel-hdr"><span>Robot</span></div>
-      <div class="robot-grid" id="robotGrid">
         <span class="label">Status</span><span class="val" id="robotConn">--</span>
+        <span class="label">VLM</span><span class="val" id="modelVLM">--</span>
         <span class="label">Motors</span><span class="val" id="robotMotors">--</span>
+        <span class="label">TTS</span><span class="val" id="modelTTS">--</span>
         <span class="label">Head</span><span class="val" id="robotHead">--</span>
+        <span class="label">VAD</span><span class="val" id="modelVAD">--</span>
+        <span class="label">Tracking</span><span class="val" id="robotTracking">--</span>
       </div>
     </div>
 
-    <!-- Config -->
-    <div class="panel robot-panel" id="configPanel" style="display:none">
+    <div class="panel config-panel" id="configPanel" style="display:none">
       <div class="panel-hdr"><span>Config</span></div>
-      <div class="robot-grid" id="configGrid"></div>
+      <div class="config-grid" id="configGrid"></div>
     </div>
   </div>
 
-  <!-- Right column -->
+  <!-- Right: face tracking (top) + conversation (bottom) -->
   <div class="right">
+    <div class="panel face-panel">
+      <div class="panel-hdr">
+        <span>Face Tracking</span>
+        <span class="track-badge off" id="trackBadge">OFF</span>
+      </div>
+      <div class="face-body">
+        <div class="face-crop-wrap">
+          <canvas id="faceCropCanvas" width="120" height="120"></canvas>
+          <div class="face-crop-placeholder" id="faceCropPlaceholder">No face<br>detected</div>
+        </div>
+        <div class="face-info">
+          <div class="track-status-row">
+            <span class="track-dot" id="trackDot"></span>
+            <span class="track-label" id="trackLabel" style="color:var(--dim)">No face</span>
+          </div>
+          <div class="track-stats" id="trackStats">Waiting for camera...</div>
+          <div class="track-axes">
+            <div class="axis-row"><span class="axis-cap">X</span><div class="axis-bar"><div class="axis-fill" id="axisX"></div></div></div>
+            <div class="axis-row"><span class="axis-cap">Y</span><div class="axis-bar"><div class="axis-fill" id="axisY"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="panel conv-panel">
       <div class="panel-hdr">
         <span>Conversation</span>
@@ -211,7 +267,7 @@ footer{display:flex;align-items:center;gap:16px;padding:6px 20px;background:var(
       <div class="messages" id="messages">
         <div class="empty-state" id="emptyState">
           <div>Speak to Reachy Mini to start a conversation.</div>
-          <div style="font-size:.75rem;margin-top:8px;color:var(--dim)">The robot listens through its microphone and responds via VLM + TTS.</div>
+          <div style="font-size:.7rem;margin-top:6px;color:var(--dim)">The robot listens, sees via camera, and responds via VLM + TTS.</div>
         </div>
       </div>
     </div>
@@ -247,54 +303,79 @@ footer{display:flex;align-items:center;gap:16px;padding:6px 20px;background:var(
 (function(){
   const $ = id => document.getElementById(id);
 
-  /* ── State ────────────────────────── */
-  let ws = null;
-  let frameCount = 0;
-  let msgIdx = 0;
-  let currentAssistant = null;
-  let reconnectTimer = null;
-  let pttActive = false;
+  let ws = null, frameCount = 0, msgIdx = 0, currentAssistant = null;
+  let reconnectTimer = null, pttActive = false, faceBoxTimer = null;
+  const camNatural = {w:640, h:480};
+  let lastFaceBox = null, lastCentered = false, trackingEnabled = false;
+  let faceHoldTimer = null;
+  const FACE_HOLD_MS = 2500;
 
-  /* ── WebSocket ────────────────────── */
+  /* ── WebSocket ──────────────────── */
   function connect(){
     const proto = location.protocol === 'https:' ? 'wss' : 'ws';
     ws = new WebSocket(`${proto}://${location.host}/ws`);
-
     ws.onopen = () => {
       $('connStatus').className = 'conn-status ok';
       $('connStatus').innerHTML = '<span class="conn-dot"></span> Connected';
       if(reconnectTimer){ clearTimeout(reconnectTimer); reconnectTimer = null; }
     };
-
     ws.onclose = () => {
       $('connStatus').className = 'conn-status err';
       $('connStatus').innerHTML = '<span class="conn-dot"></span> Disconnected';
       $('liveBadge').className = 'live-badge off';
+      $('speakerSelect').disabled = true;
+      $('speakerStatus').textContent = 'Offline';
       reconnectTimer = setTimeout(connect, 3000);
     };
-
     ws.onerror = () => ws.close();
-
     ws.onmessage = (ev) => {
       let msg;
       try{ msg = JSON.parse(ev.data); } catch(e){ return; }
       switch(msg.type){
-        case 'frame':    onFrame(msg); break;
-        case 'status':   onStatus(msg); break;
-        case 'transcript': onTranscript(msg); break;
-        case 'token':    onToken(msg); break;
-        case 'done':     onDone(msg); break;
-        case 'stats':    onStats(msg); break;
-        case 'robot':    onRobot(msg); break;
-        case 'info':     onInfo(msg); break;
-        case 'ptt_state': onPttState(msg); break;
+        case 'frame':        onFrame(msg); break;
+        case 'status':       onStatus(msg); break;
+        case 'transcript':   onTranscript(msg); break;
+        case 'token':        onToken(msg); break;
+        case 'done':         onDone(msg); break;
+        case 'stats':        onStats(msg); break;
+        case 'robot':        onRobot(msg); break;
+        case 'info':         onInfo(msg); break;
+        case 'ptt_state':    onPttState(msg); break;
+        case 'speaker_state':onSpeakerState(msg); break;
       }
     };
   }
 
-  /* ── Handlers ─────────────────────── */
+  /* ── Frame handler ─────────────── */
+  let pendingFaceBox = null;
+
   function onFrame(msg){
     const img = $('camImg');
+
+    const hasFace = msg.face_detected && msg.face_box;
+    pendingFaceBox = hasFace ? msg.face_box : null;
+    const faceLost = msg.face_detected === false;
+    if(msg.centered != null) lastCentered = msg.centered;
+
+    img.onload = function(){
+      if(img.naturalWidth){ camNatural.w = img.naturalWidth; camNatural.h = img.naturalHeight; }
+      const cv = $('faceOverlay');
+      cv.width = cv.offsetWidth;
+      cv.height = cv.offsetHeight;
+
+      if(pendingFaceBox){
+        lastFaceBox = pendingFaceBox;
+        drawFaceBox(pendingFaceBox, lastCentered);
+        cropFace(pendingFaceBox);
+        showFaceCrop(true);
+        updateTrackPanel(pendingFaceBox, lastCentered);
+        resetFaceHold();
+      } else if(faceLost){
+        clearFaceBox();
+        scheduleFaceHide();
+      }
+    };
+
     img.src = 'data:image/jpeg;base64,' + msg.data;
     img.style.display = 'block';
     $('camPlaceholder').style.display = 'none';
@@ -303,19 +384,97 @@ footer{display:flex;align-items:center;gap:16px;padding:6px 20px;background:var(
     $('camInfo').textContent = `Frame #${frameCount}`;
   }
 
+  /* ── Face crop visibility with hold timer ── */
+  function resetFaceHold(){
+    if(faceHoldTimer){ clearTimeout(faceHoldTimer); faceHoldTimer = null; }
+  }
+
+  function scheduleFaceHide(){
+    if(faceHoldTimer) return;
+    faceHoldTimer = setTimeout(() => {
+      faceHoldTimer = null;
+      showFaceCrop(false);
+      setTrackIdle();
+    }, FACE_HOLD_MS);
+  }
+
+  function showFaceCrop(visible){
+    $('faceCropPlaceholder').style.display = visible ? 'none' : '';
+    $('faceCropCanvas').style.display = visible ? '' : 'none';
+  }
+
+  /* ── Face tracking panel ───────── */
+  function setTrackIdle(){
+    const dot = $('trackDot'), lbl = $('trackLabel');
+    dot.className = 'track-dot' + (trackingEnabled ? ' searching' : '');
+    lbl.textContent = trackingEnabled ? 'Searching\u2026' : 'No face';
+    lbl.style.color = 'var(--dim)';
+    $('trackStats').textContent = trackingEnabled ? 'Head holding position' : 'Tracking disabled';
+    setAxis('axisX', 0, true); setAxis('axisY', 0, true);
+  }
+
+  function updateTrackPanel(box, centered){
+    const cx = camNatural.w/2, cy = camNatural.h/2;
+    const fx = (box[0]+box[2])/2, fy = (box[1]+box[3])/2;
+    const ox = (fx - cx)/cx, oy = (fy - cy)/cy;   // -1..1
+
+    const dot = $('trackDot'), lbl = $('trackLabel');
+    if(centered){
+      dot.className = 'track-dot centered';
+      lbl.textContent = 'Centered'; lbl.style.color = 'var(--accent)';
+    } else {
+      dot.className = 'track-dot tracking';
+      lbl.textContent = 'Tracking'; lbl.style.color = '#58a6ff';
+    }
+    $('trackStats').textContent = 'offset ' + signed(ox) + ' \u00b7 ' + signed(oy);
+    setAxis('axisX', ox, centered);
+    setAxis('axisY', oy, centered);
+  }
+
+  function signed(v){ const p = Math.round(Math.abs(v)*100); return (v>=0?'+':'\u2212')+p+'%'; }
+
+  function setAxis(id, off, centered){
+    const fill = $(id);
+    const v = Math.max(-1, Math.min(1, off));
+    const half = Math.abs(v) * 50;          // % of half-width
+    fill.style.left = (v >= 0 ? 50 : 50 - half) + '%';
+    fill.style.width = half + '%';
+    fill.className = 'axis-fill' + (centered ? ' centered' : '');
+  }
+
+  function cropFace(box){
+    const img = $('camImg');
+    if(!img.naturalWidth) return;
+    const cv = $('faceCropCanvas');
+    const ctx = cv.getContext('2d');
+
+    const x1 = box[0], y1 = box[1], x2 = box[2], y2 = box[3];
+    const fw = x2 - x1, fh = y2 - y1;
+    if(fw < 5 || fh < 5) return;
+
+    const pad = Math.max(fw, fh) * 0.25;
+    const sx = Math.max(0, x1 - pad);
+    const sy = Math.max(0, y1 - pad);
+    const sw = Math.min(img.naturalWidth - sx, fw + pad * 2);
+    const sh = Math.min(img.naturalHeight - sy, fh + pad * 2);
+
+    const size = Math.max(sw, sh);
+    cv.width = 120;
+    cv.height = 120;
+
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, 120, 120);
+    const scale = 120 / size;
+    const dx = (120 - sw * scale) / 2;
+    const dy = (120 - sh * scale) / 2;
+    ctx.drawImage(img, sx, sy, sw, sh, dx, dy, sw * scale, sh * scale);
+  }
+
+  /* ── Pipeline / transcript / chat ── */
   function onStatus(msg){
     const stages = $('pipeStages').children;
-    for(let s of stages){
-      s.classList.toggle('active', s.dataset.stage === msg.stage);
-    }
-    const labels = {
-      muted: 'Muted',
-      listening: 'Waiting for speech...',
-      recording: 'Recording speech...',
-      transcribing: 'Transcribing audio...',
-      thinking: 'Generating response...',
-      speaking: 'Speaking response...',
-    };
+    for(let s of stages) s.classList.toggle('active', s.dataset.stage === msg.stage);
+    const labels = {muted:'Muted', listening:'Listening...', recording:'Recording...', transcribing:'Transcribing...', thinking:'Thinking...', speaking:'Speaking...'};
     $('pipeStatus').textContent = labels[msg.stage] || msg.stage;
   }
 
@@ -324,8 +483,8 @@ footer{display:flex;align-items:center;gap:16px;padding:6px 20px;background:var(
     const div = document.createElement('div');
     div.className = 'msg user';
     div.innerHTML = `<div class="content">${esc(msg.text)}</div>`
-      + `<div class="meta">${msg.stt_time ? 'STT ' + msg.stt_time.toFixed(1) + 's' : ''}`
-      + `${msg.duration ? ' &middot; ' + msg.duration.toFixed(1) + 's utterance' : ''}</div>`;
+      + `<div class="meta">${msg.stt_time ? 'STT '+msg.stt_time.toFixed(1)+'s' : ''}`
+      + `${msg.duration ? ' \u00b7 '+msg.duration.toFixed(1)+'s' : ''}</div>`;
     $('messages').appendChild(div);
     scrollChat();
     msgIdx++;
@@ -340,20 +499,18 @@ footer{display:flex;align-items:center;gap:16px;padding:6px 20px;background:var(
       currentAssistant.innerHTML = '<div class="content cursor-blink"></div><div class="meta"></div>';
       $('messages').appendChild(currentAssistant);
     }
-    const content = currentAssistant.querySelector('.content');
-    content.textContent += msg.text;
+    currentAssistant.querySelector('.content').textContent += msg.text;
     scrollChat();
   }
 
   function onDone(msg){
     if(currentAssistant){
-      const content = currentAssistant.querySelector('.content');
-      content.classList.remove('cursor-blink');
+      currentAssistant.querySelector('.content').classList.remove('cursor-blink');
       const meta = currentAssistant.querySelector('.meta');
       const parts = [];
-      if(msg.ttft != null) parts.push('TTFT ' + msg.ttft.toFixed(1) + 's');
-      if(msg.vlm_time != null) parts.push('VLM ' + msg.vlm_time.toFixed(1) + 's');
-      if(msg.tokens != null) parts.push(msg.tokens + ' tokens');
+      if(msg.ttft != null) parts.push('TTFT '+msg.ttft.toFixed(1)+'s');
+      if(msg.vlm_time != null) parts.push('VLM '+msg.vlm_time.toFixed(1)+'s');
+      if(msg.tokens != null) parts.push(msg.tokens+' tok');
       meta.textContent = parts.join(' \u00b7 ');
       currentAssistant = null;
       msgIdx++;
@@ -361,23 +518,17 @@ footer{display:flex;align-items:center;gap:16px;padding:6px 20px;background:var(
     }
   }
 
+  /* ── Stats / Robot / Info ────── */
   function onStats(msg){
     setBar('cpu', msg.cpu);
-    const ramPct = msg.ram_total ? (msg.ram_used / msg.ram_total * 100) : 0;
-    $('ramBar').style.width = ramPct.toFixed(0) + '%';
-    barColor($('ramBar'), ramPct);
-    $('ramVal').textContent = msg.ram_used.toFixed(1) + ' / ' + msg.ram_total.toFixed(1) + ' GB';
-    if(msg.gpu != null){
-      $('gpuStat').style.display = '';
-      $('gpuSep').style.display = '';
-      setBar('gpu', msg.gpu);
-    }
+    const rp = msg.ram_total ? (msg.ram_used/msg.ram_total*100) : 0;
+    $('ramBar').style.width = rp.toFixed(0)+'%';
+    barColor($('ramBar'), rp);
+    $('ramVal').textContent = msg.ram_used.toFixed(1)+' / '+msg.ram_total.toFixed(1)+' GB';
+    if(msg.gpu != null){ $('gpuStat').style.display=''; $('gpuSep').style.display=''; setBar('gpu', msg.gpu); }
     if(msg.models) updateModels(msg.models);
-    if(msg.platform){
-      $('platformBadge').textContent = msg.platform;
-      $('headerPlatform').textContent = msg.platform;
-    }
-    if(msg.clients != null) $('clientCount').textContent = msg.clients + ' viewer' + (msg.clients !== 1 ? 's' : '');
+    if(msg.platform){ $('platformBadge').textContent=msg.platform; $('headerPlatform').textContent=msg.platform; }
+    if(msg.clients != null) $('clientCount').textContent = msg.clients+' viewer'+(msg.clients!==1?'s':'');
   }
 
   function onRobot(msg){
@@ -385,60 +536,79 @@ footer{display:flex;align-items:center;gap:16px;padding:6px 20px;background:var(
     $('robotConn').style.color = msg.connected ? 'var(--accent)' : 'var(--danger)';
     if(msg.motors != null) $('robotMotors').textContent = msg.motors ? 'Enabled' : 'Disabled';
     if(msg.head != null) $('robotHead').textContent = msg.head;
+
+    const trackingOn = msg.tracking != null;
+    trackingEnabled = trackingOn;
+    const badge = $('trackBadge');
+    badge.className = 'track-badge ' + (trackingOn ? 'on' : 'off');
+    badge.textContent = trackingOn ? 'ON' : 'OFF';
+
+    const t = $('robotTracking');
+    if(trackingOn){ t.textContent = msg.tracking ? 'Active' : 'Idle'; t.style.color = msg.tracking ? 'var(--accent)' : 'var(--dim)'; }
+    else { t.textContent = 'Off'; t.style.color = 'var(--dim)'; }
+
+    // When the tracker reports no face, reflect it in the panel (unless a
+    // recent frame is still holding the crop visible).
+    if(msg.face_detected === false && !faceHoldTimer && $('faceCropCanvas').style.display === 'none'){
+      setTrackIdle();
+    }
   }
 
   function onInfo(msg){
     if(msg.models) updateModels(msg.models);
-    if(msg.platform){
-      $('platformBadge').textContent = msg.platform;
-      $('platformFooter').textContent = msg.platform;
-      $('headerPlatform').textContent = msg.platform;
-    }
+    if(msg.platform){ $('platformBadge').textContent=msg.platform; $('platformFooter').textContent=msg.platform; $('headerPlatform').textContent=msg.platform; }
     if(msg.config) updateConfig(msg.config);
   }
 
   function updateConfig(cfg){
-    const grid = $('configGrid');
-    grid.innerHTML = '';
-    const items = [
-      ['Max Tokens', cfg.max_tokens],
-      ['Temperature', cfg.temperature],
-      ['Resolution', cfg.resolution],
-      ['JPEG Quality', cfg.jpeg_quality],
-      ['VLM Frames', cfg.vision_frames],
-      ['Capture FPS', cfg.capture_fps],
-      ['UI FPS', cfg.ui_fps],
-      ['Beam Size', cfg.beam_size],
-    ];
+    const g = $('configGrid'); g.innerHTML = '';
+    const items = [['Max Tokens',cfg.max_tokens],['Temperature',cfg.temperature],['Resolution',cfg.resolution],
+      ['JPEG Quality',cfg.jpeg_quality],['VLM Frames',cfg.vision_frames],['Capture FPS',cfg.capture_fps],
+      ['UI FPS',cfg.ui_fps],['Beam Size',cfg.beam_size]];
     if(cfg.silero_threshold != null) items.push(['Silero Thresh', cfg.silero_threshold]);
-    for(const [label, val] of items){
-      if(val == null) continue;
-      grid.innerHTML += `<span class="label">${label}</span><span class="val">${val}</span>`;
-    }
+    for(const [l,v] of items){ if(v==null) continue; g.innerHTML += `<span class="label">${l}</span><span class="val">${v}</span>`; }
     $('configPanel').style.display = '';
   }
 
   function updateModels(m){
-    if(m.stt) $('modelSTT').textContent = m.stt;
-    if(m.vlm) $('modelVLM').textContent = m.vlm;
-    if(m.tts) $('modelTTS').textContent = m.tts;
-    if(m.vad) $('modelVAD').textContent = m.vad;
+    if(m.stt) $('modelSTT').textContent=m.stt;
+    if(m.vlm) $('modelVLM').textContent=m.vlm;
+    if(m.tts) $('modelTTS').textContent=m.tts;
+    if(m.vad) $('modelVAD').textContent=m.vad;
   }
 
   function onPttState(msg){
     pttActive = msg.active;
-    const btn = $('pttBtn');
-    const lbl = $('pttLabel');
-    const slash = $('micSlash');
-    if(pttActive){
-      btn.className = 'ptt-btn live';
-      lbl.textContent = 'Mute';
-      slash.style.display = 'none';
-    } else {
-      btn.className = 'ptt-btn muted';
-      lbl.textContent = 'Unmute';
-      slash.style.display = '';
+    const btn=$('pttBtn'), lbl=$('pttLabel'), slash=$('micSlash');
+    if(pttActive){ btn.className='ptt-btn live'; lbl.textContent='Mute'; slash.style.display='none'; }
+    else { btn.className='ptt-btn muted'; lbl.textContent='Unmute'; slash.style.display=''; }
+  }
+
+  function onSpeakerState(msg){
+    const select=$('speakerSelect'), status=$('speakerStatus');
+    const speakers=Array.isArray(msg.speakers) ? msg.speakers : [];
+    select.replaceChildren();
+
+    if(!speakers.length){
+      const option=document.createElement('option');
+      option.textContent='No speaker outputs found';
+      select.appendChild(option);
+      select.disabled=true;
+      status.textContent=msg.error || '';
+      status.className='speaker-status err';
+      return;
     }
+
+    for(const speaker of speakers){
+      const option=document.createElement('option');
+      option.value=speaker.id;
+      option.textContent=speaker.label || speaker.id;
+      option.selected=speaker.id===msg.selected;
+      select.appendChild(option);
+    }
+    select.disabled=false;
+    status.textContent=msg.error || (msg.aec_enabled ? 'AEC Active' : 'Direct');
+    status.className='speaker-status' + (msg.error ? ' err' : '');
   }
 
   $('pttBtn').addEventListener('click', function(){
@@ -446,22 +616,60 @@ footer{display:flex;align-items:center;gap:16px;padding:6px 20px;background:var(
     ws.send(JSON.stringify({type:'ptt', active:!pttActive}));
   });
 
-  /* ── Helpers ──────────────────────── */
-  function setBar(prefix, pct){
-    const bar = $(prefix+'Bar');
-    bar.style.width = pct.toFixed(0) + '%';
-    barColor(bar, pct);
-    $(prefix+'Val').textContent = pct.toFixed(0) + '%';
-  }
-  function barColor(el, pct){
-    el.className = 'stat-bar-fill ' + (pct > 90 ? 'red' : pct > 70 ? 'amber' : 'green');
-  }
-  function scrollChat(){ const m = $('messages'); m.scrollTop = m.scrollHeight; }
-  function hideEmpty(){ const e = $('emptyState'); if(e) e.remove(); }
-  function esc(s){ const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
-  function updateMsgCount(){ $('msgCount').textContent = msgIdx + ' message' + (msgIdx !== 1 ? 's' : ''); }
+  $('speakerSelect').addEventListener('change', function(){
+    if(!ws || ws.readyState !== WebSocket.OPEN) return;
+    this.disabled=true;
+    $('speakerStatus').textContent='Switching...';
+    $('speakerStatus').className='speaker-status';
+    ws.send(JSON.stringify({type:'set_speaker', sink:this.value}));
+  });
 
-  /* ── Boot ─────────────────────────── */
+  /* ── Drawing helpers ───────────── */
+  function drawFaceBox(box, centered){
+    const cv=$('faceOverlay'), ctx=cv.getContext('2d');
+    const cw=cv.width, ch=cv.height;
+    if(!cw||!ch) return;
+    const nw=camNatural.w, nh=camNatural.h, s=Math.min(cw/nw,ch/nh);
+    const ox=(cw-nw*s)/2, oy=(ch-nh*s)/2;
+    ctx.clearRect(0,0,cw,ch);
+
+    // Center target crosshair
+    const tcx=ox+nw*s/2, tcy=oy+nh*s/2, r=10;
+    ctx.strokeStyle='rgba(255,255,255,.35)'; ctx.lineWidth=1; ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.moveTo(tcx-r,tcy); ctx.lineTo(tcx+r,tcy);
+    ctx.moveTo(tcx,tcy-r); ctx.lineTo(tcx,tcy+r);
+    ctx.stroke();
+
+    // Face box (green when centered, blue while tracking)
+    const color = centered ? '#76b900' : '#58a6ff';
+    ctx.strokeStyle=color; ctx.lineWidth=2; ctx.setLineDash([6,3]);
+    ctx.strokeRect(ox+box[0]*s, oy+box[1]*s, (box[2]-box[0])*s, (box[3]-box[1])*s);
+    ctx.setLineDash([]);
+
+    // Line from face center toward target center
+    const fcx=ox+(box[0]+box[2])/2*s, fcy=oy+(box[1]+box[3])/2*s;
+    ctx.strokeStyle=color; ctx.globalAlpha=.5; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(fcx,fcy); ctx.lineTo(tcx,tcy); ctx.stroke();
+    ctx.globalAlpha=1;
+
+    if(faceBoxTimer) clearTimeout(faceBoxTimer);
+    faceBoxTimer = setTimeout(()=>ctx.clearRect(0,0,cw,ch), 600);
+  }
+
+  function clearFaceBox(){
+    const cv=$('faceOverlay'), ctx=cv.getContext('2d');
+    ctx.clearRect(0,0,cv.width,cv.height);
+    if(faceBoxTimer){ clearTimeout(faceBoxTimer); faceBoxTimer=null; }
+  }
+
+  function setBar(p, pct){ const b=$(p+'Bar'); b.style.width=pct.toFixed(0)+'%'; barColor(b,pct); $(p+'Val').textContent=pct.toFixed(0)+'%'; }
+  function barColor(el, pct){ el.className='stat-bar-fill '+(pct>90?'red':pct>70?'amber':'green'); }
+  function scrollChat(){ const m=$('messages'); m.scrollTop=m.scrollHeight; }
+  function hideEmpty(){ const e=$('emptyState'); if(e) e.remove(); }
+  function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+  function updateMsgCount(){ $('msgCount').textContent=msgIdx+' message'+(msgIdx!==1?'s':''); }
+
   connect();
 })();
 </script>

@@ -13,11 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Camera — USB webcam with background ring buffer for VLM context.
+"""Camera — USB webcam with shared latest frame and VLM ring buffer.
 
-The background thread continuously grabs frames into a timestamped ring buffer.
-When speech ends, get_speech_frames() returns evenly-sampled frames spanning
-the full speech window (0.5s pre-speech through speech end).
+The background thread owns hardware reads and publishes frames into a
+timestamped ring buffer. Consumers such as the web UI, face tracker, and VLM
+capture use the latest buffered frame instead of competing for VideoCapture.
 """
 
 import base64
@@ -31,6 +31,8 @@ import numpy as np
 
 try:
     from reachy_mini.media.camera_utils import find_camera
+    from reachy_mini.media.camera_constants import CameraResolution
+    from reachy_mini.media.camera_utils import scale_intrinsics
     HAS_REACHY_CAM = True
 except ImportError:
     HAS_REACHY_CAM = False
@@ -57,10 +59,19 @@ class Camera:
         self.jpeg_quality = jpeg_quality
         self.capture_fps = capture_fps
         self._cap: Optional[cv2.VideoCapture] = None
+        self.camera_specs = None
+        self.camera_K: Optional[np.ndarray] = None
+        self.camera_D: Optional[np.ndarray] = None
         self._cap_lock = threading.Lock()
-        self._ring: deque[tuple[float, np.ndarray]] = deque(
+        # Reachy's camera can ignore the requested 640x480 mode and return
+        # 1920x1080 BGR frames. Keeping a 16.5 second raw ring at 10 FPS would
+        # retain about 979 MiB. Preserve the temporal window as JPEG bytes and
+        # keep only the newest frame raw for face tracking.
+        self._ring: deque[tuple[float, bytes]] = deque(
             maxlen=max(1, int(capture_fps * (MAX_SPEECH_SECS + PRE_SPEECH_SECS)))
         )
+        self._latest: Optional[tuple[float, np.ndarray]] = None
+        self._latest_jpeg: Optional[bytes] = None
         self._lock = threading.Lock()
         self._alive = False
         self._thread: Optional[threading.Thread] = None
@@ -76,9 +87,11 @@ class Camera:
                 cap, specs = find_camera()
                 if cap is not None and cap.isOpened():
                     self._cap = cap
+                    self.camera_specs = specs
                     self._cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.width)
                     self._cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
                     self._cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+                    self._sync_actual_frame_geometry()
                     return True
             except Exception:
                 pass
@@ -93,7 +106,42 @@ class Camera:
         self._cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.width)
         self._cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
         self._cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+        self._sync_actual_frame_geometry()
         return True
+
+    def _sync_actual_frame_geometry(self) -> None:
+        """Record the mode accepted by the camera and calibrate for that mode."""
+        if self._cap is None:
+            return
+        actual_width = int(self._cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        actual_height = int(self._cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        if actual_width > 0:
+            self.width = actual_width
+        if actual_height > 0:
+            self.height = actual_height
+        self._set_camera_calibration(width=self.width, height=self.height)
+
+    def _set_camera_calibration(self, *, width: int, height: int) -> None:
+        """Scale SDK camera intrinsics to the frame size used by OpenCV."""
+        specs = self.camera_specs
+        if specs is None:
+            return
+        self.camera_D = specs.D
+        try:
+            # The SDK calibration is stored against the native calibration
+            # frame. This mirrors reachy_mini.media.camera_base.CameraBase.
+            original_size = (
+                CameraResolution.R3840x2592at30fps.value[0],
+                CameraResolution.R3840x2592at30fps.value[1],
+            )
+            self.camera_K = scale_intrinsics(
+                specs.K,
+                original_size,
+                (width, height),
+                crop_scale=1.0,
+            )
+        except Exception:
+            self.camera_K = specs.K
 
     def start(self) -> bool:
         """Open the camera and start the background capture thread."""
@@ -122,18 +170,33 @@ class Camera:
                 ret, frame = self._cap.read()
             if not ret:
                 continue
+            t_frame = time.monotonic()
+            jpg = self._encode_frame_bytes(frame)
             with self._lock:
-                self._ring.append((time.monotonic(), frame))
+                self._latest = (t_frame, frame)
+                self._latest_jpeg = jpg
+                if jpg is not None:
+                    self._ring.append((t_frame, jpg))
             n_frames += 1
             elapsed = time.monotonic() - t_start
             if elapsed > 0:
                 self._actual_fps = n_frames / elapsed
 
-    def _encode_frame(self, frame: np.ndarray) -> Optional[str]:
+    def _encode_frame_bytes(self, frame: np.ndarray) -> Optional[bytes]:
         ok, jpg = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, self.jpeg_quality])
         if not ok:
             return None
-        return base64.b64encode(jpg.tobytes()).decode("ascii")
+        return jpg.tobytes()
+
+    def _encode_frame(self, frame: np.ndarray) -> Optional[str]:
+        jpg = self._encode_frame_bytes(frame)
+        if jpg is None:
+            return None
+        return base64.b64encode(jpg).decode("ascii")
+
+    @staticmethod
+    def _base64_jpeg(jpg: bytes) -> str:
+        return base64.b64encode(jpg).decode("ascii")
 
     def get_speech_frames(
         self,
@@ -153,53 +216,55 @@ class Camera:
             window_start = speech_start
 
         with self._lock:
-            candidates = [(t, f) for t, f in self._ring
+            candidates = [(t, jpg) for t, jpg in self._ring
                           if window_start <= t <= speech_end]
 
         if not candidates:
             with self._lock:
                 if self._ring:
                     candidates = [(self._ring[-1][0], self._ring[-1][1])]
+                elif self._latest_jpeg is not None:
+                    candidates = [(speech_end, self._latest_jpeg)]
                 else:
                     return []
 
         if max_frames == 1:
             selected = [candidates[-1][1]]
         elif len(candidates) <= max_frames:
-            selected = [f for _, f in candidates]
+            selected = [jpg for _, jpg in candidates]
         else:
             step = len(candidates) / max_frames
             selected = [candidates[int(i * step)][1] for i in range(max_frames)]
 
-        result = []
-        for frame in selected:
-            b64 = self._encode_frame(frame)
-            if b64:
-                result.append(b64)
-        return result
+        return [self._base64_jpeg(jpg) for jpg in selected]
 
     def capture_single(self) -> Optional[str]:
         """Grab the latest frame from the ring buffer."""
         with self._lock:
-            if not self._ring:
+            jpg = self._latest_jpeg
+        return self._base64_jpeg(jpg) if jpg is not None else None
+
+    def latest_raw(self, *, copy: bool = True) -> Optional[np.ndarray]:
+        """Return the newest raw BGR frame captured by the background thread."""
+        with self._lock:
+            if self._latest is None:
                 return None
-            _, frame = self._ring[-1]
-        return self._encode_frame(frame)
+            _, frame = self._latest
+            return frame.copy() if copy else frame
 
     def read_live(self) -> Optional[str]:
-        """Read a fresh frame directly from the camera hardware.
+        """Encode the latest buffered frame for live UI/VLM consumers."""
+        with self._lock:
+            jpg = self._latest_jpeg
+        return self._base64_jpeg(jpg) if jpg is not None else None
 
-        Unlike capture_single() (which reads from the 3fps ring buffer),
-        this can be called at any rate for a smooth UI stream without
-        affecting the VLM ring buffer.
+    def read_raw_live(self) -> Optional[np.ndarray]:
+        """Return the latest raw BGR frame.
+
+        Kept for compatibility with existing tracking/diagnostic callers.
+        Hardware reads are owned by the background capture thread.
         """
-        if self._cap is None or not self._cap.isOpened():
-            return None
-        with self._cap_lock:
-            ret, frame = self._cap.read()
-        if not ret:
-            return None
-        return self._encode_frame(frame)
+        return self.latest_raw()
 
     @property
     def buffer_count(self) -> int:
@@ -221,4 +286,9 @@ class Camera:
         if self._cap is not None:
             self._cap.release()
             self._cap = None
+        self.camera_specs = None
+        self.camera_K = None
+        self.camera_D = None
         self._ring.clear()
+        self._latest = None
+        self._latest_jpeg = None

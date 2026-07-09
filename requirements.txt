@@ -22,8 +22,8 @@ faster-whisper>=1.0.0
 # TTS — Kokoro (GPU via ONNX Runtime, runs in subprocess for GPL isolation)
 kokoro-onnx>=0.4.0
 
-# Emotion — lightweight sentiment classifier (ONNX + fast tokenizer)
-tokenizers>=0.15.0
+# Face tracking — YuNet face detection via OpenCV (cv2.FaceDetectorYN)
+# No extra pip dependencies; uses opencv already listed
 
 # Vision — camera capture for VLM
 opencv-python-headless>=4.8.0
@@ -32,7 +32,7 @@ opencv-python-headless>=4.8.0
 chromadb>=0.4.0
 
 # Web UI (optional — only needed for run_web_vision_chat.py)
-fastapi>=0.104.0
+fastapi>=0.109.1  # excludes Content-Type header ReDoS-affected releases
 uvicorn>=0.24.0
 
 # Reachy Mini SDK (robot control)

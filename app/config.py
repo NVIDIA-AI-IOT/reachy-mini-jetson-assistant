@@ -57,6 +57,8 @@ class AudioConfig:
     sample_rate: int = 16000
     channels: int = 2
     input_device: Optional[str] = "Reachy Mini Audio"
+    output_device: Optional[str] = None
+    echo_cancellation: bool = True
 
 
 @dataclass
@@ -67,8 +69,7 @@ class VADConfig:
     max_speech_secs: int = 15
     chunk_ms: int = 30
     min_utterance_secs: float = 0.3
-    min_utterance_rms: float = 0.005
-    use_silero: bool = False
+    min_utterance_rms: float = 0.001
     silero_threshold: float = 0.5
 
 
@@ -79,7 +80,7 @@ class VisionConfig:
     height: int = 480
     jpeg_quality: int = 80
     frames: int = 3
-    capture_fps: float = 3.0
+    capture_fps: float = 10.0
     system_prompt: str = (
         "You are a vision assistant on an NVIDIA Jetson device with a live camera. "
         "Answer in one to two sentences. Be direct and concise."
@@ -93,16 +94,42 @@ class ReachyConfig:
     spawn_daemon: bool = True
     timeout: float = 30.0
     media_backend: str = "no_media"
+    automatic_body_yaw: bool = False
     wake_on_start: bool = True
     sleep_on_exit: bool = False
     antenna_rest_position: List[float] = field(default_factory=lambda: [0.0, 0.0])
     daemon_retry_attempts: int = 3
     daemon_startup_wait: float = 15.0
-
-
-@dataclass
-class EmotionConfig:
-    enabled: bool = True
+    face_tracking: bool = True
+    tracking_fps: float = 15.0
+    tracking_dead_zone: float = 0.12
+    tracking_lock_zone: float = 0.18
+    tracking_reacquire_zone: float = 0.45
+    tracking_good_frame_zone: float = 0.18
+    tracking_min_face_size: float = 0.06
+    tracking_stable_frames: int = 2
+    tracking_face_lost_delay: float = 3.0
+    tracking_head_yaw_max_deg: float = 20.0
+    tracking_head_yaw_gain: float = 18.0
+    tracking_head_yaw_step: float = 1.4
+    tracking_soft_center_head_yaw_max_deg: float = 12.0
+    tracking_soft_center_head_yaw_step: float = 0.75
+    tracking_pose_smoothing: float = 0.18
+    tracking_pose_max_step_deg: float = 6.0
+    tracking_body_max_deg: float = 30.0
+    tracking_body_gain: float = 18.0
+    tracking_body_step: float = 0.7
+    tracking_invert_body: bool = True
+    tracking_body_enabled: bool = True
+    tracking_vertical: bool = True
+    tracking_return_to_neutral: bool = False
+    tracking_scan_enabled: bool = True
+    tracking_scan_body_range_deg: float = 20.0
+    tracking_scan_speed_deg_per_sec: float = 5.0
+    tracking_capture_settle_secs: float = 0.35
+    tracking_capture_acquire_timeout_secs: float = 0.4
+    speaking_movements_enabled: bool = True
+    speaking_movement_excitement_probability: float = 0.4
 
 
 @dataclass
@@ -134,7 +161,6 @@ _SECTIONS = [
     ("vad", "vad", VADConfig),
     ("vision", "vision", VisionConfig),
     ("reachy", "reachy", ReachyConfig),
-    ("emotion", "emotion", EmotionConfig),
     ("rag", "rag", RAGConfig),
     ("web", "web", WebConfig),
 ]
@@ -149,7 +175,6 @@ class Config:
     vad: VADConfig = field(default_factory=VADConfig)
     vision: VisionConfig = field(default_factory=VisionConfig)
     reachy: ReachyConfig = field(default_factory=ReachyConfig)
-    emotion: EmotionConfig = field(default_factory=EmotionConfig)
     rag: RAGConfig = field(default_factory=RAGConfig)
     web: WebConfig = field(default_factory=WebConfig)
 

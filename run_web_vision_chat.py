@@ -16,7 +16,7 @@
 
 """
 Web Vision Chat — browser UI + terminal output simultaneously.
-Mic -> Silero/energy VAD -> [camera] -> STT -> VLM -> TTS -> Speaker
+Mic -> Silero VAD -> [camera] -> STT -> VLM -> TTS -> Speaker
                + WebSocket broadcast to connected browsers.
 
 Usage:
@@ -48,8 +48,11 @@ from app.pipeline import (
     tts_player, load_silero,
 )
 from app.reachy import kill_stale_camera_holders, connect as connect_reachy
-from app.emotion import EmotionDetector
-from app.movements import MovementController
+from app.face_detector import FaceDetector
+from app.face_tracker import FaceTracker
+from app.movement_manager import MovementManager
+from app.speaking_movements import SpeakingMovementController
+from app.vision_capture import capture_frames_for_vlm
 from app.web import Broadcaster, start_web_server
 from rich.console import Console
 from rich.panel import Panel
@@ -59,18 +62,32 @@ console = Console()
 
 # ── Background threads ───────────────────────────────────────────
 
-def _frame_broadcast_thread(cam: Camera, broadcaster: Broadcaster, fps: float = 10.0):
-    """Stream camera frames to browsers at UI fps via direct hardware reads.
+def _frame_broadcast_thread(
+    cam: Camera,
+    broadcaster: Broadcaster,
+    fps: float = 10.0,
+    tracker=None,
+):
+    """Stream latest shared camera frames to browsers at UI fps.
 
-    Uses cam.read_live() (bypasses the 3fps VLM ring buffer) so the browser
-    gets a smooth video feed without affecting VLM frame selection.
+    cam.read_live() encodes the latest frame captured by the camera thread,
+    so the browser does not compete with tracking or VLM capture.
+    Includes live face detection status from the tracker when available.
     """
     interval = 1.0 / fps
     while cam.health_check():
         if broadcaster.client_count > 0:
             b64 = cam.read_live()
             if b64:
-                broadcaster.send({"type": "frame", "data": b64})
+                msg = {"type": "frame", "data": b64}
+                if tracker is not None:
+                    msg["face_detected"] = tracker.face_detected
+                    msg["centered"] = tracker.centered
+                    msg["stable"] = tracker.stable
+                    box = tracker.last_face_box
+                    if box is not None:
+                        msg["face_box"] = list(box)
+                broadcaster.send(msg)
         time.sleep(interval)
 
 
@@ -78,6 +95,7 @@ def _stats_broadcast_thread(
     broadcaster: Broadcaster,
     models: dict,
     reachy,
+    tracker=None,
     interval: float = 2.0,
 ):
     """Periodically send system stats + robot status to all WebSocket clients."""
@@ -96,12 +114,23 @@ def _stats_broadcast_thread(
                 msg["gpu"] = round(s.gpu_percent, 1)
             broadcaster.send(msg)
 
-            broadcaster.send({
+            robot_msg = {
                 "type": "robot",
                 "connected": reachy is not None,
                 "motors": True if reachy else False,
                 "head": "Up" if reachy else "N/A",
-            })
+            }
+            if tracker is not None:
+                robot_msg["tracking"] = tracker.is_tracking
+                robot_msg["scanning"] = tracker.is_scanning
+                robot_msg["face_detected"] = tracker.face_detected
+                robot_msg["centered"] = tracker.centered
+                robot_msg["stable"] = tracker.stable
+                robot_msg["pose_locked"] = tracker.pose_locked
+                robot_msg["face_error_x"] = round(tracker.error_x, 3)
+                robot_msg["target_head_yaw"] = round(tracker.target_yaw_deg, 1)
+                robot_msg["target_body_yaw"] = round(tracker.target_body_yaw_deg, 1)
+            broadcaster.send(robot_msg)
         except Exception:
             pass
         time.sleep(interval)
@@ -153,7 +182,7 @@ def main():
         console.print(
             f"  ✓ Camera /dev/video{config.vision.camera_device} "
             f"({config.vision.width}x{config.vision.height}, "
-            f"{config.vision.capture_fps} fps ring buffer)"
+            f"{config.vision.capture_fps} fps compressed ring buffer)"
         )
     else:
         console.print("[red]  ✗ Camera not found! Check USB webcam.[/red]")
@@ -164,8 +193,6 @@ def main():
     stt = None
     llm = None
     tts = None
-    silero_model = None
-
     # ── Cleanup handler ──────────────────────────────────────────
     _cleanup_done = threading.Event()
 
@@ -216,10 +243,7 @@ def main():
     console.print("    CUDA warmup...", end=" ")
     console.print(f"done ({warmup_stt(stt):.1f}s)")
 
-    if config.vad.use_silero:
-        silero_model = load_silero(console)
-    else:
-        console.print("  [dim]Silero VAD disabled, using energy-only VAD[/dim]")
+    silero_model = load_silero(console)
 
     vision_system_prompt = config.vision.system_prompt
     vision_few_shot = config.vision.few_shot or []
@@ -241,26 +265,81 @@ def main():
     else:
         console.print("  ⚠ TTS unavailable")
 
-    emotion_detector = None
-    mover = None
-    if config.emotion.enabled:
-        emotion_detector = EmotionDetector()
-        if emotion_detector.load():
-            console.print("  ✓ Emotion (distilbert-sst2, CPU)")
-            if reachy:
-                mover = MovementController(reachy, config.reachy.antenna_rest_position)
-                console.print("  ✓ Emotion movements enabled")
+    face_detector = None
+    movement_manager = None
+    face_tracker = None
+    speaking_mover = None
+    if reachy and config.reachy.face_tracking:
+        face_detector = FaceDetector()
+        if face_detector.load():
+            console.print(f"  ✓ Face detection ({face_detector.backend})")
+            movement_manager = MovementManager(
+                reachy,
+                pose_smoothing=config.reachy.tracking_pose_smoothing,
+                pose_max_step_deg=config.reachy.tracking_pose_max_step_deg,
+            )
+            movement_manager.start()
+            console.print("  ✓ Head controller (100 Hz)")
+
+            if config.reachy.speaking_movements_enabled:
+                speaking_mover = SpeakingMovementController(
+                    movement_manager,
+                    excitement_probability=(
+                        config.reachy.speaking_movement_excitement_probability
+                    ),
+                )
+                if speaking_mover.available:
+                    console.print("  ✓ Official Pollen speaking movements")
+                else:
+                    console.print("  ⚠ Speaking movement library unavailable")
+                    speaking_mover = None
+
+            face_tracker = FaceTracker(
+                cam, face_detector, movement_manager, reachy,
+                fps=config.reachy.tracking_fps,
+                dead_zone=config.reachy.tracking_dead_zone,
+                lock_zone=config.reachy.tracking_lock_zone,
+                reacquire_zone=config.reachy.tracking_reacquire_zone,
+                good_frame_zone=config.reachy.tracking_good_frame_zone,
+                min_face_size=config.reachy.tracking_min_face_size,
+                stable_frames=config.reachy.tracking_stable_frames,
+                face_lost_delay=config.reachy.tracking_face_lost_delay,
+                head_yaw_max_deg=config.reachy.tracking_head_yaw_max_deg,
+                head_yaw_gain=config.reachy.tracking_head_yaw_gain,
+                head_yaw_step=config.reachy.tracking_head_yaw_step,
+                soft_center_head_yaw_max_deg=config.reachy.tracking_soft_center_head_yaw_max_deg,
+                soft_center_head_yaw_step=config.reachy.tracking_soft_center_head_yaw_step,
+                body_max_deg=config.reachy.tracking_body_max_deg,
+                body_gain=config.reachy.tracking_body_gain,
+                body_step=config.reachy.tracking_body_step,
+                invert_body=config.reachy.tracking_invert_body,
+                body_enabled=config.reachy.tracking_body_enabled,
+                vertical=config.reachy.tracking_vertical,
+                return_to_neutral=config.reachy.tracking_return_to_neutral,
+                scan_enabled=config.reachy.tracking_scan_enabled,
+                scan_body_range_deg=config.reachy.tracking_scan_body_range_deg,
+                scan_speed_deg_per_sec=config.reachy.tracking_scan_speed_deg_per_sec,
+            )
+            face_tracker.start()
+            console.print(f"  ✓ Face tracking ({config.reachy.tracking_fps:.0f} Hz)")
         else:
-            console.print("  ⚠ Emotion detector unavailable")
-            emotion_detector = None
+            console.print("  ⚠ Face detector unavailable")
+            face_detector = None
 
     # ── Start mic ────────────────────────────────────────────────
-    effective_chunk_ms = 32 if silero_model else config.vad.chunk_ms
+    effective_chunk_ms = 32
     mic = MicRecorder(console, chunk_ms=effective_chunk_ms)
-    if not mic.start(hw, config.audio.input_device or "Reachy Mini Audio"):
+    if not mic.start(
+        hw,
+        config.audio.input_device or "Reachy Mini Audio",
+        config.audio.output_device,
+        config.audio.echo_cancellation,
+    ):
         console.print("[red]Cannot start recording! Check mic.[/red]")
         cam.close()
         return
+
+    broadcaster.configure_speakers(mic.speaker_state, mic.select_speaker)
 
     # ── Start web server + background threads ────────────────────
     web_thread = start_web_server(broadcaster, host=web_host, port=web_port)
@@ -269,7 +348,7 @@ def main():
 
     threading.Thread(
         target=_frame_broadcast_thread,
-        args=(cam, broadcaster, config.web.ui_fps),
+        args=(cam, broadcaster, config.web.ui_fps, face_tracker),
         daemon=True, name="frame-broadcaster",
     ).start()
 
@@ -277,12 +356,12 @@ def main():
         "stt": f"faster-whisper ({config.stt.model})",
         "vlm": llm.model,
         "tts": f"{tts.backend_name} ({tts.voice})" if tts else "unavailable",
-        "vad": "Silero" if silero_model else "Energy",
+        "vad": "Silero",
     }
 
     threading.Thread(
         target=_stats_broadcast_thread,
-        args=(broadcaster, model_info, reachy),
+        args=(broadcaster, model_info, reachy, face_tracker),
         daemon=True, name="stats-broadcaster",
     ).start()
 
@@ -295,7 +374,7 @@ def main():
         "ui_fps": config.web.ui_fps,
         "jpeg_quality": config.vision.jpeg_quality,
         "resolution": f"{config.vision.width}x{config.vision.height}",
-        "silero_threshold": config.vad.silero_threshold if config.vad.use_silero else None,
+        "silero_threshold": config.vad.silero_threshold,
         "beam_size": config.stt.beam_size,
     }
     broadcaster.send({
@@ -332,10 +411,12 @@ def main():
             broadcaster.send({"type": "status", "stage": "transcribing"})
 
             t_cam = time.perf_counter()
-            captured_frames = cam.get_speech_frames(
-                speech_start=segment.start_time,
-                speech_end=segment.end_time,
-                max_frames=n_frames,
+            captured_frames, stable_at_capture = capture_frames_for_vlm(
+                cam,
+                face_tracker,
+                n_frames,
+                settle_secs=config.reachy.tracking_capture_settle_secs,
+                acquire_timeout_secs=config.reachy.tracking_capture_acquire_timeout_secs,
             )
             dt_cam = time.perf_counter() - t_cam
 
@@ -361,26 +442,17 @@ def main():
                 mic.resume()
                 continue
 
-            emotion_tag = ""
-            if emotion_detector:
-                emo = emotion_detector.detect(text)
-                moved = mover.react(emo.emotion, emo.confidence) if mover else False
-                emotion_tag = (
-                    f" | {emo.emotion.value} ({emo.confidence:.0%}, {emo.inference_ms:.0f}ms)"
-                    f"{'*' if moved else ''}"
-                )
-
             n_imgs = len(captured_frames)
             console.print(
                 f'  [green]You:[/green] "{text}" '
                 f'[dim]({n_imgs} frame{"s" if n_imgs != 1 else ""} captured)[/dim]'
             )
+
             broadcaster.send({
                 "type": "transcript",
                 "text": text,
                 "stt_time": round(dt_stt, 2),
                 "duration": round(segment.duration, 1),
-                "emotion": emo.emotion.value if emotion_detector else None,
             })
 
             # ── VLM streaming with TTS + WebSocket broadcast ─────
@@ -393,7 +465,18 @@ def main():
             if tts:
                 tts_q = queue.Queue()
                 tts_thread = threading.Thread(
-                    target=tts_player, args=(tts, tts_q, mic.pa_sink), daemon=True,
+                    target=tts_player,
+                    args=(tts, tts_q),
+                    kwargs={
+                        "sink": mic.get_pa_sink,
+                        "on_audio_start": (
+                            speaking_mover.start_response if speaking_mover else None
+                        ),
+                        "on_audio_end": (
+                            speaking_mover.stop_response if speaking_mover else None
+                        ),
+                    },
+                    daemon=True,
                 )
                 tts_thread.start()
 
@@ -440,12 +523,12 @@ def main():
             console.print()
 
             toks = len(full_resp.split())
-            timing = f"  [dim]STT {dt_stt:.1f}s | CAM {dt_cam*1000:.0f}ms ({n_imgs} img from buf)"
+            stability = "stable" if stable_at_capture else "latest"
+            timing = f"  [dim]STT {dt_stt:.1f}s | CAM {dt_cam*1000:.0f}ms ({n_imgs} {stability} img)"
             if ttft is not None:
                 timing += f" | TTFT {ttft:.1f}s | VLM {dt_llm:.1f}s ~{toks/(dt_llm or 1):.0f}w/s"
             else:
                 timing += " | VLM no response"
-            timing += emotion_tag
             timing += "[/dim]"
             console.print(timing)
 
@@ -465,8 +548,13 @@ def main():
         pass
 
     _do_cleanup()
-    if mover:
-        mover.reset()
+    if face_tracker:
+        face_tracker.stop()
+    if movement_manager:
+        if speaking_mover:
+            speaking_mover.stop_response()
+        time.sleep(0.5)
+        movement_manager.stop()
     try:
         if stt:
             stt.unload()
@@ -474,8 +562,8 @@ def main():
             llm.unload()
         if tts:
             tts.unload()
-        if emotion_detector:
-            emotion_detector.unload()
+        if face_detector:
+            face_detector.unload()
     except Exception:
         pass
     console.print("[yellow]Goodbye![/yellow]")

@@ -57,6 +57,8 @@ audio:
   sample_rate: 16000
   channels: 2
   input_device: "Reachy Mini Audio"
+  output_device: "Anker PowerConf"       # preferred TTS speaker; switchable live in the web UI
+  echo_cancellation: true                 # WebRTC AEC: Reachy mic + currently selected speaker
 
 vad:
   use_silero: true                    # true = Silero neural VAD (much better), false = energy-only
@@ -67,7 +69,7 @@ vad:
   max_speech_secs: 15                 # max single utterance length
   chunk_ms: 32                        # audio chunk size (32ms required for Silero, 30ms for energy-only)
   min_utterance_secs: 0.8             # reject utterances shorter than this (filters coughs/bumps)
-  min_utterance_rms: 0.025            # reject utterances quieter than this (filters background chatter)
+  min_utterance_rms: 0.001            # AEC output is quieter; Silero remains the primary speech classifier
 
 vision:
   camera_device: 1                    # /dev/video1
@@ -75,7 +77,7 @@ vision:
   height: 480
   jpeg_quality: 80                    # JPEG compression (lower = smaller payload)
   frames: 1                           # max frames to send per utterance
-  capture_fps: 3.0                    # background capture rate (frames/sec)
+  capture_fps: 10.0                   # shared camera capture rate (frames/sec)
   system_prompt: |
     You are Reachy Mini, a friendly robot made by Pollen Robotics, running on an NVIDIA Jetson Orin Nano.
     You use the Cosmos Reason2 vision-language model for understanding what you see.
@@ -96,19 +98,49 @@ vision:
     - role: "assistant"
       content: "Goodbye, see you later!"
 
-emotion:
-  enabled: true                       # enable sentiment-based emotion detection + reactive movements
-
 reachy:
   enabled: true                       # set false to skip robot connection entirely
   spawn_daemon: true
   timeout: 30.0                       # Zenoh connection timeout (seconds)
   media_backend: "no_media"           # "no_media" = our app handles camera/audio
+  automatic_body_yaw: false           # app owns body yaw; prevents SDK IK from exceeding app limits
   wake_on_start: true                 # call wake_up() on fresh daemon start
   sleep_on_exit: true                 # call goto_sleep() on exit (blocks ~4s)
   antenna_rest_position: [0.0, 0.0]   # antenna target after wake-up
   daemon_retry_attempts: 3            # connection retries
   daemon_startup_wait: 15.0           # seconds to wait before retry
+  # Face tracking — quickly frame a face, then hold still for stable VLM images.
+  face_tracking: true                 # set false to disable face tracking
+  tracking_fps: 15.0                  # high-rate detection + control loop (Hz)
+  tracking_dead_zone: 0.12            # normalized error below which the face is near center
+  tracking_lock_zone: 0.18            # freeze once face is inside the central 18% normalized offset
+  tracking_reacquire_zone: 0.45       # switch from gentle centering only for a far-edge face
+  tracking_good_frame_zone: 0.18      # gently center faces outside this offset
+  tracking_min_face_size: 0.06        # min face width/height fraction for a stable frame
+  tracking_stable_frames: 2           # consecutive good frames before capture is considered stable
+  tracking_face_lost_delay: 3.0       # seconds to hold before neutral return (if enabled)
+  tracking_head_yaw_max_deg: 20.0     # conservative hard limit for face-tracking head yaw (degrees)
+  tracking_head_yaw_gain: 18.0        # head yaw correction per normalized horizontal error
+  tracking_head_yaw_step: 1.4         # responsive far-edge head correction per tracker update (degrees)
+  tracking_soft_center_head_yaw_max_deg: 12.0 # max head yaw while gently centering inside frame
+  tracking_soft_center_head_yaw_step: 0.75 # responsive gentle head correction per tracker update (degrees)
+  tracking_pose_smoothing: 0.18       # SDK look-at pose interpolation fraction per control tick
+  tracking_pose_max_step_deg: 6.0     # max rotation step per control tick for SDK look-at poses
+  tracking_body_max_deg: 30.0         # max optional body rotation when body assist is explicitly enabled
+  tracking_body_gain: 18.0            # body assist target for sustained far-edge faces
+  tracking_body_step: 0.7             # bounded body change per update (5.6 deg/sec at 8 Hz)
+  tracking_invert_body: true          # measured: face at right edge needs negative body_yaw to center
+  tracking_body_enabled: true         # head-first tracking; body assists only beyond the reacquire zone
+  tracking_vertical: true             # center faces above/below frame using bounded head pitch
+  tracking_return_to_neutral: false   # ease back to neutral after losing the face (off: hold heading)
+  tracking_scan_enabled: true         # after a brief face-loss delay, slowly search for a person
+  tracking_scan_body_range_deg: 20.0  # bounded body range during search; never use the old +/-90 degrees
+  tracking_scan_speed_deg_per_sec: 5.0 # slow head sweep; body scans at 35% of this speed
+  tracking_capture_settle_secs: 0.35  # freeze motion this long before VLM image capture
+  tracking_capture_acquire_timeout_secs: 0.4 # max wait for a stable face before VLM capture
+  # Speaking personality — one short official Pollen gesture per TTS reply.
+  speaking_movements_enabled: true    # starts only when the first playable TTS audio begins
+  speaking_movement_excitement_probability: 0.4 # 40% energetic, 60% friendly/interactive
 
 web:
   ui_fps: 10.0                        # camera FPS for browser UI (independent of VLM ring buffer)

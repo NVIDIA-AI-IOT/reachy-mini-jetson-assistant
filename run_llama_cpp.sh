@@ -16,11 +16,14 @@
 
 # Run llama.cpp server (GPU) — pass any HuggingFace model or local GGUF.
 #
+# Models are stored in ./models/ for fully offline operation.
+# On first run with a HF spec, models are downloaded and saved locally.
+# All subsequent runs load from disk — no internet required.
+#
 # Usage:
-#   ./run_llama_cpp.sh ggml-org/gemma-3-1b-it-GGUF:Q8_0
 #   ./run_llama_cpp.sh Kbenkhaled/Cosmos-Reason2-2B-GGUF:Q4_K_M
-#   ./run_llama_cpp.sh bartowski/Phi-4-mini-instruct-GGUF:Q4_K_M
-#   ./run_llama_cpp.sh ./models/gemma-3-1b-it-Q8_0.gguf
+#   ./run_llama_cpp.sh ggml-org/gemma-3-1b-it-GGUF:Q8_0
+#   ./run_llama_cpp.sh ./models/Cosmos-Reason2-2B-Q4_K_M.gguf
 #
 # Options (env vars):
 #   PORT=8090 ./run_llama_cpp.sh ...          # custom port (default: 8080)
@@ -40,6 +43,10 @@ CTX="${CTX:-4096}"
 NP="${NP:-1}"
 IMAGE="ghcr.io/nvidia-ai-iot/llama_cpp:b8095-r36.4-tegra-aarch64-cu126-22.04"
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+MODELS_DIR="$SCRIPT_DIR/models"
+mkdir -p "$MODELS_DIR"
+
 if [ "${EMBED:-0}" = "1" ]; then
     NAME="${NAME:-assistant-embed}"
     EXTRA_ARGS="--embeddings"
@@ -55,44 +62,151 @@ if [ "$(docker ps -aq -f name=^${NAME}$)" ]; then
     docker rm "$NAME" > /dev/null 2>&1 || true
 fi
 
-# Detect local file vs HuggingFace repo
+# ── HuggingFace spec helpers ────────────────────────────────────
+# Parse "user/repo:quant" → derive expected local filename and download URL.
+
+hf_expected_filename() {
+    local spec="$1"
+    local repo="${spec%%:*}"
+    local quant="${spec##*:}"
+    local repo_name="${repo##*/}"
+    local base="${repo_name%-GGUF}"
+    base="${base%-$quant}"
+    echo "${base}-${quant}.gguf"
+}
+
+find_local_model() {
+    local spec="$1"
+    local expected
+    expected="$(hf_expected_filename "$spec")"
+    local quant="${spec##*:}"
+
+    # Exact match
+    if [ -f "$MODELS_DIR/$expected" ]; then
+        echo "$MODELS_DIR/$expected"
+        return 0
+    fi
+
+    # Fuzzy: any GGUF in models/ containing the quant string (skip mmproj files)
+    local match
+    for f in "$MODELS_DIR"/*.gguf; do
+        [ -f "$f" ] || continue
+        case "$(basename "$f")" in
+            mmproj*) continue ;;
+        esac
+        case "$(basename "$f")" in
+            *"$quant"*|*"$(echo "$quant" | tr '[:upper:]' '[:lower:]')"*)
+                echo "$f"
+                return 0
+                ;;
+        esac
+    done
+
+    return 1
+}
+
+download_hf_model() {
+    local spec="$1"
+    local repo="${spec%%:*}"
+    local expected
+    expected="$(hf_expected_filename "$spec")"
+    local url="https://huggingface.co/${repo}/resolve/main/${expected}"
+    local dest="$MODELS_DIR/$expected"
+
+    echo "Downloading $expected ..."
+    echo "  URL : $url"
+    echo "  Dest: $dest"
+    if wget -c --progress=bar:force -O "$dest" "$url" 2>&1; then
+        echo "✓ Downloaded $expected"
+        return 0
+    fi
+    rm -f "$dest"
+    echo "✗ Download failed. Check your internet connection."
+    return 1
+}
+
+# ── Resolve model to a local file ───────────────────────────────
+
 if [ -f "$MODEL" ]; then
-    MODEL_DIR="$(cd "$(dirname "$MODEL")" && pwd)"
-    MODEL_BASE="$(basename "$MODEL")"
-    echo "Model : $MODEL (local)"
-    echo "Port  : $PORT"
-    echo ""
-    docker run -d \
-        --name "$NAME" \
-        --runtime=nvidia \
-        -p "${PORT}:8080" \
-        -v "$MODEL_DIR:/models:ro" \
-        -e NVIDIA_VISIBLE_DEVICES=all \
-        -e NVIDIA_DRIVER_CAPABILITIES=compute,utility \
-        "$IMAGE" \
-        llama-server \
-        -m "/models/$MODEL_BASE" \
-        --host 0.0.0.0 --port 8080 \
-        -ngl 999 -c "$CTX" -np "$NP" -fa on --cache-reuse 256 $EXTRA_ARGS
+    # Explicit local path
+    LOCAL_MODEL="$(cd "$(dirname "$MODEL")" && pwd)/$(basename "$MODEL")"
+
+elif echo "$MODEL" | grep -q '/'; then
+    # HuggingFace spec (user/repo:quant)
+    LOCAL_MODEL="$(find_local_model "$MODEL" 2>/dev/null)" || {
+        echo "Model not found in $MODELS_DIR — downloading..."
+        download_hf_model "$MODEL"
+        LOCAL_MODEL="$(find_local_model "$MODEL")" || {
+            echo "ERROR: could not resolve model after download."
+            exit 1
+        }
+    }
+    echo "Model : $(basename "$LOCAL_MODEL") (local cache)"
 else
-    HF_CACHE="$HOME/.cache/huggingface"
-    mkdir -p "$HF_CACHE"
-    echo "Model : $MODEL (HuggingFace)"
-    echo "Port  : $PORT"
-    echo ""
-    docker run -d \
-        --name "$NAME" \
-        --runtime=nvidia \
-        -p "${PORT}:8080" \
-        -v "$HF_CACHE:/root/.cache/huggingface" \
-        -e NVIDIA_VISIBLE_DEVICES=all \
-        -e NVIDIA_DRIVER_CAPABILITIES=compute,utility \
-        "$IMAGE" \
-        llama-server \
-        -hf "$MODEL" \
-        --host 0.0.0.0 --port 8080 \
-        -ngl 999 -c "$CTX" -np "$NP" -fa on --cache-reuse 256 $EXTRA_ARGS
+    echo "ERROR: '$MODEL' is not a local file or HuggingFace spec (user/repo:quant)."
+    exit 1
 fi
+
+MODEL_DIR="$(dirname "$LOCAL_MODEL")"
+MODEL_BASE="$(basename "$LOCAL_MODEL")"
+
+# Auto-detect multimodal projector (mmproj) for VLMs.
+# Only attach an mmproj whose filename contains part of the model name,
+# so e.g. mmproj-Cosmos-Reason2-2B-F16.gguf matches Cosmos-Reason2-2B-Q4_K_M.gguf
+# but not Qwen3.5-0.8B-Q5_K_M.gguf.
+MMPROJ_ARGS=""
+if [ "${EMBED:-0}" != "1" ]; then
+    # Extract model family from filename (strip quant suffix like -Q4_K_M)
+    MODEL_FAMILY="$(echo "$MODEL_BASE" | sed -E 's/-[QFBqfb][0-9_A-Za-z]+\.gguf$//')"
+
+    # Try mmproj matching the model family first
+    for f in "$MODEL_DIR"/mmproj*.gguf; do
+        [ -f "$f" ] || continue
+        case "$(basename "$f")" in
+            *"$MODEL_FAMILY"*)
+                MMPROJ_BASE="$(basename "$f")"
+                MMPROJ_ARGS="--mmproj /models/$MMPROJ_BASE"
+                echo "Vision: $MMPROJ_BASE (multimodal projector)"
+                break
+                ;;
+        esac
+    done
+
+    # Fall back to any generic mmproj (no model name in filename, e.g. mmproj-F16.gguf)
+    if [ -z "$MMPROJ_ARGS" ]; then
+        for f in "$MODEL_DIR"/mmproj*.gguf; do
+            [ -f "$f" ] || continue
+            fname="$(basename "$f")"
+            # Generic mmproj: short name like mmproj-F16.gguf or mmproj-BF16.gguf
+            case "$fname" in
+                mmproj-[FBfb]*.gguf)
+                    MMPROJ_BASE="$fname"
+                    MMPROJ_ARGS="--mmproj /models/$MMPROJ_BASE"
+                    echo "Vision: $MMPROJ_BASE (generic multimodal projector)"
+                    break
+                    ;;
+            esac
+        done
+    fi
+fi
+
+echo "Model : $MODEL_BASE (local)"
+echo "Port  : $PORT"
+echo ""
+
+docker run -d \
+    --name "$NAME" \
+    --runtime=nvidia \
+    -p "${PORT}:8080" \
+    -v "$MODEL_DIR:/models:ro" \
+    -e NVIDIA_VISIBLE_DEVICES=all \
+    -e NVIDIA_DRIVER_CAPABILITIES=compute,utility \
+    "$IMAGE" \
+    llama-server \
+    -m "/models/$MODEL_BASE" \
+    $MMPROJ_ARGS \
+    --host 0.0.0.0 --port 8080 \
+    -ngl 999 -c "$CTX" -np "$NP" -fa on --cache-reuse 256 $EXTRA_ARGS
 
 echo "✓ Container '$NAME' started."
 echo ""
