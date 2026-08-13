@@ -1,0 +1,27 @@
+# Optional conservative hardware bring-up overlay for JetPack 7.2.
+# The base config already defaults to JetPack 7.2. Use this profile to disable
+# body assist and scanning during initial connected-Reachy validation.
+
+stt:
+  device: "cuda"
+  compute_type: "float16"
+
+audio:
+  input_device: "Reachy Mini Audio"
+  output_device: "Reachy Mini Audio"
+  echo_cancellation: true
+
+reachy:
+  enabled: true
+  spawn_daemon: true
+  wake_on_start: true
+  sleep_on_exit: true
+  face_tracking: true
+  # Keep initial hardware validation conservative: head tracking is enabled,
+  # but body scanning/assistance is disabled until the complete flow passes.
+  tracking_body_enabled: false
+  tracking_scan_enabled: false
+  speaking_movements_enabled: true
+
+rag:
+  enabled: false

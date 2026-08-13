@@ -31,6 +31,7 @@
 #   NP=1 ./run_llama_cpp.sh ...              # parallel slots (default: 1, use 1 for VLM)
 #   NAME=my-llm ./run_llama_cpp.sh ...        # custom container name
 #   EMBED=1 ./run_llama_cpp.sh ...            # run as embedding server
+#   LLAMA_CPP_IMAGE=... ./run_llama_cpp.sh ... # override the JetPack-compatible image
 #
 # Stop:
 #   docker stop assistant-llm
@@ -41,7 +42,9 @@ MODEL="${1:?Usage: $0 <user/repo:quant or path/to/model.gguf>}"
 PORT="${PORT:-8080}"
 CTX="${CTX:-4096}"
 NP="${NP:-1}"
-IMAGE="ghcr.io/nvidia-ai-iot/llama_cpp:b8095-r36.4-tegra-aarch64-cu126-22.04"
+# The old r36.4/cu126 pin is a JetPack 6 image. NVIDIA AI-IOT publishes this
+# Jetson Orin tag for current JetPack releases; override it to pin a digest.
+IMAGE="${LLAMA_CPP_IMAGE:-ghcr.io/nvidia-ai-iot/llama_cpp:latest-jetson-orin}"
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 MODELS_DIR="$SCRIPT_DIR/models"

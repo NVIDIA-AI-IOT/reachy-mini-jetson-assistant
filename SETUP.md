@@ -1,6 +1,10 @@
-# Setup Guide
+# Legacy JetPack 6 Setup Guide
 
-Full installation instructions for the Reachy Mini Jetson Assistant.
+> JetPack 7.2 is now the default. New installations should use the
+> [JetPack 7.2 setup guide](docs/JETPACK_7_2_SETUP.md).
+
+These instructions retain the previous JetPack 6 / L4T r36 / Python 3.10
+installation path for existing deployments.
 
 ## Prerequisites
 
@@ -251,6 +255,21 @@ Reachy Mini SDK: OK
 faster-whisper: OK
 kokoro-onnx: OK
 ```
+
+## Select the JetPack 6 runtime
+
+The repository defaults now target JetPack 7.2. In every shell that launches
+the assistant or llama.cpp on JetPack 6, select the legacy configuration and
+r36/CUDA 12.6 container:
+
+```bash
+export REACHY_ASSISTANT_CONFIG=config/settings.jp6.yaml
+export LLAMA_CPP_IMAGE=ghcr.io/nvidia-ai-iot/llama_cpp:b8095-r36.4-tegra-aarch64-cu126-22.04
+```
+
+The JP6 overlay restores the previous CUDA `int8` STT compute type and Anker
+speaker preference. The normal web UI can then be launched with the same
+commands shown in the README. Keep these variables out of JP7.2 shells.
 
 ## Models
 

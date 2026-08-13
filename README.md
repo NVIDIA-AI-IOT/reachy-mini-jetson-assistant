@@ -8,7 +8,10 @@
 
 A low-latency, fully on-device voice and vision assistant for [Reachy Mini Lite](https://www.pollen-robotics.com/reachy-mini/) powered by NVIDIA Jetson. Everything runs locally with GPU acceleration — no cloud, no API keys, no internet required at runtime.
 
-> **Current target:** Jetson Orin Nano 8GB (JetPack 6.x, Python 3.10)
+> **Default target:** Jetson Orin Nano 8GB on JetPack 7.2 / L4T r39,
+> Python 3.12, CUDA 13.2, and GPU architecture `sm_87`.
+>
+> **Legacy target:** JetPack 6.x / L4T r36 and Python 3.10 remain supported.
 >
 > AGX Orin and Thor support is planned — see [Roadmap](#roadmap).
 
@@ -68,13 +71,20 @@ Face tracking and speaking movements are configurable under the `reachy` section
 
 ## Prerequisites
 
-- **NVIDIA Jetson Orin Nano** (8GB) with JetPack 6.x, Python 3.10, Docker + NVIDIA runtime
-- **[Reachy Mini Lite](https://huggingface.co/docs/reachy_mini/platforms/reachy_mini_lite/get_started)** connected via USB
+- **NVIDIA Jetson Orin Nano** (8GB) with JetPack 7.2 by default, or JetPack 6.x through the legacy profile
+- **[Reachy Mini Lite](https://huggingface.co/docs/reachy_mini/platforms/reachy_mini_lite/get_started)** connected via USB (optional for the software-only benchmark)
 - **NVMe SSD** recommended for swap and model storage
 
 ## Setup
 
-See **[SETUP.md](SETUP.md)** for the full installation guide — hardware setup, dependencies, Python packages, model downloads, and troubleshooting.
+| Platform | Status | Setup guide |
+|----------|--------|-------------|
+| **JetPack 7.2 / L4T r39** | Default and validated on Orin Nano 8GB | **[JetPack 7.2 setup](docs/JETPACK_7_2_SETUP.md)** |
+| **JetPack 6.x / L4T r36** | Retained legacy path | [JetPack 6 setup](SETUP.md) |
+
+The base `config/settings.yaml` and `run_llama_cpp.sh` defaults target JetPack
+7.2. JetPack 6 users select `config/settings.jp6.yaml` and the legacy r36
+container as documented in [SETUP.md](SETUP.md).
 
 ## Usage
 
@@ -93,7 +103,7 @@ Wait until you see `llama server listening at http://0.0.0.0:8080`.
 **Terminal 2** — Start the assistant:
 
 ```bash
-source venv/bin/activate
+source .venv/bin/activate
 python3 run_web_vision_chat.py
 ```
 
@@ -108,7 +118,7 @@ Same pipeline without the web UI:
 ```bash
 NP=1 ./run_llama_cpp.sh Kbenkhaled/Cosmos-Reason2-2B-GGUF:Q4_K_M
 # In another terminal:
-source venv/bin/activate
+source .venv/bin/activate
 python3 run_vision_chat.py
 ```
 
@@ -122,7 +132,7 @@ For text-only conversations with optional RAG:
 ./run_llama_embedding.sh ggml-org/bge-small-en-v1.5-Q8_0-GGUF:Q8_0
 
 # In another terminal:
-source venv/bin/activate
+source .venv/bin/activate
 python3 run_voice_chat.py           # with RAG
 python3 run_voice_chat.py --no-rag  # without RAG
 ```
@@ -168,7 +178,16 @@ Access at `http://<jetson-ip>:8090`. The web UI adds minimal overhead (~5 MB RAM
 
 ## Configuration
 
-All settings live in `config/settings.yaml`. Edit this file to tune behavior:
+`config/settings.yaml` is the JetPack 7.2 default. Optional YAML overlays are
+merged on top of it through `REACHY_ASSISTANT_CONFIG`:
+
+```bash
+export REACHY_ASSISTANT_CONFIG=config/settings.jp72-no-reachy.yaml  # software benchmark
+export REACHY_ASSISTANT_CONFIG=config/settings.jp72-reachy.yaml     # conservative robot bring-up
+export REACHY_ASSISTANT_CONFIG=config/settings.jp6.yaml             # legacy JetPack 6
+```
+
+Unset the variable to return to the normal JetPack 7.2 connected-Reachy configuration. Edit the base file to tune shared behavior:
 
 | Section | What It Controls |
 |---------|-----------------|
@@ -182,7 +201,9 @@ All settings live in `config/settings.yaml`. Edit this file to tune behavior:
 | `web` | UI FPS, host, port |
 | `rag` | Embedding backend, knowledge directory, retrieval settings |
 
-For developers adding new config fields, see `app/config.py` — typed dataclasses that define the schema and fallback defaults. The YAML always wins at runtime; the dataclass default is used if a key is missing from YAML.
+For developers adding new config fields, see `app/config.py` — typed
+dataclasses define schema defaults, the base YAML overrides those defaults,
+and the selected profile overrides only the fields it contains.
 
 ## Project Structure
 
@@ -208,11 +229,19 @@ reachy-mini-jetson-assistant/
 │   ├── audio.py             # PulseAudio / ALSA device helpers
 │   └── cli.py               # Typer CLI (chat, ask, rag-*)
 ├── config/
-│   └── settings.yaml        # All runtime configuration
+│   ├── settings.yaml        # JetPack 7.2 default configuration
+│   ├── settings.jp6.yaml    # Legacy JetPack 6 overlay
+│   ├── settings.jp72-reachy.yaml    # Conservative hardware bring-up
+│   └── settings.jp72-no-reachy.yaml # Software-only benchmark
+├── docs/
+│   └── JETPACK_7_2_SETUP.md # Default JP7.2 source-build guide
+├── patches/
+│   └── onnxruntime-v1.28.0-jp72.patch
 ├── static/
 │   └── index.html           # Web UI (single-file HTML/CSS/JS)
 ├── scripts/
 │   ├── bench_ttft.py        # VLM TTFT benchmark
+│   ├── bench_mocked_voice_pipeline.py # Software-only latency benchmark
 │   ├── test_reachy_movement.py   # Robot movement test
 │   └── test_vlm_prompts.py  # VLM prompt experiments
 ├── knowledge_base/          # Markdown docs for RAG
@@ -229,16 +258,29 @@ reachy-mini-jetson-assistant/
 
 ## Performance Notes (Orin Nano 8GB)
 
-| Metric | Value |
-|--------|-------|
-| STT latency | ~0.7s (small.en, beam=1) |
-| VLM TTFT (warm cache) | ~6–8s (Cosmos-Reason2-2B Q4_K_M) |
-| VLM TTFT (cold) | ~8–10s |
-| TTS latency (first chunk) | ~0.3s (Kokoro GPU) |
-| End-to-end (speak → robot responds) | ~8–12s |
-| Peak RAM | ~7.5 GB (STT + VLM + TTS + camera + web UI) |
+JetPack 7.2 software-only measurements used CUDA `float16` faster-whisper,
+a GPU llama.cpp text model, and Kokoro on `CUDAExecutionProvider`. Median warm
+latencies over three runs were:
 
-The VLM vision encoder prefill is the primary bottleneck on Orin Nano. Flash attention (`-fa on`) and KV cache prefix reuse (`--cache-reuse 256`) are enabled in `run_llama_cpp.sh` to minimize repeated work across queries.
+| Stage | JP7.2 median |
+|-------|-------------:|
+| Silero VAD compute | 48 ms |
+| STT | 494 ms |
+| LLM time to first token | 400 ms |
+| TTS compute | 665 ms |
+| First audio ready | 1.45 s |
+| Pipeline complete | 1.88 s |
+
+Those numbers exclude real microphone capture, camera/VLM prefill, speaker
+playback, and robot motion. A controlled connected-Reachy pass separately
+validated the USB motor controller, 1920x1080 camera, GPU STT/VLM/TTS, Reachy
+speaker playback, and an official speaking gesture. Its VLM TTFT was 11.75 s
+with Qwen3.5-2B; the query was injected at the STT boundary, so a human-spoken
+microphone-to-VAD turn remains to be validated.
+
+Vision encoder prefill is the primary bottleneck on Orin Nano. Flash attention
+is enabled in `run_llama_cpp.sh`; llama.cpp automatically disables cache reuse
+when it is unsupported by the selected multimodal model.
 
 ## Development and Validation
 
@@ -250,7 +292,8 @@ Jetson Device Skills are development and validation tools only. They are not pac
 
 ## Roadmap
 
-- [x] Orin Nano 8GB — full pipeline validated
+- [x] Orin Nano 8GB — JP7.2 GPU pipeline and controlled Reachy output path validated
+- [ ] Complete a human-spoken microphone → Silero VAD hardware turn on JP7.2
 - [x] Web UI with live camera, conversation log, push-to-talk
 - [x] Kokoro TTS GPU acceleration
 - [x] Silero VAD for robust speech detection
@@ -266,7 +309,8 @@ Contributions for AGX Orin and Thor testing are welcome.
 
 ## Troubleshooting
 
-See [SETUP.md](SETUP.md#troubleshooting) for common issues and fixes.
+See the default [JetPack 7.2 setup guide](docs/JETPACK_7_2_SETUP.md) for JP7.2 bring-up.
+JetPack 6 users should use the [legacy troubleshooting guide](SETUP.md#troubleshooting).
 
 ## Reachy Mini Resources
 

@@ -1,0 +1,29 @@
+diff --git a/cmake/onnxruntime_providers_cuda.cmake b/cmake/onnxruntime_providers_cuda.cmake
+index c5fc0fd..f743ff4 100644
+--- a/cmake/onnxruntime_providers_cuda.cmake
++++ b/cmake/onnxruntime_providers_cuda.cmake
+@@ -211,4 +211,4 @@
+-  # Work around a CUDA 13.3 cudafe++ (EDG front-end) regression that mis-parses CCCL's
++  # Work around a CUDA 13.2/13.3 cudafe++ (EDG front-end) regression that mis-parses CCCL's
+   # global-qualified partial specializations, e.g. in <cub/device/device_transform.cuh>:
+   #   template <typename T>
+   #   struct ::cuda::proclaims_copyable_arguments<...> : ::cuda::std::true_type {};
+@@ -417,7 +417,7 @@
+     if (CMAKE_CUDA_COMPILER_VERSION VERSION_GREATER_EQUAL 13.0)
+       foreach(inc_dir ${CUDAToolkit_INCLUDE_DIRS})
+         if (EXISTS "${inc_dir}/cccl")
+-          if (UNIX AND CMAKE_CUDA_COMPILER_VERSION VERSION_GREATER_EQUAL 13.3 AND CMAKE_CUDA_COMPILER_VERSION VERSION_LESS 13.4)
++          if (UNIX AND CMAKE_CUDA_COMPILER_VERSION VERSION_GREATER_EQUAL 13.2 AND CMAKE_CUDA_COMPILER_VERSION VERSION_LESS 13.4)
+             # Generate cudafe++-parseable copies of the CCCL headers that contain global-qualified
+             # partial specializations (see ort_cuda133_patch_cccl_header above) and put the fixed
+             # directory ahead of the toolkit cccl include so the corrected headers win.
+@@ -604,6 +604,9 @@
+             CUDA_ARCHITECTURES "${_ort_llm_cuda_architectures}"
+             NVCC_THREADS "${onnxruntime_NVCC_THREADS}"
+             SOURCES ${onnxruntime_cuda_llm_srcs})
++          # The Reachy voice pipeline does not use ORT's LLM/MoE operators. Keep the
++          # link-compatible quick-build variants and avoid exhaustive CUTLASS instantiations.
++          target_compile_definitions(onnxruntime_providers_cuda_llm PRIVATE ORT_QUICK_BUILD=1)
+         endif()
+       endif()
+     endif()

@@ -42,7 +42,7 @@ llm:
 stt:
   model: "small.en"                   # tiny.en, base.en, small.en
   device: "cuda"
-  compute_type: "int8"
+  compute_type: "float16"             # JetPack 7.2 default; JP6 uses config/settings.jp6.yaml
   language: "en"
   beam_size: 1                        # 1=greedy (fast), 5=beam (quality)
 
@@ -57,7 +57,7 @@ audio:
   sample_rate: 16000
   channels: 2
   input_device: "Reachy Mini Audio"
-  output_device: "Anker PowerConf"       # preferred TTS speaker; switchable live in the web UI
+  output_device: "Reachy Mini Audio"     # preferred TTS speaker; switchable live in the web UI
   echo_cancellation: true                 # WebRTC AEC: Reachy mic + currently selected speaker
 
 vad:

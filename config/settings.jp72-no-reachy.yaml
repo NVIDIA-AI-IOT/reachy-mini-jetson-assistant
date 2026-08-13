@@ -1,0 +1,26 @@
+# JetPack 7.2 software bring-up overlay.
+# Select with:
+#   REACHY_ASSISTANT_CONFIG=config/settings.jp72-no-reachy.yaml python3 run_voice_chat.py --no-rag
+# Values not listed here are inherited from config/settings.yaml.
+
+stt:
+  device: "cuda"
+  compute_type: "float16"
+
+audio:
+  input_device: null
+  output_device: null
+  echo_cancellation: false
+
+reachy:
+  enabled: false
+  spawn_daemon: false
+  wake_on_start: false
+  sleep_on_exit: false
+  face_tracking: false
+  tracking_body_enabled: false
+  tracking_scan_enabled: false
+  speaking_movements_enabled: false
+
+rag:
+  enabled: false

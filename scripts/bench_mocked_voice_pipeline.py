@@ -8,12 +8,17 @@ streaming LLM client, and begins TTS on the first speakable response chunk.
 """
 import argparse
 import json
+import sys
 import time
 from pathlib import Path
 
 import numpy as np
 
+# Make direct invocation from the project root work without PYTHONPATH=.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 from app.llm import LLM
+from app.pipeline import SILERO_CHUNK_SAMPLES, SileroVAD
 from app.stt import STT
 from app.tts import KokoroTTS
 
@@ -25,6 +30,20 @@ def ms(seconds):
 def resample_linear(audio, src_rate, dst_rate=16000):
     n = round(len(audio) * dst_rate / src_rate)
     return np.interp(np.linspace(0, len(audio) - 1, n), np.arange(len(audio)), audio).astype(np.float32)
+
+
+def run_silero_vad(vad, audio):
+    """Run the production Silero wrapper over one in-memory utterance."""
+    pcm = (np.clip(audio, -1.0, 1.0) * 32767).astype(np.int16)
+    remainder = len(pcm) % SILERO_CHUNK_SAMPLES
+    if remainder:
+        pcm = np.pad(pcm, (0, SILERO_CHUNK_SAMPLES - remainder))
+    probabilities = [
+        vad(pcm[start:start + SILERO_CHUNK_SAMPLES].tobytes())
+        for start in range(0, len(pcm), SILERO_CHUNK_SAMPLES)
+    ]
+    vad.reset()
+    return max(probabilities, default=0.0)
 
 
 def main():
@@ -46,7 +65,11 @@ def main():
         raise SystemExit(f"Kokoro seed speech failed: {seed.get('error')}")
     utterance = resample_linear(seed["audio"].astype(np.float32) / 32768.0, seed["sample_rate"])
 
-    stt = STT(model="small.en", device="cuda", compute_type="int8", language="en", beam_size=1)
+    t0 = time.perf_counter()
+    silero = SileroVAD()
+    vad_load_s = time.perf_counter() - t0
+
+    stt = STT(model="small.en", device="cuda", compute_type="float16", language="en", beam_size=1)
     t0 = time.perf_counter()
     if not stt.load():
         raise SystemExit("STT could not load")
@@ -57,17 +80,21 @@ def main():
         raise SystemExit("LLM server is not ready")
 
     # Warm every executable stage, but do not include this in reported latency.
-    stt.transcribe(utterance, 16000)
+    run_silero_vad(silero, utterance)
+    warm_transcript = stt.transcribe(utterance, 16000)
+    if not warm_transcript.get("text"):
+        raise SystemExit(f"STT warmup failed: {warm_transcript}")
     list(llm.generate_stream(prompt=prompt_text))
     tts.synthesize("Paris is the capital of France.")
 
     results = []
     for i in range(args.runs):
         start = time.perf_counter()
-        # Energy VAD stands in for the mic/VAD capture loop; its production
-        # decision is dominated by audio cadence, not compute time.
+        # Feed the generated speech through the same chunking and Silero model
+        # wrapper used by the production mic loop. Real-time capture is mocked.
         vad_start = time.perf_counter()
         rms = float(np.sqrt(np.mean(utterance ** 2)))
+        speech_probability = run_silero_vad(silero, utterance)
         vad_s = time.perf_counter() - vad_start
 
         stt_start = time.perf_counter()
@@ -109,7 +136,8 @@ def main():
             tts_calls += 1
         total_s = time.perf_counter() - start
         results.append({
-            "run": i + 1, "energy_vad_ms": ms(vad_s), "rms": rms,
+            "run": i + 1, "silero_vad_ms": ms(vad_s), "rms": rms,
+            "speech_probability_max": round(speech_probability, 4),
             "stt_ms": ms(stt_s), "llm_ttft_ms": ms(ttft_s or 0),
             "llm_stream_ms": ms(llm_s), "tts_compute_ms": ms(tts_compute_s),
             "first_audio_ready_ms": ms(first_tts_done_s or total_s),
@@ -120,9 +148,11 @@ def main():
     report = {
         "benchmark": "reachy-mini-jetson-assistant mocked voice pipeline",
         "hardware_mocked": ["Reachy microphone", "camera", "speaker playback", "USB motion controller"],
-        "real_stages": ["energy VAD decision", "faster-whisper STT", "llama.cpp streaming LLM", "Kokoro TTS"],
+        "real_stages": ["Silero VAD", "faster-whisper STT", "llama.cpp streaming LLM", "Kokoro TTS"],
+        "vad_provider": silero._model.session.get_providers()[0],
         "stt_backend": stt.get_info(), "tts_provider": tts.provider,
-        "cold_load_ms": {"stt": ms(stt_load_s), "tts": ms(tts_load_s)},
+        "onnxruntime_available_providers": __import__("onnxruntime").get_available_providers(),
+        "cold_load_ms": {"vad": ms(vad_load_s), "stt": ms(stt_load_s), "tts": ms(tts_load_s)},
         "runs": results,
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)

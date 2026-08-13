@@ -1,5 +1,6 @@
 # Reachy Mini Jetson Assistant
-# Tested on: Jetson Orin Nano 8GB, JetPack 6, Python 3.10
+# Default: Jetson Orin Nano 8GB, JetPack 7.2, Python 3.12
+# Legacy JetPack 6 / Python 3.10 remains documented in SETUP.md
 
 # Core
 pyyaml>=6.0
@@ -38,6 +39,7 @@ uvicorn>=0.24.0
 # Reachy Mini SDK (robot control)
 # Installed separately: pip install reachy-mini
 
-# Jetson-specific (install separately, see README):
-#   pip install onnxruntime-gpu --extra-index-url https://pypi.jetson-ai-lab.io/jp6/cu126
-#   pip install numpy==1.26.4
+# Jetson-specific GPU runtimes (install separately):
+#   JetPack 6: pip install onnxruntime-gpu --extra-index-url https://pypi.jetson-ai-lab.io/jp6/cu126
+#   JetPack 7.2: build CTranslate2 and ONNX Runtime for CUDA 13.2/sm_87;
+#                 see docs/JETPACK_7_2_SETUP.md
