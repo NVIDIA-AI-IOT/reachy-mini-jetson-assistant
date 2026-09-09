@@ -1,0 +1,7 @@
+# SPDX-FileCopyrightText: Copyright (c) 2023-2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+interface:
+  display_name: "Reachy Jetson Deploy"
+  short_description: "Launch and verify the Reachy assistant"
+  default_prompt: "Use $reachy-jetson-deploy to launch and verify the Reachy assistant pipeline."

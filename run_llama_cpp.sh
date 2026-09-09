@@ -21,27 +21,41 @@
 # All subsequent runs load from disk — no internet required.
 #
 # Usage:
-#   ./run_llama_cpp.sh Kbenkhaled/Cosmos-Reason2-2B-GGUF:Q4_K_M
+#   ./run_llama_cpp.sh unsloth/gemma-4-E2B-it-GGUF:Q4_K_M
 #   ./run_llama_cpp.sh ggml-org/gemma-3-1b-it-GGUF:Q8_0
-#   ./run_llama_cpp.sh ./models/Cosmos-Reason2-2B-Q4_K_M.gguf
+#   ./run_llama_cpp.sh ./models/gemma-4-E2B-it-Q4_K_M.gguf
 #
 # Options (env vars):
 #   PORT=8090 ./run_llama_cpp.sh ...          # custom port (default: 8080)
-#   CTX=4096 ./run_llama_cpp.sh ...           # custom context size (default: 4096)
-#   NP=1 ./run_llama_cpp.sh ...              # parallel slots (default: 1, use 1 for VLM)
-#   NAME=my-llm ./run_llama_cpp.sh ...        # custom container name
-#   EMBED=1 ./run_llama_cpp.sh ...            # run as embedding server
+#   CTX=2048 ./run_llama_cpp.sh ...           # context (VLM default: 1024; text: 4096)
+#   BATCH=256 ./run_llama_cpp.sh ...           # logical batch (VLM default: 128; text: 2048)
+#   UBATCH=256 ./run_llama_cpp.sh ...          # physical batch (VLM default: 128; text: 512)
+#   RESTART=no ./run_llama_cpp.sh ...          # Docker restart policy (default: unless-stopped)
+#   REASONING=auto ./run_llama_cpp.sh ...       # enable model reasoning (default: off for spoken replies)
+#   CACHE_RAM=256 ./run_llama_cpp.sh ...        # prompt-cache RAM in MiB (default: 0 on 8 GB Jetsons)
+#   NP=1 ./run_llama_cpp.sh ...                # parallel slots (default: 1, use 1 for VLM)
+#   NAME=my-llm ./run_llama_cpp.sh ...          # custom container name
+#   EMBED=1 ./run_llama_cpp.sh ...              # run as embedding server
+#   MMPROJ=./models/mmproj-F16.gguf ...         # explicit projector (must share model directory)
+#   LLAMA_CPP_IMAGE=... ./run_llama_cpp.sh ... # override the JetPack-compatible image
 #
 # Stop:
 #   docker stop assistant-llm
 
-set -e
+set -euo pipefail
 
 MODEL="${1:?Usage: $0 <user/repo:quant or path/to/model.gguf>}"
 PORT="${PORT:-8080}"
-CTX="${CTX:-4096}"
+CTX="${CTX:-}"
+BATCH="${BATCH:-}"
+UBATCH="${UBATCH:-}"
+RESTART="${RESTART:-unless-stopped}"
+REASONING="${REASONING:-off}"
+CACHE_RAM="${CACHE_RAM:-0}"
 NP="${NP:-1}"
-IMAGE="ghcr.io/nvidia-ai-iot/llama_cpp:b8095-r36.4-tegra-aarch64-cu126-22.04"
+# The old r36.4/cu126 pin is a JetPack 6 image. NVIDIA AI-IOT publishes this
+# Jetson Orin tag for current JetPack releases; override it to pin a digest.
+IMAGE="${LLAMA_CPP_IMAGE:-ghcr.io/nvidia-ai-iot/llama_cpp:latest-jetson-orin}"
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 MODELS_DIR="$SCRIPT_DIR/models"
@@ -80,6 +94,13 @@ find_local_model() {
     local expected
     expected="$(hf_expected_filename "$spec")"
     local quant="${spec##*:}"
+    local repo="${spec%%:*}"
+    local repo_name="${repo##*/}"
+    local base="${repo_name%-GGUF}"
+    local base_lower
+    local quant_lower
+    base_lower="$(echo "$base" | tr '[:upper:]' '[:lower:]')"
+    quant_lower="$(echo "$quant" | tr '[:upper:]' '[:lower:]')"
 
     # Exact match
     if [ -f "$MODELS_DIR/$expected" ]; then
@@ -87,15 +108,18 @@ find_local_model() {
         return 0
     fi
 
-    # Fuzzy: any GGUF in models/ containing the quant string (skip mmproj files)
-    local match
+    # Some repositories vary filename case or add a suffix. Require both the
+    # repository's model family and quantization so an unrelated Q4 model can
+    # never be selected merely because it is already cached.
     for f in "$MODELS_DIR"/*.gguf; do
         [ -f "$f" ] || continue
         case "$(basename "$f")" in
             mmproj*) continue ;;
         esac
-        case "$(basename "$f")" in
-            *"$quant"*|*"$(echo "$quant" | tr '[:upper:]' '[:lower:]')"*)
+        local filename_lower
+        filename_lower="$(basename "$f" | tr '[:upper:]' '[:lower:]')"
+        case "$filename_lower" in
+            *"$base_lower"*"$quant_lower"*)
                 echo "$f"
                 return 0
                 ;;
@@ -103,6 +127,33 @@ find_local_model() {
     done
 
     return 1
+}
+
+download_hf_projector() {
+    local repo="$1"
+    local repo_name="${repo##*/}"
+    local base="${repo_name%-GGUF}"
+    local remote="mmproj-F16.gguf"
+    local dest="$MODELS_DIR/mmproj-${base}-F16.gguf"
+    local url="https://huggingface.co/${repo}/resolve/main/${remote}"
+
+    if [ -f "$dest" ]; then
+        return 0
+    fi
+
+    # VLM repositories commonly publish this companion file. Text-only
+    # repositories return a non-success status and simply skip this step.
+    if wget -q --spider "$url"; then
+        echo "Downloading $remote for vision..."
+        if wget -c --progress=bar:force -O "$dest" "$url" 2>&1; then
+            echo "✓ Downloaded $(basename "$dest")"
+            return 0
+        fi
+        rm -f "$dest"
+        echo "✗ Multimodal projector download failed."
+        return 1
+    fi
+    return 0
 }
 
 download_hf_model() {
@@ -127,12 +178,15 @@ download_hf_model() {
 
 # ── Resolve model to a local file ───────────────────────────────
 
+HF_REPO=""
+
 if [ -f "$MODEL" ]; then
     # Explicit local path
     LOCAL_MODEL="$(cd "$(dirname "$MODEL")" && pwd)/$(basename "$MODEL")"
 
 elif echo "$MODEL" | grep -q '/'; then
     # HuggingFace spec (user/repo:quant)
+    HF_REPO="${MODEL%%:*}"
     LOCAL_MODEL="$(find_local_model "$MODEL" 2>/dev/null)" || {
         echo "Model not found in $MODELS_DIR — downloading..."
         download_hf_model "$MODEL"
@@ -147,42 +201,47 @@ else
     exit 1
 fi
 
+# Probe/download the named projector even when the model was already cached.
+# Text-only repositories simply return success without creating one.
+if [ -n "$HF_REPO" ]; then
+    download_hf_projector "$HF_REPO"
+fi
+
 MODEL_DIR="$(dirname "$LOCAL_MODEL")"
 MODEL_BASE="$(basename "$LOCAL_MODEL")"
 
-# Auto-detect multimodal projector (mmproj) for VLMs.
+# Use an explicit projector or auto-detect a model-family-named projector.
 # Only attach an mmproj whose filename contains part of the model name,
-# so e.g. mmproj-Cosmos-Reason2-2B-F16.gguf matches Cosmos-Reason2-2B-Q4_K_M.gguf
-# but not Qwen3.5-0.8B-Q5_K_M.gguf.
+# so e.g. mmproj-gemma-4-E2B-it-F16.gguf matches
+# gemma-4-E2B-it-Q4_K_M.gguf but not an unrelated model.
 MMPROJ_ARGS=""
 if [ "${EMBED:-0}" != "1" ]; then
-    # Extract model family from filename (strip quant suffix like -Q4_K_M)
-    MODEL_FAMILY="$(echo "$MODEL_BASE" | sed -E 's/-[QFBqfb][0-9_A-Za-z]+\.gguf$//')"
+    if [ -n "${MMPROJ:-}" ]; then
+        if [ ! -f "$MMPROJ" ]; then
+            echo "ERROR: MMPROJ does not exist: $MMPROJ"
+            exit 1
+        fi
+        MMPROJ_PATH="$(cd "$(dirname "$MMPROJ")" && pwd)/$(basename "$MMPROJ")"
+        MMPROJ_DIR="$(dirname "$MMPROJ_PATH")"
+        if [ "$MMPROJ_DIR" != "$MODEL_DIR" ]; then
+            echo "ERROR: MMPROJ must be in the same directory as the model: $MODEL_DIR"
+            exit 1
+        fi
+        MMPROJ_BASE="$(basename "$MMPROJ_PATH")"
+        MMPROJ_ARGS="--mmproj /models/$MMPROJ_BASE"
+        echo "Vision: $MMPROJ_BASE (explicit multimodal projector)"
+    else
+        # Extract model family from filename (strip quant suffix like -Q4_K_M).
+        MODEL_FAMILY="$(echo "$MODEL_BASE" | sed -E 's/-[QFBqfb][0-9_A-Za-z]+\.gguf$//')"
 
-    # Try mmproj matching the model family first
-    for f in "$MODEL_DIR"/mmproj*.gguf; do
-        [ -f "$f" ] || continue
-        case "$(basename "$f")" in
-            *"$MODEL_FAMILY"*)
-                MMPROJ_BASE="$(basename "$f")"
-                MMPROJ_ARGS="--mmproj /models/$MMPROJ_BASE"
-                echo "Vision: $MMPROJ_BASE (multimodal projector)"
-                break
-                ;;
-        esac
-    done
-
-    # Fall back to any generic mmproj (no model name in filename, e.g. mmproj-F16.gguf)
-    if [ -z "$MMPROJ_ARGS" ]; then
+        # Try an mmproj matching the model family; never guess a generic one.
         for f in "$MODEL_DIR"/mmproj*.gguf; do
             [ -f "$f" ] || continue
-            fname="$(basename "$f")"
-            # Generic mmproj: short name like mmproj-F16.gguf or mmproj-BF16.gguf
-            case "$fname" in
-                mmproj-[FBfb]*.gguf)
-                    MMPROJ_BASE="$fname"
+            case "$(basename "$f")" in
+                *"$MODEL_FAMILY"*)
+                    MMPROJ_BASE="$(basename "$f")"
                     MMPROJ_ARGS="--mmproj /models/$MMPROJ_BASE"
-                    echo "Vision: $MMPROJ_BASE (generic multimodal projector)"
+                    echo "Vision: $MMPROJ_BASE (multimodal projector)"
                     break
                     ;;
             esac
@@ -190,13 +249,33 @@ if [ "${EMBED:-0}" != "1" ]; then
     fi
 fi
 
+# Full GPU STT + VLM + TTS is memory-constrained on Orin Nano 8GB. Keep
+# multimodal image batches small and valid (BATCH == UBATCH) so Gemma 4's
+# 264 image tokens are decoded in several bounded chunks. Preserve llama.cpp's
+# former text/embedding-sized defaults when no multimodal projector is active.
+if [ -n "$MMPROJ_ARGS" ]; then
+    CTX="${CTX:-1024}"
+    BATCH="${BATCH:-128}"
+    UBATCH="${UBATCH:-128}"
+else
+    CTX="${CTX:-4096}"
+    BATCH="${BATCH:-2048}"
+    UBATCH="${UBATCH:-512}"
+fi
+
 echo "Model : $MODEL_BASE (local)"
 echo "Port  : $PORT"
 echo ""
+echo "Context: $CTX tokens"
+echo "Batch : $BATCH / $UBATCH logical / physical"
+echo "Restart: $RESTART"
+echo "Reasoning: $REASONING"
+echo "Prompt cache RAM: ${CACHE_RAM} MiB"
 
 docker run -d \
     --name "$NAME" \
     --runtime=nvidia \
+    --restart "$RESTART" \
     -p "${PORT}:8080" \
     -v "$MODEL_DIR:/models:ro" \
     -e NVIDIA_VISIBLE_DEVICES=all \
@@ -206,7 +285,8 @@ docker run -d \
     -m "/models/$MODEL_BASE" \
     $MMPROJ_ARGS \
     --host 0.0.0.0 --port 8080 \
-    -ngl 999 -c "$CTX" -np "$NP" -fa on --cache-reuse 256 $EXTRA_ARGS
+    -ngl 999 -c "$CTX" -b "$BATCH" -ub "$UBATCH" -np "$NP" -fa on \
+    --cache-reuse 256 --cache-ram "$CACHE_RAM" --reasoning "$REASONING" $EXTRA_ARGS
 
 echo "✓ Container '$NAME' started."
 echo ""

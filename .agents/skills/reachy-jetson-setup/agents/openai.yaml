@@ -1,0 +1,7 @@
+# SPDX-FileCopyrightText: Copyright (c) 2023-2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+interface:
+  display_name: "Reachy Jetson Setup"
+  short_description: "Install validated JetPack GPU dependencies"
+  default_prompt: "Use $reachy-jetson-setup to install this Reachy assistant on a supported Jetson."

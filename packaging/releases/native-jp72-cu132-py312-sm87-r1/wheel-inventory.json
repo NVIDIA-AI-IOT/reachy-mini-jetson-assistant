@@ -1,0 +1,3669 @@
+{
+  "created": "2026-09-09T00:49:12Z",
+  "host": {
+    "kernel": "6.8.12-1021-tegra",
+    "l4t": "# R39 (release), REVISION: 2.0, GCID: 45755727, BOARD: generic, EABI: aarch64, DATE: Mon Jun  1 09:28:48 PM UTC 2026\n# KERNEL_VARIANT: oot\nTARGET_USERSPACE_LIB_DIR=nvidia\nTARGET_USERSPACE_LIB_DIR_PATH=usr/lib/aarch64-linux-gnu/nvidia",
+    "machine": "aarch64",
+    "python": "3.12.3",
+    "system": "Linux"
+  },
+  "platform_id": "jp72-l4t39.2-cu13.2-py3.12-sm87",
+  "schema_version": 1,
+  "verdict": {
+    "passed": true,
+    "scope": "Archive members, wheel metadata, ELF headers/dependencies, host resolution, NVIDIA library-name/string references, required license hashes, and libculibos symbols",
+    "violations": []
+  },
+  "wheels": [
+    {
+      "bundled_nvidia_library_count": 0,
+      "filename": "ctranslate2-4.8.1+reachy.jp72.cu132.sm87-cp312-cp312-linux_aarch64.whl",
+      "key": "ctranslate2",
+      "license_declared": "MIT",
+      "member_count": 42,
+      "members": [
+        {
+          "compressed_size": 768,
+          "path": "ctranslate2-4.8.1+reachy.jp72.cu132.sm87.dist-info/METADATA",
+          "sha256": "7c55ad126d26c63bcc64571ae934e91aa0fc8d999d9ef17694fd03b3cdfa6ae0",
+          "size": 2070,
+          "type": "wheel-metadata",
+          "unix_mode": "0o644"
+        },
+        {
+          "compressed_size": 2098,
+          "path": "ctranslate2-4.8.1+reachy.jp72.cu132.sm87.dist-info/RECORD",
+          "sha256": "dbde11ca304928d768a432983772aca501438c0e4d60ef8552c1723cfd9d9fe0",
+          "size": 4507,
+          "type": "wheel-metadata",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 102,
+          "path": "ctranslate2-4.8.1+reachy.jp72.cu132.sm87.dist-info/WHEEL",
+          "sha256": "bf1edac492fed1140b75ac92d9e33324aaf5b0f691fb3b8b1bdd1f7d19951bab",
+          "size": 105,
+          "type": "wheel-metadata",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 141,
+          "path": "ctranslate2-4.8.1+reachy.jp72.cu132.sm87.dist-info/entry_points.txt",
+          "sha256": "6479288eeb7f4e65511e5d1b2481a6d9bf70aabf7c18026ac4df6b949b50b21b",
+          "size": 466,
+          "type": "other",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 665,
+          "path": "ctranslate2-4.8.1+reachy.jp72.cu132.sm87.dist-info/licenses/LICENSES/BS-thread-pool-MIT.txt",
+          "sha256": "24ee7ca059a540470e15eba63918a477e3bda7b6f611959533ff3b64dc920505",
+          "size": 1121,
+          "type": "license-or-notice",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 716,
+          "path": "ctranslate2-4.8.1+reachy.jp72.cu132.sm87.dist-info/licenses/LICENSES/BUILD-AND-LICENSE-NOTICE.txt",
+          "sha256": "4987b070b978e7dad4732906c0d675350271ea1d92f8601d16cf9a3cc75096d5",
+          "size": 1167,
+          "type": "license-or-notice",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 652,
+          "path": "ctranslate2-4.8.1+reachy.jp72.cu132.sm87.dist-info/licenses/LICENSES/CTranslate2-MIT.txt",
+          "sha256": "54aa79d9fe3c09e67a16dcd95b9e88676405a6ec174efda31036983cf7672ecb",
+          "size": 1115,
+          "type": "license-or-notice",
+          "unix_mode": "0o600"
+        },
+        {
+          "compressed_size": 830,
+          "path": "ctranslate2-4.8.1+reachy.jp72.cu132.sm87.dist-info/licenses/LICENSES/CUTLASS-BSD-3-Clause.txt",
+          "sha256": "6fc6ad419e4d26571a14c7c4d26b65345865c20dd8686ddcf5e8673f54d3d233",
+          "size": 1547,
+          "type": "license-or-notice",
+          "unix_mode": "0o600"
+        },
+        {
+          "compressed_size": 10645,
+          "path": "ctranslate2-4.8.1+reachy.jp72.cu132.sm87.dist-info/licenses/LICENSES/Thrust-CUB-libcu++-Apache-2.0-with-exceptions.txt",
+          "sha256": "01b767dcd7d36f42efb608076741cf83f154a995e198028cb698aadc3a43b63b",
+          "size": 33838,
+          "type": "license-or-notice",
+          "unix_mode": "0o600"
+        },
+        {
+          "compressed_size": 782,
+          "path": "ctranslate2-4.8.1+reachy.jp72.cu132.sm87.dist-info/licenses/LICENSES/fmt-MIT.txt",
+          "sha256": "825c9324e70f8c839c8ba910543dd4a7daee243b86ef960594c11381a19980b8",
+          "size": 1408,
+          "type": "license-or-notice",
+          "unix_mode": "0o600"
+        },
+        {
+          "compressed_size": 692,
+          "path": "ctranslate2-4.8.1+reachy.jp72.cu132.sm87.dist-info/licenses/LICENSES/half-MIT.txt",
+          "sha256": "38fbc32180bff759d5a0a04d683e9aaa3bfc2370930874adbb25a571b3cf17a9",
+          "size": 1152,
+          "type": "license-or-notice",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 483,
+          "path": "ctranslate2-4.8.1+reachy.jp72.cu132.sm87.dist-info/licenses/LICENSES/neon-mathfun-Zlib.txt",
+          "sha256": "fc78a02381487322a0338bc047ad399c06b01b6969beb43d98675d699bd4adbd",
+          "size": 900,
+          "type": "license-or-notice",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 662,
+          "path": "ctranslate2-4.8.1+reachy.jp72.cu132.sm87.dist-info/licenses/LICENSES/nlohmann-json-MIT.txt",
+          "sha256": "258b9f6b8be156b061c9016b5e8f4da54b252617e6687fe9b7fc8fb9cd2ed621",
+          "size": 1105,
+          "type": "license-or-notice",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 911,
+          "path": "ctranslate2-4.8.1+reachy.jp72.cu132.sm87.dist-info/licenses/LICENSES/pybind11-BSD-3-Clause.txt",
+          "sha256": "83965b843b98f670d3a85bd041ed4b372c8ec50d7b4a5995a83ac697ba675dcb",
+          "size": 1684,
+          "type": "license-or-notice",
+          "unix_mode": "0o600"
+        },
+        {
+          "compressed_size": 776,
+          "path": "ctranslate2-4.8.1+reachy.jp72.cu132.sm87.dist-info/licenses/LICENSES/spdlog-MIT.txt",
+          "sha256": "a7241a379cb98d37788f82c2fc2e484c3ae85dae881fd3406f0637644850926f",
+          "size": 1348,
+          "type": "license-or-notice",
+          "unix_mode": "0o600"
+        },
+        {
+          "compressed_size": 14,
+          "path": "ctranslate2-4.8.1+reachy.jp72.cu132.sm87.dist-info/top_level.txt",
+          "sha256": "d6151a5b370522e4a8d81008507140dceb20b2ee92d608aad32e91a2cbfc1ce4",
+          "size": 12,
+          "type": "other",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 625,
+          "path": "ctranslate2/__init__.py",
+          "sha256": "1d6a5da7215bcfe3c705eca6b08e04acd2c0f9c7080d3c9fde072ca851847152",
+          "size": 1559,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 14950098,
+          "elf": {
+            "build_id": "532aecedc4311553955d7b09cc598c02f1929d50",
+            "culibos_symbols": [],
+            "dependency_resolution": {
+              "entries": [
+                {
+                  "dpkg_owner": null,
+                  "name": "linux-vdso.so.1",
+                  "raw": "linux-vdso.so.1 (0x0000ffffa556a000)",
+                  "resolved": null
+                },
+                {
+                  "dpkg_owner": null,
+                  "inside_wheel": true,
+                  "name": "libctranslate2.so.4",
+                  "raw": "libctranslate2.so.4 => /tmp/reachy-wheel-audit-kgvsuv8s/ctranslate2/ctranslate2/libctranslate2.so.4 (0x0000ffffa4770000)",
+                  "resolved": "/tmp/reachy-wheel-audit-kgvsuv8s/ctranslate2/ctranslate2/libctranslate2.so.4"
+                },
+                {
+                  "dpkg_owner": "libstdc++6",
+                  "inside_wheel": false,
+                  "name": "libstdc++.so.6",
+                  "raw": "libstdc++.so.6 => /lib/aarch64-linux-gnu/libstdc++.so.6 (0x0000ffffa44c0000)",
+                  "resolved": "/usr/lib/aarch64-linux-gnu/libstdc++.so.6.0.33"
+                },
+                {
+                  "dpkg_owner": "libgcc-s1",
+                  "inside_wheel": false,
+                  "name": "libgcc_s.so.1",
+                  "raw": "libgcc_s.so.1 => /lib/aarch64-linux-gnu/libgcc_s.so.1 (0x0000ffffa4480000)",
+                  "resolved": "/usr/lib/aarch64-linux-gnu/libgcc_s.so.1"
+                },
+                {
+                  "dpkg_owner": "libc6",
+                  "inside_wheel": false,
+                  "name": "libc.so.6",
+                  "raw": "libc.so.6 => /lib/aarch64-linux-gnu/libc.so.6 (0x0000ffffa42c0000)",
+                  "resolved": "/usr/lib/aarch64-linux-gnu/libc.so.6"
+                },
+                {
+                  "dpkg_owner": "libc6",
+                  "inside_wheel": false,
+                  "name": "ld-linux-aarch64.so.1",
+                  "raw": "/lib/ld-linux-aarch64.so.1 (0x0000ffffa5520000)",
+                  "resolved": "/usr/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1"
+                },
+                {
+                  "dpkg_owner": "cuda-cudart-13-2",
+                  "inside_wheel": false,
+                  "name": "libcudart.so.13",
+                  "raw": "libcudart.so.13 => /usr/local/cuda/targets/sbsa-linux/lib/libcudart.so.13 (0x0000ffffa41f0000)",
+                  "resolved": "/usr/local/cuda-13.2/targets/sbsa-linux/lib/libcudart.so.13.2.75"
+                },
+                {
+                  "dpkg_owner": "libcudnn9-cuda-13",
+                  "inside_wheel": false,
+                  "name": "libcudnn.so.9",
+                  "raw": "libcudnn.so.9 => /lib/aarch64-linux-gnu/libcudnn.so.9 (0x0000ffffa3a00000)",
+                  "resolved": "/usr/lib/aarch64-linux-gnu/libcudnn.so.9.20.0"
+                },
+                {
+                  "dpkg_owner": "libcublas-13-2",
+                  "inside_wheel": false,
+                  "name": "libcublas.so.13",
+                  "raw": "libcublas.so.13 => /usr/local/cuda/targets/sbsa-linux/lib/libcublas.so.13 (0x0000ffff9f800000)",
+                  "resolved": "/usr/local/cuda-13.2/targets/sbsa-linux/lib/libcublas.so.13.4.0.1"
+                },
+                {
+                  "dpkg_owner": "libc6",
+                  "inside_wheel": false,
+                  "name": "libm.so.6",
+                  "raw": "libm.so.6 => /lib/aarch64-linux-gnu/libm.so.6 (0x0000ffffa4140000)",
+                  "resolved": "/usr/lib/aarch64-linux-gnu/libm.so.6"
+                },
+                {
+                  "dpkg_owner": "libc6",
+                  "inside_wheel": false,
+                  "name": "libdl.so.2",
+                  "raw": "libdl.so.2 => /lib/aarch64-linux-gnu/libdl.so.2 (0x0000ffffa4110000)",
+                  "resolved": "/usr/lib/aarch64-linux-gnu/libdl.so.2"
+                },
+                {
+                  "dpkg_owner": "libc6",
+                  "inside_wheel": false,
+                  "name": "libpthread.so.0",
+                  "raw": "libpthread.so.0 => /lib/aarch64-linux-gnu/libpthread.so.0 (0x0000ffffa40e0000)",
+                  "resolved": "/usr/lib/aarch64-linux-gnu/libpthread.so.0"
+                },
+                {
+                  "dpkg_owner": "libc6",
+                  "inside_wheel": false,
+                  "name": "librt.so.1",
+                  "raw": "librt.so.1 => /lib/aarch64-linux-gnu/librt.so.1 (0x0000ffffa40b0000)",
+                  "resolved": "/usr/lib/aarch64-linux-gnu/librt.so.1"
+                },
+                {
+                  "dpkg_owner": "libcublas-13-2",
+                  "inside_wheel": false,
+                  "name": "libcublasLt.so.13",
+                  "raw": "libcublasLt.so.13 => /usr/local/cuda/targets/sbsa-linux/lib/libcublasLt.so.13 (0x0000ffff75a00000)",
+                  "resolved": "/usr/local/cuda-13.2/targets/sbsa-linux/lib/libcublasLt.so.13.4.0.1"
+                }
+              ],
+              "unresolved": []
+            },
+            "dynamic": {
+              "needed": [
+                "ld-linux-aarch64.so.1",
+                "libc.so.6",
+                "libctranslate2.so.4",
+                "libgcc_s.so.1",
+                "libstdc++.so.6"
+              ],
+              "runpath": "$ORIGIN"
+            },
+            "header": {
+              "class": "ELF64",
+              "data": "2's complement, little endian",
+              "machine": "AArch64",
+              "type": "DYN (Shared object file)"
+            },
+            "nvidia_library_strings": []
+          },
+          "path": "ctranslate2/_ext.cpython-312-aarch64-linux-gnu.so",
+          "sha256": "1159e89b58bb92a1ac9bde79d443b0b7c9670f911f78973c091070972432356a",
+          "size": 45840632,
+          "type": "elf",
+          "unix_mode": "0o775"
+        },
+        {
+          "compressed_size": 144,
+          "path": "ctranslate2/converters/__init__.py",
+          "sha256": "4ffc89327b3f5d757aa49cb7496a53b60aef6d3d28c119f170c9ffee2e6aa29e",
+          "size": 499,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1122,
+          "path": "ctranslate2/converters/converter.py",
+          "sha256": "c44dc260f0ef37352778157f36e3c9e7d4b178d29151cc819d2fccb31383dc83",
+          "size": 3492,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 2614,
+          "path": "ctranslate2/converters/eole_ct2.py",
+          "sha256": "7abd11a43a653f8f886793516b087977a87b98da31e8bbb1c0b48c4916152090",
+          "size": 12270,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 3049,
+          "path": "ctranslate2/converters/fairseq.py",
+          "sha256": "71d8f200163f1eacb53d2eb073f9d9b3724d8740fc45cfde3c34f5ce1897b1d7",
+          "size": 13095,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 2956,
+          "path": "ctranslate2/converters/marian.py",
+          "sha256": "8b9a624bfe3348cf459a9d76170207ba8b74a4cf953e1ab630dc6eb7ee146bcd",
+          "size": 10959,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1091,
+          "path": "ctranslate2/converters/openai_gpt2.py",
+          "sha256": "466bf1cba52a6b97fd616f514097c5e1709e35b5e1f80c3ad69e4dfc4d77f613",
+          "size": 3209,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 3116,
+          "path": "ctranslate2/converters/opennmt_py.py",
+          "sha256": "c55283c0947e47a26850d6231504b0f21a7980eb2b575283fae52ef96d156a45",
+          "size": 13476,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 3387,
+          "path": "ctranslate2/converters/opennmt_tf.py",
+          "sha256": "8227b4b7ce11f6f5171fc435cbebeeea124153c96388e3d6753f3107d2d78313",
+          "size": 15767,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 513,
+          "path": "ctranslate2/converters/opus_mt.py",
+          "sha256": "5c201bdd7e1a7d10ad69912b6fb6ef22f24199f5600bd3566bf205e6d3814a64",
+          "size": 1210,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 19309,
+          "path": "ctranslate2/converters/transformers.py",
+          "sha256": "08df6d7e3893043cf7f252303bcae5c31f48ee3389da8b935c830a9e7d4eab94",
+          "size": 162173,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1114,
+          "path": "ctranslate2/converters/utils.py",
+          "sha256": "bb9d6383753ecd044c32130ea7e28a1ec1d69bab504384c0ae55e246f2e91324",
+          "size": 3690,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 3866,
+          "path": "ctranslate2/extensions.py",
+          "sha256": "69783f7663cfbd34df9c8d45301834958366d2d655015b44a96d54a5ba864745",
+          "size": 21351,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 2962983,
+          "elf": {
+            "build_id": "9089d20f6c79022db80ec53eb00a47b9d83bbf70",
+            "culibos_symbols": [],
+            "dependency_resolution": {
+              "entries": [
+                {
+                  "dpkg_owner": null,
+                  "name": "linux-vdso.so.1",
+                  "raw": "linux-vdso.so.1 (0x0000ffffbb465000)",
+                  "resolved": null
+                },
+                {
+                  "dpkg_owner": "cuda-cudart-13-2",
+                  "inside_wheel": false,
+                  "name": "libcudart.so.13",
+                  "raw": "libcudart.so.13 => /usr/local/cuda/targets/sbsa-linux/lib/libcudart.so.13 (0x0000ffffba6b0000)",
+                  "resolved": "/usr/local/cuda-13.2/targets/sbsa-linux/lib/libcudart.so.13.2.75"
+                },
+                {
+                  "dpkg_owner": "libcudnn9-cuda-13",
+                  "inside_wheel": false,
+                  "name": "libcudnn.so.9",
+                  "raw": "libcudnn.so.9 => /lib/aarch64-linux-gnu/libcudnn.so.9 (0x0000ffffba000000)",
+                  "resolved": "/usr/lib/aarch64-linux-gnu/libcudnn.so.9.20.0"
+                },
+                {
+                  "dpkg_owner": "libcublas-13-2",
+                  "inside_wheel": false,
+                  "name": "libcublas.so.13",
+                  "raw": "libcublas.so.13 => /usr/local/cuda/targets/sbsa-linux/lib/libcublas.so.13 (0x0000ffffb5e00000)",
+                  "resolved": "/usr/local/cuda-13.2/targets/sbsa-linux/lib/libcublas.so.13.4.0.1"
+                },
+                {
+                  "dpkg_owner": "libstdc++6",
+                  "inside_wheel": false,
+                  "name": "libstdc++.so.6",
+                  "raw": "libstdc++.so.6 => /lib/aarch64-linux-gnu/libstdc++.so.6 (0x0000ffffb5b70000)",
+                  "resolved": "/usr/lib/aarch64-linux-gnu/libstdc++.so.6.0.33"
+                },
+                {
+                  "dpkg_owner": "libc6",
+                  "inside_wheel": false,
+                  "name": "libm.so.6",
+                  "raw": "libm.so.6 => /lib/aarch64-linux-gnu/libm.so.6 (0x0000ffffb9f50000)",
+                  "resolved": "/usr/lib/aarch64-linux-gnu/libm.so.6"
+                },
+                {
+                  "dpkg_owner": "libgcc-s1",
+                  "inside_wheel": false,
+                  "name": "libgcc_s.so.1",
+                  "raw": "libgcc_s.so.1 => /lib/aarch64-linux-gnu/libgcc_s.so.1 (0x0000ffffba670000)",
+                  "resolved": "/usr/lib/aarch64-linux-gnu/libgcc_s.so.1"
+                },
+                {
+                  "dpkg_owner": "libc6",
+                  "inside_wheel": false,
+                  "name": "libc.so.6",
+                  "raw": "libc.so.6 => /lib/aarch64-linux-gnu/libc.so.6 (0x0000ffffb59b0000)",
+                  "resolved": "/usr/lib/aarch64-linux-gnu/libc.so.6"
+                },
+                {
+                  "dpkg_owner": "libc6",
+                  "inside_wheel": false,
+                  "name": "ld-linux-aarch64.so.1",
+                  "raw": "/lib/ld-linux-aarch64.so.1 (0x0000ffffbb420000)",
+                  "resolved": "/usr/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1"
+                },
+                {
+                  "dpkg_owner": "libc6",
+                  "inside_wheel": false,
+                  "name": "libdl.so.2",
+                  "raw": "libdl.so.2 => /lib/aarch64-linux-gnu/libdl.so.2 (0x0000ffffba640000)",
+                  "resolved": "/usr/lib/aarch64-linux-gnu/libdl.so.2"
+                },
+                {
+                  "dpkg_owner": "libc6",
+                  "inside_wheel": false,
+                  "name": "libpthread.so.0",
+                  "raw": "libpthread.so.0 => /lib/aarch64-linux-gnu/libpthread.so.0 (0x0000ffffba610000)",
+                  "resolved": "/usr/lib/aarch64-linux-gnu/libpthread.so.0"
+                },
+                {
+                  "dpkg_owner": "libc6",
+                  "inside_wheel": false,
+                  "name": "librt.so.1",
+                  "raw": "librt.so.1 => /lib/aarch64-linux-gnu/librt.so.1 (0x0000ffffb9f20000)",
+                  "resolved": "/usr/lib/aarch64-linux-gnu/librt.so.1"
+                },
+                {
+                  "dpkg_owner": "libcublas-13-2",
+                  "inside_wheel": false,
+                  "name": "libcublasLt.so.13",
+                  "raw": "libcublasLt.so.13 => /usr/local/cuda/targets/sbsa-linux/lib/libcublasLt.so.13 (0x0000ffff8bc00000)",
+                  "resolved": "/usr/local/cuda-13.2/targets/sbsa-linux/lib/libcublasLt.so.13.4.0.1"
+                }
+              ],
+              "unresolved": []
+            },
+            "dynamic": {
+              "needed": [
+                "ld-linux-aarch64.so.1",
+                "libc.so.6",
+                "libcublas.so.13",
+                "libcudart.so.13",
+                "libcudnn.so.9",
+                "libgcc_s.so.1",
+                "libm.so.6",
+                "libstdc++.so.6"
+              ],
+              "soname": "libctranslate2.so.4"
+            },
+            "header": {
+              "class": "ELF64",
+              "data": "2's complement, little endian",
+              "machine": "AArch64",
+              "type": "DYN (Shared object file)"
+            },
+            "nvidia_library_strings": [
+              "libcublas.so.13",
+              "libcudart.so.13",
+              "libcudnn.so.9"
+            ]
+          },
+          "path": "ctranslate2/libctranslate2.so.4",
+          "sha256": "99c306c7eb027b25c6d7ec0eae3399aaaf115443bdee3b9c1b9c61ed620a1fa3",
+          "size": 14745696,
+          "type": "elf",
+          "unix_mode": "0o644"
+        },
+        {
+          "compressed_size": 488,
+          "path": "ctranslate2/logging.py",
+          "sha256": "c66c762e5af23a100f6cc989c0c02bf89b97659a2047d8fad8e34d659d9f14e4",
+          "size": 1176,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 263,
+          "path": "ctranslate2/models/__init__.py",
+          "sha256": "b2c31b866438bf40b9030918a2999837f53daed4c526f36c76579c01c0661de9",
+          "size": 479,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 211,
+          "path": "ctranslate2/specs/__init__.py",
+          "sha256": "5c4fc6c26b183696a8999c1a60981b271b1781d2aebc637bdf269fdde0429a0b",
+          "size": 635,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 864,
+          "path": "ctranslate2/specs/attention_spec.py",
+          "sha256": "85991d005ad1bec5a1c610da8b9f39ec3f822972ea146f73993429116e5e391a",
+          "size": 3684,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 500,
+          "path": "ctranslate2/specs/common_spec.py",
+          "sha256": "ed4b90dd8b0ef9f2c087016e5a5e3555b34b40bccd9584df8eb652805ff88039",
+          "size": 1542,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 5910,
+          "path": "ctranslate2/specs/model_spec.py",
+          "sha256": "565dc4766f3e39e8f78ba994544e9175ae3a7b9e771928b603f5395289a753cb",
+          "size": 24969,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 4357,
+          "path": "ctranslate2/specs/transformer_spec.py",
+          "sha256": "6863845c7cefd783554b012bc7364d1c407c6c5a9068387d329f7cb420bdafc9",
+          "size": 34082,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 587,
+          "path": "ctranslate2/specs/wav2vec2_spec.py",
+          "sha256": "0fa0fe37f7dbb2f38455ef34da34b4de977aa6de5b3a2ef5ca0ff531f77f8637",
+          "size": 2034,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 756,
+          "path": "ctranslate2/specs/wav2vec2bert_spec.py",
+          "sha256": "34a4c2f2735dc4c793056d18fc429436b0e92a13f02faecfd65dddc264fe6b29",
+          "size": 3432,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 723,
+          "path": "ctranslate2/specs/whisper_spec.py",
+          "sha256": "bf1c6b02c1d8188b580b62bd630da07851146d799e1ad72a1585c332a71ad250",
+          "size": 2370,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 69,
+          "path": "ctranslate2/version.py",
+          "sha256": "a5e78d275d379d26b88eaf92fed37d92bc8591bb3906fea67abef3e18d5e4ac5",
+          "size": 73,
+          "type": "python",
+          "unix_mode": "0o664"
+        }
+      ],
+      "metadata": {
+        "generator": "setuptools (84.0.0)",
+        "license": "MIT",
+        "license_files": [
+          "LICENSES/BS-thread-pool-MIT.txt",
+          "LICENSES/BUILD-AND-LICENSE-NOTICE.txt",
+          "LICENSES/CTranslate2-MIT.txt",
+          "LICENSES/CUTLASS-BSD-3-Clause.txt",
+          "LICENSES/Thrust-CUB-libcu++-Apache-2.0-with-exceptions.txt",
+          "LICENSES/fmt-MIT.txt",
+          "LICENSES/half-MIT.txt",
+          "LICENSES/neon-mathfun-Zlib.txt",
+          "LICENSES/nlohmann-json-MIT.txt",
+          "LICENSES/pybind11-BSD-3-Clause.txt",
+          "LICENSES/spdlog-MIT.txt"
+        ],
+        "name": "ctranslate2",
+        "requires_dist": [
+          "numpy",
+          "pyyaml<7,>=5.3",
+          "setuptools"
+        ],
+        "requires_python": ">=3.9",
+        "version": "4.8.1+reachy.jp72.cu132.sm87",
+        "wheel_tags": [
+          "cp312-cp312-linux_aarch64"
+        ]
+      },
+      "native_member_count": 2,
+      "nvidia_library_reference_strings": [
+        "libcublas.so.13",
+        "libcudart.so.13",
+        "libcudnn.so.9"
+      ],
+      "nvidia_runtime_dependencies": [
+        {
+          "dpkg_owner": "libcublas-13-2",
+          "inside_wheel": false,
+          "member": "ctranslate2/libctranslate2.so.4",
+          "needed": "libcublas.so.13",
+          "resolved": "/usr/local/cuda-13.2/targets/sbsa-linux/lib/libcublas.so.13.4.0.1"
+        },
+        {
+          "dpkg_owner": "cuda-cudart-13-2",
+          "inside_wheel": false,
+          "member": "ctranslate2/libctranslate2.so.4",
+          "needed": "libcudart.so.13",
+          "resolved": "/usr/local/cuda-13.2/targets/sbsa-linux/lib/libcudart.so.13.2.75"
+        },
+        {
+          "dpkg_owner": "libcudnn9-cuda-13",
+          "inside_wheel": false,
+          "member": "ctranslate2/libctranslate2.so.4",
+          "needed": "libcudnn.so.9",
+          "resolved": "/usr/lib/aarch64-linux-gnu/libcudnn.so.9.20.0"
+        }
+      ],
+      "path": "/tmp/reachy-wheelhouse.40giZ7/ctranslate2-4.8.1+reachy.jp72.cu132.sm87-cp312-cp312-linux_aarch64.whl",
+      "sha256": "cd553ca1932127d16e4c2d2e38599b2e70a2a4ee8b7d06b1ec0eb37a1d38185a",
+      "size": 17999182,
+      "source": {
+        "commit": "0d8bcd362ac75ef860ef161d6f0efad0ae439ff0",
+        "modifications": "Downstream wheel packaging and local version only; the CTranslate2 C++ source is unmodified.",
+        "modified": true,
+        "repository": "https://github.com/OpenNMT/CTranslate2.git",
+        "tag": "v4.8.1",
+        "tag_object": "399239a790ad0da4e4363e0dcbb83495b5abd742"
+      },
+      "static_library_or_object_count": 0
+    },
+    {
+      "bundled_nvidia_library_count": 0,
+      "filename": "onnxruntime_gpu-1.28.0+reachy.jp72.cu132.sm87-cp312-cp312-linux_aarch64.whl",
+      "key": "onnxruntime_gpu",
+      "license_declared": "MIT",
+      "member_count": 327,
+      "members": [
+        {
+          "compressed_size": 1037,
+          "path": "onnxruntime/BUILD-AND-LICENSE-NOTICE.txt",
+          "sha256": "d298318d64c9cb5432516905a67171be1ff3d67085d64e30942c60c04420ad8b",
+          "size": 1945,
+          "type": "license-or-notice",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 626,
+          "path": "onnxruntime/LICENSE",
+          "sha256": "2f07c72751aed99790b8a4869cf2311df85a860b22ded05fa22803587a48922c",
+          "size": 1073,
+          "type": "license-or-notice",
+          "unix_mode": "0o600"
+        },
+        {
+          "compressed_size": 1167,
+          "path": "onnxruntime/Privacy.md",
+          "sha256": "9a15f9fd9d4c7b6dfc35f237f461863f84f8f73cf6189e330818a674d3828871",
+          "size": 2469,
+          "type": "other",
+          "unix_mode": "0o600"
+        },
+        {
+          "compressed_size": 31749,
+          "path": "onnxruntime/ThirdPartyNotices.txt",
+          "sha256": "0e07b95f3a8d6230037707c5c4a2b554d12c4cb67369669ac255635528ffcee2",
+          "size": 325054,
+          "type": "license-or-notice",
+          "unix_mode": "0o600"
+        },
+        {
+          "compressed_size": 5739,
+          "path": "onnxruntime/__init__.py",
+          "sha256": "15df15fbac6fea1bfb25f39c181f44420be25574c092b870ecb9df49ef50e2de",
+          "size": 21447,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 154,
+          "path": "onnxruntime/backend/__init__.py",
+          "sha256": "92ad7c59c0743a5dfc0921872fe38dc2991f504d0a726a233aaea4f951ada306",
+          "size": 328,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 3176,
+          "path": "onnxruntime/backend/backend.py",
+          "sha256": "525d90c2a39048d52b33d5386a29ea5ad6313eb9248e04641b14a06f02bfcbbb",
+          "size": 10233,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1070,
+          "path": "onnxruntime/backend/backend_rep.py",
+          "sha256": "aec649a2316ad08b2cb1f5234f6f3fdf41bd0bd7d05ada8865ff8ed905098c00",
+          "size": 2825,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 95,
+          "path": "onnxruntime/capi/__init__.py",
+          "sha256": "592371b77978964580ff4be1c35103e08eca38ed269c0b87c1280562a6ead0b8",
+          "size": 247,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 356,
+          "path": "onnxruntime/capi/_ld_preload.py",
+          "sha256": "1bd70fe884ec33b6148a9d75f8febefb386101176e1e752d6fc56ecf24367c61",
+          "size": 692,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 698,
+          "path": "onnxruntime/capi/_pybind_state.py",
+          "sha256": "9f0392aee0402506fd8da1b58398aea6a77896743cce8abab0739b9aac9e3c00",
+          "size": 1500,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 91,
+          "path": "onnxruntime/capi/build_and_package_info.py",
+          "sha256": "08de0c6c00c361363ff39f1cdbd21458fccc16665e8515ed08b4c7fea30e6193",
+          "size": 101,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 586,
+          "path": "onnxruntime/capi/convert_npz_to_onnx_adapter.py",
+          "sha256": "b2008e1314fe424777416aba16e8a25f63c7916024e9ca4f542b33232e207940",
+          "size": 1533,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 8799522,
+          "elf": {
+            "build_id": "e63457923287239598a936ea6cfba7844ae99997",
+            "culibos_symbols": [],
+            "dependency_resolution": {
+              "entries": [
+                {
+                  "dpkg_owner": null,
+                  "name": "linux-vdso.so.1",
+                  "raw": "linux-vdso.so.1 (0x0000ffffa0275000)",
+                  "resolved": null
+                },
+                {
+                  "dpkg_owner": "libstdc++6",
+                  "inside_wheel": false,
+                  "name": "libstdc++.so.6",
+                  "raw": "libstdc++.so.6 => /lib/aarch64-linux-gnu/libstdc++.so.6 (0x0000ffff9ec10000)",
+                  "resolved": "/usr/lib/aarch64-linux-gnu/libstdc++.so.6.0.33"
+                },
+                {
+                  "dpkg_owner": "libc6",
+                  "inside_wheel": false,
+                  "name": "libm.so.6",
+                  "raw": "libm.so.6 => /lib/aarch64-linux-gnu/libm.so.6 (0x0000ffff9eb60000)",
+                  "resolved": "/usr/lib/aarch64-linux-gnu/libm.so.6"
+                },
+                {
+                  "dpkg_owner": "libgcc-s1",
+                  "inside_wheel": false,
+                  "name": "libgcc_s.so.1",
+                  "raw": "libgcc_s.so.1 => /lib/aarch64-linux-gnu/libgcc_s.so.1 (0x0000ffff9eb20000)",
+                  "resolved": "/usr/lib/aarch64-linux-gnu/libgcc_s.so.1"
+                },
+                {
+                  "dpkg_owner": "libc6",
+                  "inside_wheel": false,
+                  "name": "libc.so.6",
+                  "raw": "libc.so.6 => /lib/aarch64-linux-gnu/libc.so.6 (0x0000ffff9e960000)",
+                  "resolved": "/usr/lib/aarch64-linux-gnu/libc.so.6"
+                },
+                {
+                  "dpkg_owner": "libc6",
+                  "inside_wheel": false,
+                  "name": "ld-linux-aarch64.so.1",
+                  "raw": "/lib/ld-linux-aarch64.so.1 (0x0000ffffa0230000)",
+                  "resolved": "/usr/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1"
+                }
+              ],
+              "unresolved": []
+            },
+            "dynamic": {
+              "needed": [
+                "ld-linux-aarch64.so.1",
+                "libc.so.6",
+                "libgcc_s.so.1",
+                "libm.so.6",
+                "libstdc++.so.6"
+              ],
+              "runpath": "$ORIGIN",
+              "soname": "libonnxruntime.so.1"
+            },
+            "header": {
+              "class": "ELF64",
+              "data": "2's complement, little endian",
+              "machine": "AArch64",
+              "type": "DYN (Shared object file)"
+            },
+            "nvidia_library_strings": []
+          },
+          "path": "onnxruntime/capi/libonnxruntime.so.1.28.0",
+          "sha256": "b9fd73e617518474a13acac3e839fa343798aa41d833a5270b7d74c2aa2b659f",
+          "size": 25918360,
+          "type": "elf",
+          "unix_mode": "0o700"
+        },
+        {
+          "compressed_size": 36627017,
+          "elf": {
+            "build_id": "6a274931db195a0c376c0f050fd5a2faf0520de2",
+            "culibos_symbols": [],
+            "dependency_resolution": {
+              "entries": [
+                {
+                  "dpkg_owner": null,
+                  "name": "linux-vdso.so.1",
+                  "raw": "linux-vdso.so.1 (0x0000ffff83b4e000)",
+                  "resolved": null
+                },
+                {
+                  "dpkg_owner": "libcublas-13-2",
+                  "inside_wheel": false,
+                  "name": "libcublasLt.so.13",
+                  "raw": "libcublasLt.so.13 => /usr/local/cuda/targets/sbsa-linux/lib/libcublasLt.so.13 (0x0000ffff55600000)",
+                  "resolved": "/usr/local/cuda-13.2/targets/sbsa-linux/lib/libcublasLt.so.13.4.0.1"
+                },
+                {
+                  "dpkg_owner": "libcublas-13-2",
+                  "inside_wheel": false,
+                  "name": "libcublas.so.13",
+                  "raw": "libcublas.so.13 => /usr/local/cuda/targets/sbsa-linux/lib/libcublas.so.13 (0x0000ffff51400000)",
+                  "resolved": "/usr/local/cuda-13.2/targets/sbsa-linux/lib/libcublas.so.13.4.0.1"
+                },
+                {
+                  "dpkg_owner": "cuda-cudart-13-2",
+                  "inside_wheel": false,
+                  "name": "libcudart.so.13",
+                  "raw": "libcudart.so.13 => /usr/local/cuda/targets/sbsa-linux/lib/libcudart.so.13 (0x0000ffff7f3c0000)",
+                  "resolved": "/usr/local/cuda-13.2/targets/sbsa-linux/lib/libcudart.so.13.2.75"
+                },
+                {
+                  "dpkg_owner": "libstdc++6",
+                  "inside_wheel": false,
+                  "name": "libstdc++.so.6",
+                  "raw": "libstdc++.so.6 => /lib/aarch64-linux-gnu/libstdc++.so.6 (0x0000ffff51170000)",
+                  "resolved": "/usr/lib/aarch64-linux-gnu/libstdc++.so.6.0.33"
+                },
+                {
+                  "dpkg_owner": "libc6",
+                  "inside_wheel": false,
+                  "name": "libm.so.6",
+                  "raw": "libm.so.6 => /lib/aarch64-linux-gnu/libm.so.6 (0x0000ffff7f310000)",
+                  "resolved": "/usr/lib/aarch64-linux-gnu/libm.so.6"
+                },
+                {
+                  "dpkg_owner": "libgcc-s1",
+                  "inside_wheel": false,
+                  "name": "libgcc_s.so.1",
+                  "raw": "libgcc_s.so.1 => /lib/aarch64-linux-gnu/libgcc_s.so.1 (0x0000ffff7f2d0000)",
+                  "resolved": "/usr/lib/aarch64-linux-gnu/libgcc_s.so.1"
+                },
+                {
+                  "dpkg_owner": "libc6",
+                  "inside_wheel": false,
+                  "name": "libc.so.6",
+                  "raw": "libc.so.6 => /lib/aarch64-linux-gnu/libc.so.6 (0x0000ffff50fb0000)",
+                  "resolved": "/usr/lib/aarch64-linux-gnu/libc.so.6"
+                },
+                {
+                  "dpkg_owner": "libc6",
+                  "inside_wheel": false,
+                  "name": "ld-linux-aarch64.so.1",
+                  "raw": "/lib/ld-linux-aarch64.so.1 (0x0000ffff83b00000)",
+                  "resolved": "/usr/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1"
+                },
+                {
+                  "dpkg_owner": "libc6",
+                  "inside_wheel": false,
+                  "name": "librt.so.1",
+                  "raw": "librt.so.1 => /lib/aarch64-linux-gnu/librt.so.1 (0x0000ffff555d0000)",
+                  "resolved": "/usr/lib/aarch64-linux-gnu/librt.so.1"
+                },
+                {
+                  "dpkg_owner": "libc6",
+                  "inside_wheel": false,
+                  "name": "libpthread.so.0",
+                  "raw": "libpthread.so.0 => /lib/aarch64-linux-gnu/libpthread.so.0 (0x0000ffff555a0000)",
+                  "resolved": "/usr/lib/aarch64-linux-gnu/libpthread.so.0"
+                },
+                {
+                  "dpkg_owner": "libc6",
+                  "inside_wheel": false,
+                  "name": "libdl.so.2",
+                  "raw": "libdl.so.2 => /lib/aarch64-linux-gnu/libdl.so.2 (0x0000ffff55570000)",
+                  "resolved": "/usr/lib/aarch64-linux-gnu/libdl.so.2"
+                }
+              ],
+              "unresolved": []
+            },
+            "dynamic": {
+              "needed": [
+                "ld-linux-aarch64.so.1",
+                "libc.so.6",
+                "libcublas.so.13",
+                "libcublasLt.so.13",
+                "libcudart.so.13",
+                "libgcc_s.so.1",
+                "libm.so.6",
+                "libstdc++.so.6"
+              ]
+            },
+            "header": {
+              "class": "ELF64",
+              "data": "2's complement, little endian",
+              "machine": "AArch64",
+              "type": "DYN (Shared object file)"
+            },
+            "nvidia_library_strings": [
+              "libcublas.so.13",
+              "libcublasLt.so.13",
+              "libcuda.so.1",
+              "libcudart.so",
+              "libcudart.so.12",
+              "libcudart.so.13",
+              "libcudnn.so",
+              "libcudnn.so.9",
+              "libcufft.so.12",
+              "libnvrtc.so",
+              "libnvrtc.so.12",
+              "libnvrtc.so.13"
+            ]
+          },
+          "path": "onnxruntime/capi/libonnxruntime_providers_cuda.so",
+          "sha256": "f1957e2b406c5ef745225b3765198b23b665b2a7339b35887557742db7fe13a4",
+          "size": 91123912,
+          "type": "elf",
+          "unix_mode": "0o700"
+        },
+        {
+          "compressed_size": 2326,
+          "elf": {
+            "build_id": "71e14180b0a620053cb294bd3278fed9041425eb",
+            "culibos_symbols": [],
+            "dependency_resolution": {
+              "entries": [
+                {
+                  "dpkg_owner": null,
+                  "name": "statically",
+                  "raw": "statically linked",
+                  "resolved": null
+                }
+              ],
+              "unresolved": []
+            },
+            "dynamic": {
+              "needed": [],
+              "soname": "libonnxruntime_providers_shared.so"
+            },
+            "header": {
+              "class": "ELF64",
+              "data": "2's complement, little endian",
+              "machine": "AArch64",
+              "type": "DYN (Shared object file)"
+            },
+            "nvidia_library_strings": []
+          },
+          "path": "onnxruntime/capi/libonnxruntime_providers_shared.so",
+          "sha256": "ec5466a571b44718e64b7e62605b7a87045df08bbaa2b7d67804208f22ab32d2",
+          "size": 69608,
+          "type": "elf",
+          "unix_mode": "0o700"
+        },
+        {
+          "compressed_size": 763,
+          "path": "onnxruntime/capi/onnxruntime_collect_build_info.py",
+          "sha256": "8fd2e904489839779f5ff3e422e9ff1355ac6d6d8fcab20d324c1b1a7bea3986",
+          "size": 2062,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 15084,
+          "path": "onnxruntime/capi/onnxruntime_inference_collection.py",
+          "sha256": "de8a9b322be3ba444ce4d04da2fb1cbc2a87743ced46882093ccec66b6d20213",
+          "size": 68906,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 9548616,
+          "elf": {
+            "build_id": "b1eb41ba1a6ce9be0402d7fe68d7b993c53ff1fd",
+            "culibos_symbols": [],
+            "dependency_resolution": {
+              "entries": [
+                {
+                  "dpkg_owner": null,
+                  "name": "linux-vdso.so.1",
+                  "raw": "linux-vdso.so.1 (0x0000ffff81a4d000)",
+                  "resolved": null
+                },
+                {
+                  "dpkg_owner": "libstdc++6",
+                  "inside_wheel": false,
+                  "name": "libstdc++.so.6",
+                  "raw": "libstdc++.so.6 => /lib/aarch64-linux-gnu/libstdc++.so.6 (0x0000ffff80230000)",
+                  "resolved": "/usr/lib/aarch64-linux-gnu/libstdc++.so.6.0.33"
+                },
+                {
+                  "dpkg_owner": "libc6",
+                  "inside_wheel": false,
+                  "name": "libm.so.6",
+                  "raw": "libm.so.6 => /lib/aarch64-linux-gnu/libm.so.6 (0x0000ffff80180000)",
+                  "resolved": "/usr/lib/aarch64-linux-gnu/libm.so.6"
+                },
+                {
+                  "dpkg_owner": "libgcc-s1",
+                  "inside_wheel": false,
+                  "name": "libgcc_s.so.1",
+                  "raw": "libgcc_s.so.1 => /lib/aarch64-linux-gnu/libgcc_s.so.1 (0x0000ffff80140000)",
+                  "resolved": "/usr/lib/aarch64-linux-gnu/libgcc_s.so.1"
+                },
+                {
+                  "dpkg_owner": "libc6",
+                  "inside_wheel": false,
+                  "name": "libc.so.6",
+                  "raw": "libc.so.6 => /lib/aarch64-linux-gnu/libc.so.6 (0x0000ffff7ff80000)",
+                  "resolved": "/usr/lib/aarch64-linux-gnu/libc.so.6"
+                },
+                {
+                  "dpkg_owner": "libc6",
+                  "inside_wheel": false,
+                  "name": "ld-linux-aarch64.so.1",
+                  "raw": "/lib/ld-linux-aarch64.so.1 (0x0000ffff81a10000)",
+                  "resolved": "/usr/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1"
+                }
+              ],
+              "unresolved": []
+            },
+            "dynamic": {
+              "needed": [
+                "ld-linux-aarch64.so.1",
+                "libc.so.6",
+                "libgcc_s.so.1",
+                "libm.so.6",
+                "libstdc++.so.6"
+              ],
+              "runpath": "$ORIGIN"
+            },
+            "header": {
+              "class": "ELF64",
+              "data": "2's complement, little endian",
+              "machine": "AArch64",
+              "type": "DYN (Shared object file)"
+            },
+            "nvidia_library_strings": []
+          },
+          "path": "onnxruntime/capi/onnxruntime_pybind11_state.so",
+          "sha256": "4f8193a6a80e76e842ebf652220c37b13dbab980733e06af86f33157be1732c8",
+          "size": 28526352,
+          "type": "elf",
+          "unix_mode": "0o700"
+        },
+        {
+          "compressed_size": 1949,
+          "path": "onnxruntime/capi/onnxruntime_validation.py",
+          "sha256": "8b841ee5c921a0aebd23dc79514fc34e940ce7bc7902540025e50a1d0cb6e120",
+          "size": 6795,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 278,
+          "path": "onnxruntime/datasets/__init__.py",
+          "sha256": "28244c8b55c33ad8aa29e063d5b9ac0e3520ee582fe19d20d8b16c0ad6a4062d",
+          "size": 455,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 462,
+          "path": "onnxruntime/datasets/logreg_iris.onnx",
+          "sha256": "8224784c98d73412d9fd99abcd57a38568bd590980d0fbe5916464531c52e8fc",
+          "size": 670,
+          "type": "other",
+          "unix_mode": "0o600"
+        },
+        {
+          "compressed_size": 107,
+          "path": "onnxruntime/datasets/mul_1.onnx",
+          "sha256": "71f431c4e9321ec6fbeb158d02ed240459a7dcc98673fa79a4f439ce42efaf10",
+          "size": 130,
+          "type": "other",
+          "unix_mode": "0o600"
+        },
+        {
+          "compressed_size": 74,
+          "path": "onnxruntime/datasets/sigmoid.onnx",
+          "sha256": "5340aba67a7e3475162ad794378af55f1718f55f9a5d74b4af60ecc7f7a624b6",
+          "size": 103,
+          "type": "other",
+          "unix_mode": "0o600"
+        },
+        {
+          "compressed_size": 595,
+          "path": "onnxruntime/quantization/CalTableFlatBuffers/KeyValue.py",
+          "sha256": "fecc58656ee31b11d336456ad3e6e5fce4e8ab60dd31718e9e968756180dd8cb",
+          "size": 2172,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 713,
+          "path": "onnxruntime/quantization/CalTableFlatBuffers/TrtTable.py",
+          "sha256": "eeb0e37992385ac644f978f88e601dbcceb10c6c42c256cb88889a87b05f1133",
+          "size": 2592,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 2,
+          "path": "onnxruntime/quantization/CalTableFlatBuffers/__init__.py",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "size": 0,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 279,
+          "path": "onnxruntime/quantization/__init__.py",
+          "sha256": "e6a397c6f48639307150aa6d495826b3a3f3229220748a095837a592c9beac8c",
+          "size": 763,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 5739,
+          "path": "onnxruntime/quantization/base_quantizer.py",
+          "sha256": "d0fba38e56f9d0592cf6c4f72ee3a38a13d023a50b8852a5d05d49f6d19c1ca9",
+          "size": 25765,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 11661,
+          "path": "onnxruntime/quantization/calibrate.py",
+          "sha256": "dd84a7663166b2eb013ac51c1184cd36c689786813d49916cd5a7b779b39bea0",
+          "size": 56791,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 6470,
+          "path": "onnxruntime/quantization/cuda_quantizer.py",
+          "sha256": "1e4dbc4f780c06a281054aac00fbbb7e136dfee1c29eee350c3e3dd420310e55",
+          "size": 26855,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 83,
+          "path": "onnxruntime/quantization/execution_providers/qnn/__init__.py",
+          "sha256": "99a13e72b8e602904cfac188b98fcfce386542eb10afc0fe140840f5eaa6f758",
+          "size": 118,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1484,
+          "path": "onnxruntime/quantization/execution_providers/qnn/fusion_lpnorm.py",
+          "sha256": "6767db32ff39da3cc2c9691f4d36acab90883d2bed0fe1161a6507d677c7cf5f",
+          "size": 5195,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1497,
+          "path": "onnxruntime/quantization/execution_providers/qnn/fusion_spacetodepth.py",
+          "sha256": "1fe6bea7151d14dc4e0c9bca81e6b251c65bc9297bb8b6c2c5ba43e5b0650575",
+          "size": 6123,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 4290,
+          "path": "onnxruntime/quantization/execution_providers/qnn/mixed_precision_overrides_utils.py",
+          "sha256": "beff0aa9254a724556906333c169615ab64de047b45c09c1f325fee0b334da07",
+          "size": 18582,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 4076,
+          "path": "onnxruntime/quantization/execution_providers/qnn/preprocess.py",
+          "sha256": "56997c1fa18cd53a176ca84706f9667c127c8a145b2265490c8177798b249665",
+          "size": 16383,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 4890,
+          "path": "onnxruntime/quantization/execution_providers/qnn/quant_config.py",
+          "sha256": "07a58ddb57eaf0a4a17550bf86bebeee1c8c739a65a92b30368ad4629b9c68d4",
+          "size": 18597,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 123,
+          "path": "onnxruntime/quantization/fusions/__init__.py",
+          "sha256": "f05e55a909e2a9aedaec74ef9451aff14e65b6f059f9215ad936310ab822ab24",
+          "size": 242,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 2591,
+          "path": "onnxruntime/quantization/fusions/fusion.py",
+          "sha256": "f2f4cb00704942a8143f02b6539c9de94c14b64d4c1cfc8ace52e3fb89574112",
+          "size": 11777,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1591,
+          "path": "onnxruntime/quantization/fusions/fusion_gelu.py",
+          "sha256": "a2216ab4e51cba690f6601f96dd4aa9ad7a898ce9611a7b0c0cd7cc29bf79b2c",
+          "size": 10375,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1472,
+          "path": "onnxruntime/quantization/fusions/fusion_layernorm.py",
+          "sha256": "5347c96082498172da1d61742ec120746b3fd7d8a9b27ff397cd1ba9b0806784",
+          "size": 6000,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 982,
+          "path": "onnxruntime/quantization/fusions/replace_upsample_with_resize.py",
+          "sha256": "21663d11455fde7190b9aa04c334a798f8383059af561527ac309398b7cba3bc",
+          "size": 3331,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 2856,
+          "path": "onnxruntime/quantization/matmul_bnb4_quantizer.py",
+          "sha256": "2afb1460ff720f0fee991f2f12434d4a154059f00847e96853151041735fcff6",
+          "size": 9024,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 17014,
+          "path": "onnxruntime/quantization/matmul_nbits_quantizer.py",
+          "sha256": "5fb009e126b2020fc38b0dd925321c5ce228330634cf3aa18b374a1fc0a539e2",
+          "size": 79165,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 61,
+          "path": "onnxruntime/quantization/neural_compressor/__init__.py",
+          "sha256": "97eb008ba62d7bfb6234540b738dce6914085e0517358f1c091232e9db87f172",
+          "size": 67,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 9471,
+          "path": "onnxruntime/quantization/neural_compressor/onnx_model.py",
+          "sha256": "0f901eb2ee11bc2ec80a941e4072243ef472143b0e1becd020ad0de72f2d3563",
+          "size": 49600,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1250,
+          "path": "onnxruntime/quantization/neural_compressor/util.py",
+          "sha256": "20f54aa4817b69e5480e3bb456f460bcc3d53b9b12a8d1fecb038a182b968eaf",
+          "size": 2682,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 8005,
+          "path": "onnxruntime/quantization/neural_compressor/weight_only.py",
+          "sha256": "2f7a7760a7dd7bbbd65a6ea0b46c876e2ce1fda0e34bccf0a54c946f6a676598",
+          "size": 36295,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 5009,
+          "path": "onnxruntime/quantization/onnx_model.py",
+          "sha256": "1695618b252d7457efc5c6eb55d8ad959b1ef36039b364945d1e47f9a490e421",
+          "size": 23928,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 10290,
+          "path": "onnxruntime/quantization/onnx_quantizer.py",
+          "sha256": "1809b37ddeec8ee69cc0a50cf366eeaed83c2c62211d9be01e0cc751d7926800",
+          "size": 49827,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 68,
+          "path": "onnxruntime/quantization/operators/__init__.py",
+          "sha256": "7b531614058e27f1678fbea573c2e71b6dafd8ac22ff236f2a1d1aaa489d10a5",
+          "size": 83,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1204,
+          "path": "onnxruntime/quantization/operators/activation.py",
+          "sha256": "63d8004592e07fedc847da426b135e541a06bb465889063c646e0a72dc3829ff",
+          "size": 4426,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 245,
+          "path": "onnxruntime/quantization/operators/argmax.py",
+          "sha256": "86b3b40c8808df3c33956e8c7207d25b3f7b6d4bc7b96193b321f6ba11b540d1",
+          "size": 571,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 844,
+          "path": "onnxruntime/quantization/operators/attention.py",
+          "sha256": "45b7d496416d2cfd4ee702e5c2fe47f18a2535e8dfd17cae07845fa8629595e3",
+          "size": 2564,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 418,
+          "path": "onnxruntime/quantization/operators/base_operator.py",
+          "sha256": "74a29cf70d2a2e7afd1ceb4a4c6f222452993f037077956576efb544998fcaf9",
+          "size": 1092,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 699,
+          "path": "onnxruntime/quantization/operators/binary_op.py",
+          "sha256": "407cb36bfb9b087e8a2caa7b26d586a0d2d804e2d5c61b8287572b98860bf4ca",
+          "size": 2472,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 686,
+          "path": "onnxruntime/quantization/operators/concat.py",
+          "sha256": "731ec69fc8e1e1fa016e8a516f824f02836c4b23f500a737fe01969d5c891344",
+          "size": 2081,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 2254,
+          "path": "onnxruntime/quantization/operators/conv.py",
+          "sha256": "be3bc477995318cfd45619453444abb19638e746b6907318cacfe54ec1b34d7e",
+          "size": 9943,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 835,
+          "path": "onnxruntime/quantization/operators/direct_q8.py",
+          "sha256": "ed3514d7e2409b916efffe11a91c463e05f0aaa0f7ff472e4b44944788aa28d5",
+          "size": 3311,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1067,
+          "path": "onnxruntime/quantization/operators/embed_layernorm.py",
+          "sha256": "686ab6cb0e19b63be00b9fed78023f7c09f5f14120af54a126b5d3eedd7c2464",
+          "size": 3937,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 605,
+          "path": "onnxruntime/quantization/operators/gather.py",
+          "sha256": "2cac2de86bcc9bcd327047580cf73bc8e0ecee1a52b832e279289bd7695b9b7a",
+          "size": 2166,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 718,
+          "path": "onnxruntime/quantization/operators/gavgpool.py",
+          "sha256": "cdb2d953162af78b71f8e553656bfae005becbc32f9a4fb671740d6ca3352896",
+          "size": 2383,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1511,
+          "path": "onnxruntime/quantization/operators/gemm.py",
+          "sha256": "9077b95a0f33f0eb962ce2bd5f66b411ef268b80fba62a61269b327cfda6d1c4",
+          "size": 6054,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1204,
+          "path": "onnxruntime/quantization/operators/lstm.py",
+          "sha256": "1cdd3fb3c00ded7503747824a1dbd773ba08e3172f4b63da9c6fe9238c613cec",
+          "size": 5117,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1710,
+          "path": "onnxruntime/quantization/operators/matmul.py",
+          "sha256": "7d850ddaa686a670848662c50f2338a3e634a859b4b5c6efd6191bc60940d08e",
+          "size": 7995,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 381,
+          "path": "onnxruntime/quantization/operators/maxpool.py",
+          "sha256": "b7357d17439efe5c35c9d22131ef0cc33f661fb395613cfee54031bc38dc265c",
+          "size": 1349,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 511,
+          "path": "onnxruntime/quantization/operators/norm.py",
+          "sha256": "0da2c43dc5677e4c1a0fa7a94e0ac2ee1784f838e25814ecda8b0048c613f741",
+          "size": 1609,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1967,
+          "path": "onnxruntime/quantization/operators/pad.py",
+          "sha256": "92ee11d6df95801111f345685eb132ff8c41754a3dec363d7ac0df999d736b01",
+          "size": 7779,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 727,
+          "path": "onnxruntime/quantization/operators/pooling.py",
+          "sha256": "65323c1632f093e79aa3bfaa638e5c0ac52da1b95956f27b3c86745bd629404c",
+          "size": 2218,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 321,
+          "path": "onnxruntime/quantization/operators/qdq_base_operator.py",
+          "sha256": "833a553185bda598964606d9107a4a806b96a9c3a232cb18b61f93a7269ddac8",
+          "size": 801,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 272,
+          "path": "onnxruntime/quantization/operators/resize.py",
+          "sha256": "5caa4667dafb624f433982c041173f98acbe8ef884f375a74f8155eb908b4cb4",
+          "size": 928,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 884,
+          "path": "onnxruntime/quantization/operators/softmax.py",
+          "sha256": "377d90c9cf445eb62c4c84fd24e009804662f838740f81551c54ac98e226bd1d",
+          "size": 2640,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 656,
+          "path": "onnxruntime/quantization/operators/split.py",
+          "sha256": "1d76742cae13f2fb116e1c8723c0e30710a62769c0df321258cf486bdca50212",
+          "size": 2195,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 765,
+          "path": "onnxruntime/quantization/operators/where.py",
+          "sha256": "b43afc5d219013a56e43653f9a244db0e8b0efee9766478ef7a74cd67697e1e8",
+          "size": 3040,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1462,
+          "path": "onnxruntime/quantization/preprocess.py",
+          "sha256": "105d56a717cc3a81922596c1d3804bf4ae3e9801d8ef15a3e6d86fcf5b7ae1d7",
+          "size": 4904,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 4108,
+          "path": "onnxruntime/quantization/qdq_loss_debug.py",
+          "sha256": "f8fcf18ea1e0081ba77ecb6664e67650c068bdf206f0d3ff63351833da480629",
+          "size": 15440,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 14417,
+          "path": "onnxruntime/quantization/qdq_quantizer.py",
+          "sha256": "f13c5f14b64ee33168f7ad9bfe8b74f55de014131e532dd84d9c58ec7416c513",
+          "size": 72744,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 13431,
+          "path": "onnxruntime/quantization/quant_utils.py",
+          "sha256": "0a0afa92f77e7210e1d42758c34762b2185b7cb1e1053143159ea3e63e5bc369",
+          "size": 51725,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 11328,
+          "path": "onnxruntime/quantization/quantize.py",
+          "sha256": "b96538a6a4f2311cf9af9ece760170b3d90c527cd7dfc4760ad8cafbbf694324",
+          "size": 60301,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 993,
+          "path": "onnxruntime/quantization/registry.py",
+          "sha256": "342e55d91f62a64fcd4e4d721a0ac568af69c822a7557312d8bd69a4adc3a5f5",
+          "size": 3807,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 2718,
+          "path": "onnxruntime/quantization/shape_inference.py",
+          "sha256": "58aa86bc47559c7c4e84fc3eac3e78b73e98856be579bdbcaa1b8508c99eb22e",
+          "size": 10049,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 3320,
+          "path": "onnxruntime/quantization/static_quantize_runner.py",
+          "sha256": "656546050e54f699780c560b85b19209f9cbfdf6544a6bd046de4ea93d6c3a12",
+          "size": 11085,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 3888,
+          "path": "onnxruntime/quantization/tensor_quant_overrides.py",
+          "sha256": "6df028cd14bf2919ead19d103aad77331fe4fde186a90f8a74f440384932a0c9",
+          "size": 20784,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 248,
+          "path": "onnxruntime/tools/__init__.py",
+          "sha256": "8b1e1ecad6d6555f1029e66ef8d54f8dbf2820c5ab484d262b37d5867edc8419",
+          "size": 518,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 761,
+          "path": "onnxruntime/tools/check_onnx_model_mobile_usability.py",
+          "sha256": "f163240311641dad9d34cc033fde11c711b4e314a01bfc11bfe710f88229bb39",
+          "size": 1670,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 4280,
+          "path": "onnxruntime/tools/convert_onnx_models_to_ort.py",
+          "sha256": "82784f24077eeb386af47b7f6ddab52f0a9b075910a7c5993ec5efed78665880",
+          "size": 16559,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 601,
+          "path": "onnxruntime/tools/file_utils.py",
+          "sha256": "4158f78e261deb4be3ce3b14273c6a79affa3e95ea2f8ce6d160875f894aa16f",
+          "size": 1525,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 208,
+          "path": "onnxruntime/tools/logger.py",
+          "sha256": "e9d41a866f29808aab807d679569c2546048846e898ed95d2aff5f7676892a67",
+          "size": 322,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 925,
+          "path": "onnxruntime/tools/make_dynamic_shape_fixed.py",
+          "sha256": "c2467ae5ea357592b330e8c5027d1e16b3be5c68bbad9206f3be7477d9ead161",
+          "size": 2569,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 2,
+          "path": "onnxruntime/tools/mobile_helpers/__init__.py",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "size": 0,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1188,
+          "path": "onnxruntime/tools/mobile_helpers/coreml_supported_mlprogram_ops.md",
+          "sha256": "6490c306b9349c90f1e27028a95b15cf22763dc810b25e11213fd861844d070c",
+          "size": 3050,
+          "type": "other",
+          "unix_mode": "0o600"
+        },
+        {
+          "compressed_size": 726,
+          "path": "onnxruntime/tools/mobile_helpers/coreml_supported_neuralnetwork_ops.md",
+          "sha256": "7c160969aa62d276a3a27a663c39090512d7c835db4d878869128c8527acf376",
+          "size": 1915,
+          "type": "other",
+          "unix_mode": "0o600"
+        },
+        {
+          "compressed_size": 661,
+          "path": "onnxruntime/tools/mobile_helpers/nnapi_supported_ops.md",
+          "sha256": "e4ca3f87eb530f357ccb5cced6a39b8816e7e00ba40bff4bd181260a11543825",
+          "size": 2327,
+          "type": "other",
+          "unix_mode": "0o600"
+        },
+        {
+          "compressed_size": 8174,
+          "path": "onnxruntime/tools/mobile_helpers/usability_checker.py",
+          "sha256": "c1260479d702202996fde6d81954d53af24fd86b8f627ad36c753dc451a133cc",
+          "size": 31640,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1758,
+          "path": "onnxruntime/tools/offline_tuning.py",
+          "sha256": "25572a4ab56c7a34c7b9d45c5a5ffca36ec480892a5eb79342b3039bca1d67e9",
+          "size": 6199,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 4663,
+          "path": "onnxruntime/tools/onnx_model_utils.py",
+          "sha256": "c7a8caee575e8a7a51a388900549d77c6cb2e4889bc54c2f9db1261c95c0c14f",
+          "size": 16402,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1167,
+          "path": "onnxruntime/tools/onnx_randomizer.py",
+          "sha256": "4eb705a57590426a13551884c325b4e1e37d126d879500997dd3af656f71e78a",
+          "size": 3276,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1828,
+          "path": "onnxruntime/tools/onnxruntime_test.py",
+          "sha256": "34a6cc232ea2a1ff5516194e75888eccd31a8df700ab4a9707259728238fb9cb",
+          "size": 5606,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 782,
+          "path": "onnxruntime/tools/optimize_onnx_model.py",
+          "sha256": "d331e3ca321a841a2d7e65a03e687841ce8960729e2e0e6a5d45dbcd3b66d805",
+          "size": 1959,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 577,
+          "path": "onnxruntime/tools/ort_format_model/__init__.py",
+          "sha256": "6ad6e1088a303c660e4a2ad9c18082dfede79ec7a72c787237637cbcc9dc10b8",
+          "size": 1280,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 6644,
+          "path": "onnxruntime/tools/ort_format_model/operator_type_usage_processors.py",
+          "sha256": "9e33e7d1567e9267aad28b4c6599ba85ee878694e9cb95ab2e3435e67ff4ce4e",
+          "size": 26379,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 2,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/__init__.py",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "size": 0,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 121,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/ArgType.py",
+          "sha256": "a88de1f4ce5b7b545d37dc63b4f65f3c0f1fd6760ff5f4e744e3411d565c9cb7",
+          "size": 140,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 624,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/ArgTypeAndIndex.py",
+          "sha256": "be7d76a9d9944741d4d071c4468e5fe542f81d691f5cf5baa317878dcb525319",
+          "size": 2026,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1409,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/Attribute.py",
+          "sha256": "01152d7eb462c7a492727187602ae4846677db8f3495d3567f179004e17edf94",
+          "size": 10850,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 210,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/AttributeType.py",
+          "sha256": "9df4a33bcd3e69b0659d03add0bfaf772b82a88494872ad6fd8eb0d6a71ecd16",
+          "size": 328,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 926,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/Checkpoint.py",
+          "sha256": "097abb2972ca172eda88de8cc9e42b91db4099ba4ec5fd6ed3c2d7c2f9ead0ec",
+          "size": 4217,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 862,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/DeprecatedKernelCreateInfos.py",
+          "sha256": "1152d036336b214a86996fde4aa8f26235d24cd41dd0c0d12d2f43c5b90b3351",
+          "size": 4528,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 663,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/DeprecatedNodeIndexAndKernelDefHash.py",
+          "sha256": "f6f8422df0c69d56830ba601f9b20f6baa4b04cae4701ef172b322b047b3b12e",
+          "size": 2458,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 852,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/DeprecatedSessionState.py",
+          "sha256": "e799014012fbe7de1511f6ed99caf2f0c263f2950e8b8836026a8e9ea8366a49",
+          "size": 3582,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 726,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/DeprecatedSubGraphSessionState.py",
+          "sha256": "cf84d32a8e906d07ab9c125baf2d25ffd1bd2a8d458df677437255c2a672bb17",
+          "size": 2610,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 689,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/Dimension.py",
+          "sha256": "7eb48109664528f7e2ac59450b32a71775ecd8c90eeadebfc9bd11e6afa3d9e3",
+          "size": 2191,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 679,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/DimensionValue.py",
+          "sha256": "c89d085f6c9f37521af1dc9decde67ac21e568a7f56dcba284c0ea097ded6562",
+          "size": 2494,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 140,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/DimensionValueType.py",
+          "sha256": "300163a0d73be3ad4f94209adddd4de8cc74fae9ec9bf973c64ddbad0970019f",
+          "size": 166,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 399,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/EdgeEnd.py",
+          "sha256": "716b8c340f58e956d5990864c88143f4decd34f3ac0db32b64fed5b8a819ecb4",
+          "size": 1105,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 644,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/FloatProperty.py",
+          "sha256": "3221abf8ef0bc744e840bfe498bbbc768eba6c1f8174d33c20abea77085d827b",
+          "size": 2008,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1346,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/Graph.py",
+          "sha256": "c1305274847455693a90b9445688c403fd70768fe36e0ffac8277d1f2e8ebc74",
+          "size": 10719,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 758,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/InferenceSession.py",
+          "sha256": "eab477f6ef5dfe053845d94b7b7f4bd2ece5fb964099e0a1227f3565df864fe3",
+          "size": 3037,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 635,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/IntProperty.py",
+          "sha256": "91f04d09c4fb1d410fb7d4d97c8711860777c9f47f1ab0e3b0597ae851d4f10a",
+          "size": 1970,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 805,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/KernelTypeStrArgsEntry.py",
+          "sha256": "91ecddf655af14f6d6323cbd2e3e0e316d6f72ba2d646a382c307ad3ef61180a",
+          "size": 3102,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 756,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/KernelTypeStrResolver.py",
+          "sha256": "841d1183dd99668aef5287b6335b2d6a0bbdb4ab47be201458736c92faaa22d0",
+          "size": 2789,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 695,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/MapType.py",
+          "sha256": "f919a9b99457326882d85a62576eb480bb506fa261f6a7015f22a5a776c46e88",
+          "size": 2123,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1183,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/Model.py",
+          "sha256": "dc81559f18e8f3fd4c910e8f58eb305bcf1df8221036637ae8d7e40e4adaf8ec",
+          "size": 7440,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 942,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/ModuleState.py",
+          "sha256": "5e6eeb48c5be4893c71162e8601ee0fc59cff799e7d62d41eca4bd55d6c5eb4e",
+          "size": 4853,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1394,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/Node.py",
+          "sha256": "20a5ddb00fb84a51f23933837adbdef95fed61ed3d2d107a7176f82b5ffb3c48",
+          "size": 10401,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 867,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/NodeEdge.py",
+          "sha256": "d982bdedc50faf7172750d51ba50c0a38a893007a9640df341b5e50f9f64e253",
+          "size": 4057,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 125,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/NodeType.py",
+          "sha256": "f1e340673696bc427d7084bbd63a06f56a3ab9847e1935707d2c3b99f545d79d",
+          "size": 144,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1041,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/NodesToOptimizeIndices.py",
+          "sha256": "912b540e3b76db7a7f6a40fa6ea436843d09138205247b720dbccc948764982b",
+          "size": 5984,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 806,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/OpIdKernelTypeStrArgsEntry.py",
+          "sha256": "44e854d35c62987fb0c30265e72e539058c06f94d1c8d29b5840e4038d663381",
+          "size": 3296,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 642,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/OperatorSetId.py",
+          "sha256": "074775e23b00f821576ead93262c456ad34f61b68c7cc6bdacddfa73688ef125",
+          "size": 2032,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 922,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/OptimizerGroup.py",
+          "sha256": "f6711ed86d69b37e763041096ea27c543082608f2e0f20166c84192e7adf9c43",
+          "size": 4018,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 806,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/ParameterOptimizerState.py",
+          "sha256": "8dacfbd095bf019addbc9a3d83f4658b3865283d81c06190528ce596339872b2",
+          "size": 3127,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 899,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/PropertyBag.py",
+          "sha256": "1b08c5faadfab986afd3d85641d261e6ea22edc5eb6e5bb82f549e6f1dcd1cef",
+          "size": 4947,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 926,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/RuntimeOptimizationRecord.py",
+          "sha256": "9383580a2fc1660fcab29d475909c867d14dda8cfc2a7c7c6111998773f79b41",
+          "size": 3962,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 826,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/RuntimeOptimizationRecordContainerEntry.py",
+          "sha256": "d2c0fe10456793f70a19c31c49415464fcd32793703ca08d60cbd02cc1e6d597",
+          "size": 3741,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 782,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/RuntimeOptimizations.py",
+          "sha256": "18b9673fa41177169dfe3c8a6c4ff79b85157bd380c07dc6cf744ee36ef02858",
+          "size": 2721,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 639,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/SequenceType.py",
+          "sha256": "e02c0cbaa5380d86c349186ba76effad2b964638c30738c3bf47b54bb7f77bb0",
+          "size": 1771,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 725,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/Shape.py",
+          "sha256": "ea6e0838faf80ceececa1012d616cc570104ac7077442f7981334746174c6f72",
+          "size": 2274,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 850,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/SparseTensor.py",
+          "sha256": "78b5695691cfdac8d34497f4dcbe97d3994a273ef92c979d7822205aacf7ba91",
+          "size": 3692,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 621,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/StringProperty.py",
+          "sha256": "77d80a24826b57b412875dc2b376699b2e53fdd3ed9aaa6682e9654ff23d7ab7",
+          "size": 2043,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 623,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/StringStringEntry.py",
+          "sha256": "e48415976dcc158bfa4f8da7286bc92a54f1e72ef19b4f5a419d92e8b1e3d38c",
+          "size": 2080,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1091,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/Tensor.py",
+          "sha256": "1b3d0bf9ac30e0e2ad81a2bafadcf1705443ab9fa0cf035f0536036ccf20e5e2",
+          "size": 6599,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 261,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/TensorDataType.py",
+          "sha256": "05236aba77882eb2fc32e328023c5c42b2fdbe0f562b8b4ee4dc6e8023863dbf",
+          "size": 474,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 699,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/TensorTypeAndShape.py",
+          "sha256": "94d423a69770d8b7f93b647789cd634b54ea2b5712342a682d37aaf55b992fd2",
+          "size": 2255,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 719,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/TypeInfo.py",
+          "sha256": "234ef8b3bf051579fdd8b7b44ba0e47d2ba54b2fc719fbc1bd4a25fd698e9444",
+          "size": 2516,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 146,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/TypeInfoValue.py",
+          "sha256": "7749eeec4b0bd5db475c6556a2c40801da5463396204e90fd62cb3982766e2ad",
+          "size": 189,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 718,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/ValueInfo.py",
+          "sha256": "efec99056d794421bfdaa80a4c67e6154c640d8431d77eb8182248670eb4af8a",
+          "size": 2571,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 159,
+          "path": "onnxruntime/tools/ort_format_model/ort_flatbuffers_py/fbs/__init__.py",
+          "sha256": "ea499fd8cfe2c9e5dccd3d6855aa78e1d1ee3b7d6c5214bec13f719d02aa2992",
+          "size": 245,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1460,
+          "path": "onnxruntime/tools/ort_format_model/ort_model_processor.py",
+          "sha256": "6c9212ac5055e382dbd602d3aacb6032e89420dc737dcf7cb3da3359c11028ff",
+          "size": 4386,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1289,
+          "path": "onnxruntime/tools/ort_format_model/types.py",
+          "sha256": "65bf1669af8025cf781c95931740f17cdace55559c85b68833090538462d6748",
+          "size": 4383,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 893,
+          "path": "onnxruntime/tools/ort_format_model/utils.py",
+          "sha256": "44f1b75689a5c18258486586bd1c281436c444c0c120b3f981ff88e1a8a14fa1",
+          "size": 2534,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1728,
+          "path": "onnxruntime/tools/pytorch_export_contrib_ops.py",
+          "sha256": "18b5dbc0952cfc70d95e3e59d3dab69a55263120535536ea222c2e5ab9a9a20d",
+          "size": 5214,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1870,
+          "path": "onnxruntime/tools/pytorch_export_helpers.py",
+          "sha256": "f4bf797e5e42e41495e061783e833bb074a556af08c1e3fea672ef3c86e6dadd",
+          "size": 5876,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 2,
+          "path": "onnxruntime/tools/qdq_helpers/__init__.py",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "size": 0,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 602,
+          "path": "onnxruntime/tools/qdq_helpers/optimize_qdq_model.py",
+          "sha256": "58bb1989f54d570c245fc5229784de03c99fb2ab69c5432d6f47e544dda08f30",
+          "size": 1242,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 3025,
+          "path": "onnxruntime/tools/qnn/add_trans_cast.py",
+          "sha256": "b08da5d0b41e4475c8ee5c37330d149865cba59235a1c80ac9ba6db815daa1fb",
+          "size": 13456,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 3175,
+          "path": "onnxruntime/tools/qnn/gen_qnn_ctx_onnx_model.py",
+          "sha256": "9ebee3937e47672d59efa6d727f7a9f18b36f54dd65b5b27c6e378d05d1d66be",
+          "size": 16198,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1682,
+          "path": "onnxruntime/tools/qnn/preprocess.py",
+          "sha256": "73c996cd141e0490c31328603fdc5ec3dc1fdb778e211239d3253f4b3aaef158",
+          "size": 7275,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 2896,
+          "path": "onnxruntime/tools/reduced_build_config_parser.py",
+          "sha256": "7bf7afd69cd4af1958a4c6ea710f632a224850274ea25be2df3c8b9cdf645a58",
+          "size": 9958,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 408,
+          "path": "onnxruntime/tools/remove_initializer_from_input.py",
+          "sha256": "4acd0cdac966a38237a790ce6c76f0934be74cbe75c18ffecd38361e902f11ad",
+          "size": 994,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 26111,
+          "path": "onnxruntime/tools/symbolic_shape_infer.py",
+          "sha256": "cef11ca709ee9d35bded3ba26856414ea292cad120525e13a2e547ed1f81706d",
+          "size": 142725,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 486,
+          "path": "onnxruntime/tools/update_onnx_opset.py",
+          "sha256": "9df145f2cae3a53c8ef120a71d932ddf374c581d10e4707506071d6409dced42",
+          "size": 1151,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 135,
+          "path": "onnxruntime/transformers/__init__.py",
+          "sha256": "452e41e705a7c05287d0a5d9796c9d863b3d5a5f6c3d1aa053f941d7f75460de",
+          "size": 313,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 454,
+          "path": "onnxruntime/transformers/affinity_helper.py",
+          "sha256": "374411da3974cfabf800cd797322a7cd67fb4fc4b94f7641c1e390e56135971f",
+          "size": 1402,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 6794,
+          "path": "onnxruntime/transformers/benchmark.py",
+          "sha256": "84c78fd88b7721da330e1669642085a01bfcc498c1824bd50564e8bed1348af8",
+          "size": 32580,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 5429,
+          "path": "onnxruntime/transformers/benchmark_helper.py",
+          "sha256": "d9a3701e5f548bda8e55bb83922b7249154bd523f1f448d1833700d64af7b274",
+          "size": 22355,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 4803,
+          "path": "onnxruntime/transformers/bert_perf_test.py",
+          "sha256": "b8ef07969b2a96482f51f191f21413ab6e65e9004cc19a60be5ba3d02600eecc",
+          "size": 20163,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 4354,
+          "path": "onnxruntime/transformers/bert_test_data.py",
+          "sha256": "53a58a9d092b363d54b91114df6ebe17e9cacc63a0d4bb1a002e00635164feed",
+          "size": 22805,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 2288,
+          "path": "onnxruntime/transformers/compare_bert_results.py",
+          "sha256": "cfae1ba7878704e0e457904137b40e7d688ac74ce488d23a3cebd43da1d42d27",
+          "size": 8192,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 397,
+          "path": "onnxruntime/transformers/constants.py",
+          "sha256": "d0c8f1e1e103f063a38c6fe9e40f2176e34824288fa9c5aa70958a9d932d5b09",
+          "size": 1080,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 25620,
+          "path": "onnxruntime/transformers/convert_generation.py",
+          "sha256": "019223b6542c56a5976a0a9592d3af8e63ccd2216d947cbdae8ae862371b91e5",
+          "size": 141465,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 2561,
+          "path": "onnxruntime/transformers/convert_tf_models_to_pytorch.py",
+          "sha256": "6fb0080720230099f4cdcf9e3ddbea48946c1e8504e857c291f32dd8a33a0f70",
+          "size": 8993,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 3519,
+          "path": "onnxruntime/transformers/convert_to_packing_mode.py",
+          "sha256": "b6ada58310a4c99c42d6e12b741e8343429f49698c9aa0b6bf5ebe37980455a4",
+          "size": 16419,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1981,
+          "path": "onnxruntime/transformers/dynamo_onnx_helper.py",
+          "sha256": "993717e5a1125883ec54be20eab15469933877319b1e2cfce74b67cd2cfc5b25",
+          "size": 7597,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 5748,
+          "path": "onnxruntime/transformers/float16.py",
+          "sha256": "db615887c7362c866c2ab7f02aa7e4beac0f28052487079dfe0efb7dd053798d",
+          "size": 24681,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 9863,
+          "path": "onnxruntime/transformers/fusion_attention.py",
+          "sha256": "659571fd0149124e7eebfcce90232cc34f71f565b4ba4f0891f0a1dcba72aede",
+          "size": 50927,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 2638,
+          "path": "onnxruntime/transformers/fusion_attention_clip.py",
+          "sha256": "8209fe83c942d6a0350fee62eb5bfa3b52da174a1dcc821ab77d8ab684392790",
+          "size": 13756,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 4012,
+          "path": "onnxruntime/transformers/fusion_attention_sam2.py",
+          "sha256": "24d7a5ea2b7cd969687cbf1691abaca3ab76ac181f894161a6640c3b2678d89e",
+          "size": 20774,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 6585,
+          "path": "onnxruntime/transformers/fusion_attention_unet.py",
+          "sha256": "51cf78870a57685cbda57d38593332cdb65c49859420d82abbc2c66d745b80ea",
+          "size": 55648,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 2807,
+          "path": "onnxruntime/transformers/fusion_attention_vae.py",
+          "sha256": "de0941ff5f94e96ebb8c7518ccbc916753b83070f82c5810a3c2a7bbe6bf9e28",
+          "size": 12079,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 4387,
+          "path": "onnxruntime/transformers/fusion_bart_attention.py",
+          "sha256": "344360443f675caa64dd62d485dc595f8902c7e867565c72f2dadaf372e789e8",
+          "size": 23420,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1754,
+          "path": "onnxruntime/transformers/fusion_base.py",
+          "sha256": "66ee182057a50126809797b6d8803fe768cee16233d70f23638a0351587595d8",
+          "size": 5825,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 713,
+          "path": "onnxruntime/transformers/fusion_bias_add.py",
+          "sha256": "dc49a0450f61b0cc738c2dfc70247c61455fc55241ec7304198e142459f8ebce",
+          "size": 1984,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 771,
+          "path": "onnxruntime/transformers/fusion_biasgelu.py",
+          "sha256": "f99fd3b1014efbd46c58b7b31977b85366898ee5f88558081b03847256e5240a",
+          "size": 2234,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1130,
+          "path": "onnxruntime/transformers/fusion_biassplitgelu.py",
+          "sha256": "d856e1ef7d4f333d7a02080855746307fa881726cabe2ac9dac3cea9eae0cd53",
+          "size": 4381,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 2324,
+          "path": "onnxruntime/transformers/fusion_conformer_attention.py",
+          "sha256": "840cfa0b7c43817336bec3dab7f72b1f0187fa7beacb1e3b54b988aff4c8824a",
+          "size": 11705,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1480,
+          "path": "onnxruntime/transformers/fusion_constant_fold.py",
+          "sha256": "dcd3d8804c240745947f21566e01d76d602782d90de721801d879ba433ac0a7c",
+          "size": 5870,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 6501,
+          "path": "onnxruntime/transformers/fusion_embedlayer.py",
+          "sha256": "42d1da6196aa2cca6336e5d49b696afc2e731d9feb009ac10d395b8065452a05",
+          "size": 35864,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 2082,
+          "path": "onnxruntime/transformers/fusion_fastgelu.py",
+          "sha256": "66c84c9135e487e8caf568ca948d598ed552690ca0399b0a7c534acc80ca4618",
+          "size": 17689,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1504,
+          "path": "onnxruntime/transformers/fusion_gelu.py",
+          "sha256": "80a2988228e71698c5b28cc2b07f33e8ccfdc021a4c37a99a69eb95e8af12232",
+          "size": 10193,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 392,
+          "path": "onnxruntime/transformers/fusion_gelu_approximation.py",
+          "sha256": "8b6c465bef7397a5dbbabaaad05f0323cec0caab209e18cb7855beac188df72b",
+          "size": 1004,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1177,
+          "path": "onnxruntime/transformers/fusion_gemmfastgelu.py",
+          "sha256": "47d580db9e1cb06c0ed242e2fc89899a1232fb12a4341a9f0db47a34bf07092f",
+          "size": 4087,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 4179,
+          "path": "onnxruntime/transformers/fusion_gpt_attention.py",
+          "sha256": "9a4f942888e8bb3aed90c97703e2dd2ee2dceb094eab101d6c4da0462618c293",
+          "size": 21962,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 2602,
+          "path": "onnxruntime/transformers/fusion_gpt_attention_megatron.py",
+          "sha256": "1db0e80d75d886acb8b0415426f69fe4bcb953abbaba90a0f09500d5defc0901",
+          "size": 13284,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 2195,
+          "path": "onnxruntime/transformers/fusion_gpt_attention_no_past.py",
+          "sha256": "ab66f31b2533c233ebe5c15325f8d88541c05edd931d9afe7d5c41b0330222cc",
+          "size": 10573,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1839,
+          "path": "onnxruntime/transformers/fusion_group_norm.py",
+          "sha256": "c84deab405cfc829f34a6c4f50c75844a414b2d8f5f5bc242318ba8773e942a7",
+          "size": 7465,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 3656,
+          "path": "onnxruntime/transformers/fusion_layernorm.py",
+          "sha256": "7737ed0ba90bea4c5f772a229dccbf55a05e786cc1d5a0d6ce2c624ac8ead7be",
+          "size": 20356,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 5870,
+          "path": "onnxruntime/transformers/fusion_mha_dit.py",
+          "sha256": "a68afc7516874e3f207b39cfd0097522b41eaae4284c657f8e26d15ee484fd33",
+          "size": 24130,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 4486,
+          "path": "onnxruntime/transformers/fusion_mha_mmdit.py",
+          "sha256": "e039b687f3e89de7fe319f72dea3b7082f95e2df488b29aacc8342ca22d559e7",
+          "size": 25149,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1122,
+          "path": "onnxruntime/transformers/fusion_nhwc_conv.py",
+          "sha256": "416a9a0780ec64f02a3f44f0898a5508daf763c8925a2b23ddf771d7e2d3ad87",
+          "size": 3849,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 2141,
+          "path": "onnxruntime/transformers/fusion_options.py",
+          "sha256": "37605e26c7ced39f102d67d95d2aa247b83a5c67039229e46de1f2a7c8661254",
+          "size": 12386,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 3004,
+          "path": "onnxruntime/transformers/fusion_qordered_attention.py",
+          "sha256": "11441d152d57a4f4fbe6a9946e28ce473641bb64ebf2c90d901c093a4532c795",
+          "size": 16717,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1259,
+          "path": "onnxruntime/transformers/fusion_qordered_gelu.py",
+          "sha256": "a41b85369be7ca68d26b08943cd4d0806c5cd630469ab7f11c00bf77e6b84374",
+          "size": 4292,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1346,
+          "path": "onnxruntime/transformers/fusion_qordered_layernorm.py",
+          "sha256": "467d5123c319e18e5c6ad7d5cb98b53aa8a80b128f9b3665e8356e3c98d23cce",
+          "size": 4810,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1877,
+          "path": "onnxruntime/transformers/fusion_qordered_matmul.py",
+          "sha256": "7d97f166b6a65e186beb3c14a3582991b787fd947cde41cc81b59833549471fc",
+          "size": 8325,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 853,
+          "path": "onnxruntime/transformers/fusion_quickgelu.py",
+          "sha256": "202faeae88d9167d8b5ede588f3d3e887d22ec1064b68cdbb95e3da66b976828",
+          "size": 2795,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1312,
+          "path": "onnxruntime/transformers/fusion_reshape.py",
+          "sha256": "26bc95ae7564eb6dbe31693c11834b973cfc0230354821d6fd397d4ab7270e68",
+          "size": 6230,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 11130,
+          "path": "onnxruntime/transformers/fusion_rotary_attention.py",
+          "sha256": "7d0ee5931dda4e9423a632115477a5cf394a916ab05238a24e641480c8800345",
+          "size": 77850,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1087,
+          "path": "onnxruntime/transformers/fusion_shape.py",
+          "sha256": "b816bf775b55763e5493abafa2b51b37133a5ea6e2f0fc635fdae7794a011092",
+          "size": 3654,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1591,
+          "path": "onnxruntime/transformers/fusion_simplified_layernorm.py",
+          "sha256": "b3219d7e57b783b724fdb10a84b12850ccd45d7b84a6ed3e940db3495fbd461d",
+          "size": 7666,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 2776,
+          "path": "onnxruntime/transformers/fusion_skip_group_norm.py",
+          "sha256": "223d7991f65beb7da8095dca9b7c436502dffcd915e9790bef1310b4b767107e",
+          "size": 10601,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 2886,
+          "path": "onnxruntime/transformers/fusion_skiplayernorm.py",
+          "sha256": "e720d3fe8136104215b34900bfcad898e8637684df95d51f722422c5bd65e462",
+          "size": 10817,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1693,
+          "path": "onnxruntime/transformers/fusion_transpose.py",
+          "sha256": "a143990f0a381085d2d07e7723a06f7940cf9fa4f1a32ffdc13b3e8d609428bb",
+          "size": 6837,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 3362,
+          "path": "onnxruntime/transformers/fusion_utils.py",
+          "sha256": "b67cc9377ebee4f994c295006a5a67e9b2774cdb5ef8dfec35bb4179365933f9",
+          "size": 13003,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 951,
+          "path": "onnxruntime/transformers/huggingface_models.py",
+          "sha256": "7f156fea1f63aeae00029521e23df1efecf6a341abec92f5899d813c73f4b022",
+          "size": 3931,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 244,
+          "path": "onnxruntime/transformers/import_utils.py",
+          "sha256": "b08bcfa3c226d2a239dbb909157371a812b8fef8bd5e6a4c3ed2a77dd78f80ad",
+          "size": 631,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 4264,
+          "path": "onnxruntime/transformers/io_binding_helper.py",
+          "sha256": "0119e71c366de4c42f2f08922c0e855e10288843e7ae380034dd28585b0aa58c",
+          "size": 21307,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 4208,
+          "path": "onnxruntime/transformers/large_model_exporter.py",
+          "sha256": "58a35ff8d0462f66cee864825e4673bca5d7148aded421ee0eaced6cadbb382f",
+          "size": 14927,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1983,
+          "path": "onnxruntime/transformers/machine_info.py",
+          "sha256": "cface8aab9288489001def2e85421097c0e75b891232c5ecde1c142304142569",
+          "size": 7351,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1257,
+          "path": "onnxruntime/transformers/metrics.py",
+          "sha256": "f96c28503271887115f5a693ff86581c2c362ad3223d41a0fa7bffe17adb8a8e",
+          "size": 5060,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 195,
+          "path": "onnxruntime/transformers/models/bart/__init__.py",
+          "sha256": "07046f69491f612ac655dcf64fa8c28be707f2047d503deadc6aed32d9092fcc",
+          "size": 483,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1499,
+          "path": "onnxruntime/transformers/models/bart/export.py",
+          "sha256": "6307027daca8876dc535842b6daa70b294dd2f4a9244d269dbc6c0cab14e984e",
+          "size": 4187,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 195,
+          "path": "onnxruntime/transformers/models/bert/__init__.py",
+          "sha256": "07046f69491f612ac655dcf64fa8c28be707f2047d503deadc6aed32d9092fcc",
+          "size": 483,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 3488,
+          "path": "onnxruntime/transformers/models/bert/eval_squad.py",
+          "sha256": "cdb422ad7a67828e3a925c89aac7b16ebf69f1f0f953ee1a86c2900b916935b3",
+          "size": 12026,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 195,
+          "path": "onnxruntime/transformers/models/gpt2/__init__.py",
+          "sha256": "07046f69491f612ac655dcf64fa8c28be707f2047d503deadc6aed32d9092fcc",
+          "size": 483,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 3742,
+          "path": "onnxruntime/transformers/models/gpt2/benchmark_gpt2.py",
+          "sha256": "2159c8d1969c55b2d009c2c30248db59a86a3e8829300b970b10dcd9489644ab",
+          "size": 15517,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 4997,
+          "path": "onnxruntime/transformers/models/gpt2/convert_to_onnx.py",
+          "sha256": "bb305a578c5a08ad074a589a8071383ac2416d63709dc592ac3f88b69b5919bb",
+          "size": 20271,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 8703,
+          "path": "onnxruntime/transformers/models/gpt2/gpt2_helper.py",
+          "sha256": "6b728de9c4c28f1cd5c0559740c5d8e47cab5ad521ce0359cccddc837b4c551d",
+          "size": 40300,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 4828,
+          "path": "onnxruntime/transformers/models/gpt2/gpt2_parity.py",
+          "sha256": "5a17c2a8f812bed258726af49a2ee09c44c6a57bcf68628bc7e27c6a4e4ae429",
+          "size": 17735,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 4635,
+          "path": "onnxruntime/transformers/models/gpt2/gpt2_tester.py",
+          "sha256": "3c882e58ca0749850f40dbfee4c8196afc41ecaa06301bd93f5ff725b721da22",
+          "size": 19570,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1881,
+          "path": "onnxruntime/transformers/models/gpt2/parity_check_helper.py",
+          "sha256": "cffc6f3b000d63d92419599bc478fd5510a7c51a1271d84a20b111b30b772cdb",
+          "size": 5694,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 192,
+          "path": "onnxruntime/transformers/models/llama/__init__.py",
+          "sha256": "c74bfebb1533dfd0926b02c6d5107e26c761f63e57db09614b7289bb0be4dcf8",
+          "size": 478,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 6188,
+          "path": "onnxruntime/transformers/models/llama/benchmark.py",
+          "sha256": "89b55aea8cfa7340faf116ad1700a023b76c7a73c7bfc70748cba9f8b9609811",
+          "size": 26594,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 3281,
+          "path": "onnxruntime/transformers/models/llama/benchmark_all.py",
+          "sha256": "dbaee7bbdd8eca327498d4f430c8fb1e27a199e414fe956d43ce26fb6d874b17",
+          "size": 15305,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 5940,
+          "path": "onnxruntime/transformers/models/llama/benchmark_e2e.py",
+          "sha256": "4da543b764f7a8d7e46d382d9c464b3860e512591468d93a1e38230b45a458dc",
+          "size": 24869,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 8363,
+          "path": "onnxruntime/transformers/models/llama/convert_to_onnx.py",
+          "sha256": "638e027e453fc871acbb6e0dfb65c54c1e58c132910249a9f42cb8163f30df80",
+          "size": 42292,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 557,
+          "path": "onnxruntime/transformers/models/llama/dist_settings.py",
+          "sha256": "8a24d5ec2a96c3264763ae9c8cebad54642e6cf233b59d2c5236117e9111c92d",
+          "size": 1602,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 3973,
+          "path": "onnxruntime/transformers/models/llama/llama_inputs.py",
+          "sha256": "79931e42126f61c3882da3991c3ebc1ab31c105aa8ef9d19e45c3fb74dcb386e",
+          "size": 20222,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 3303,
+          "path": "onnxruntime/transformers/models/llama/llama_parity.py",
+          "sha256": "85c970e52eae46a190d6905cbd9045cf73857b46d2d67f87a3c4eedb5ec589ca",
+          "size": 11557,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 624,
+          "path": "onnxruntime/transformers/models/llama/llama_torch.py",
+          "sha256": "7163fcc7518d07631c9cf0d26c0109ba1b8762e5d99cf97c4ab21c732abf6e4e",
+          "size": 1685,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1505,
+          "path": "onnxruntime/transformers/models/llama/quant_kv_dataloader.py",
+          "sha256": "b16219e144292dc19d3642bbb3a4600a797c279c1c74c035eda910c6827e5649",
+          "size": 4851,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 195,
+          "path": "onnxruntime/transformers/models/longformer/__init__.py",
+          "sha256": "07046f69491f612ac655dcf64fa8c28be707f2047d503deadc6aed32d9092fcc",
+          "size": 483,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 6732,
+          "path": "onnxruntime/transformers/models/longformer/benchmark_longformer.py",
+          "sha256": "6b9e9f7234e020b761334d02b658e31dc4f5f46410860eebf34009f52fca230c",
+          "size": 29409,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 4024,
+          "path": "onnxruntime/transformers/models/longformer/convert_to_onnx.py",
+          "sha256": "6c7f1dd5b588871fe18f7bc3f08a57b8edc76673711477b43c556c7cdc208f17",
+          "size": 14794,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 2315,
+          "path": "onnxruntime/transformers/models/longformer/generate_test_data.py",
+          "sha256": "d2e445029cf94720d42abf702a5004ac54f1bf95c73225eb01aff51ed2687a17",
+          "size": 9617,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 986,
+          "path": "onnxruntime/transformers/models/longformer/longformer_helper.py",
+          "sha256": "efd948098c7b85a1774ea52daba4f0e98fd6e4033d4b5149e7674744ab922e7f",
+          "size": 3047,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 192,
+          "path": "onnxruntime/transformers/models/phi2/__init__.py",
+          "sha256": "c74bfebb1533dfd0926b02c6d5107e26c761f63e57db09614b7289bb0be4dcf8",
+          "size": 478,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 4115,
+          "path": "onnxruntime/transformers/models/phi2/convert_to_onnx.py",
+          "sha256": "e6dce0419db05da7407a1a1f042d572a438ec3a17a6075618f0d90bc46550c87",
+          "size": 20408,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 3783,
+          "path": "onnxruntime/transformers/models/phi2/inference_example.py",
+          "sha256": "444c7d9e3b125166cc740cd62274d5501f35a1fdbed4ebf8f73dccd6bca6f7dc",
+          "size": 17291,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 195,
+          "path": "onnxruntime/transformers/models/sam2/__init__.py",
+          "sha256": "07046f69491f612ac655dcf64fa8c28be707f2047d503deadc6aed32d9092fcc",
+          "size": 483,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 4814,
+          "path": "onnxruntime/transformers/models/sam2/benchmark_sam2.py",
+          "sha256": "c1cf83427914ae608f985834db531fc5f308fa782510fbb114a8fcb1d05e5c37",
+          "size": 21830,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 2146,
+          "path": "onnxruntime/transformers/models/sam2/convert_to_onnx.py",
+          "sha256": "6a97706cd7fb5d9dcf1f7c3fa9055dd59be7463b922137df6832f6036cca6256",
+          "size": 10399,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 2617,
+          "path": "onnxruntime/transformers/models/sam2/image_decoder.py",
+          "sha256": "f033fc76a3a8d3f16110847c6b9a4c2d0ac23c4171ca2b11dd848880a82dea6e",
+          "size": 10821,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 2607,
+          "path": "onnxruntime/transformers/models/sam2/image_encoder.py",
+          "sha256": "b2afe88df30f0d4f956ed8be0dc854f0621e7156fd1ad57653ed54ca6206402d",
+          "size": 9552,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 2049,
+          "path": "onnxruntime/transformers/models/sam2/mask_decoder.py",
+          "sha256": "d380e7195c0991c7fdd43b3daf546bbe79e1d77eeac8feeb62df1ad973f15641",
+          "size": 8858,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 439,
+          "path": "onnxruntime/transformers/models/sam2/nvtx_helper.py",
+          "sha256": "31d76e7c6599a47f4320c2740deca6b96ee73e623fce9190c434a86234b42a1d",
+          "size": 1279,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 2087,
+          "path": "onnxruntime/transformers/models/sam2/prompt_encoder.py",
+          "sha256": "faf0fc4baad1f41f997dd32f9cbc8f611444656f2e8a65e9d375173921dd6ad9",
+          "size": 8341,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 2917,
+          "path": "onnxruntime/transformers/models/sam2/sam2_demo.py",
+          "sha256": "7d7dabf89b34b63711363ddd04b2f22a1f3a112c37e2fb7ed4d4309b070bf000",
+          "size": 10501,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 3424,
+          "path": "onnxruntime/transformers/models/sam2/sam2_image_onnx_predictor.py",
+          "sha256": "7feb0499bf8375ac3f1144fbce6338cdb7f750c36eb35685835db257e66c9687",
+          "size": 12423,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1646,
+          "path": "onnxruntime/transformers/models/sam2/sam2_utils.py",
+          "sha256": "0fcd9919c85215e79cdaf848c7cd6e7e19fd326ab594ff63202e8979315ae4d0",
+          "size": 5520,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 195,
+          "path": "onnxruntime/transformers/models/stable_diffusion/__init__.py",
+          "sha256": "07046f69491f612ac655dcf64fa8c28be707f2047d503deadc6aed32d9092fcc",
+          "size": 483,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 7846,
+          "path": "onnxruntime/transformers/models/stable_diffusion/benchmark.py",
+          "sha256": "306989ec715d713d6f8362a3faba68cc33f41d98cb3c1fa1e2726a14df3dfcac",
+          "size": 49574,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 3358,
+          "path": "onnxruntime/transformers/models/stable_diffusion/benchmark_controlnet.py",
+          "sha256": "1befc6427b4395b01a0af7d1f944a3164cfaf975761753c9b89a95c05ac652de",
+          "size": 12929,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1306,
+          "path": "onnxruntime/transformers/models/stable_diffusion/demo_txt2img.py",
+          "sha256": "c07268b66e9b7d342f0e86b5b1c5384f6d79cbb4b6b1d6eca805192adda92675",
+          "size": 3312,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 3123,
+          "path": "onnxruntime/transformers/models/stable_diffusion/demo_txt2img_xl.py",
+          "sha256": "d7e5a3f0e41f839f7369f075434dae1cddc82bbb5ee11f1d4c6641f4fa086032",
+          "size": 9948,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 7433,
+          "path": "onnxruntime/transformers/models/stable_diffusion/demo_utils.py",
+          "sha256": "0e20a383e33a2d1ac15862721f893690a796972ac2b111287517c8159e4815ce",
+          "size": 28598,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 8055,
+          "path": "onnxruntime/transformers/models/stable_diffusion/diffusion_models.py",
+          "sha256": "4aa5af1ae65f4af43fe91924c90739bc12b73b9ae5e05a3a89d21e38a67bc921",
+          "size": 50398,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 8705,
+          "path": "onnxruntime/transformers/models/stable_diffusion/diffusion_schedulers.py",
+          "sha256": "267fac61dfcb3ee2510ad17051b50993eca50ca84124b80a609dc6ddfc273745",
+          "size": 48289,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 2930,
+          "path": "onnxruntime/transformers/models/stable_diffusion/engine_builder.py",
+          "sha256": "d7bd526576562daffebdce99f6d37d10d256a7b34d118bddbf9c8fec7afd0c2a",
+          "size": 11670,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 3741,
+          "path": "onnxruntime/transformers/models/stable_diffusion/engine_builder_ort_cuda.py",
+          "sha256": "31a113189c1ee4cd2f37e1075ba4d38c43bf394c683d467713211057fa31eb9d",
+          "size": 15854,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 2618,
+          "path": "onnxruntime/transformers/models/stable_diffusion/engine_builder_ort_trt.py",
+          "sha256": "4bd404e9842808a3a491823b6b8d1eb26553c780a4ed8d5224fd16657eba8de3",
+          "size": 11163,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 3964,
+          "path": "onnxruntime/transformers/models/stable_diffusion/engine_builder_tensorrt.py",
+          "sha256": "b7615f32bbef0847416ee393356e6337cd460bbb71fbc44f343c3df726fca464",
+          "size": 15621,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1228,
+          "path": "onnxruntime/transformers/models/stable_diffusion/engine_builder_torch.py",
+          "sha256": "37f045dfb2366ee36e84da4a551d1e977c457131512b094aa5c594e4474c8237",
+          "size": 4198,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 5274,
+          "path": "onnxruntime/transformers/models/stable_diffusion/optimize_pipeline.py",
+          "sha256": "daaa85149f640fb9b36bbdc659a50a2abb3b123b5f5c067df08ef746e2a60d60",
+          "size": 21648,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1781,
+          "path": "onnxruntime/transformers/models/stable_diffusion/ort_optimizer.py",
+          "sha256": "f206d294aa735f7b8abc210ceab30fe240c62cb5db4b7b654caf3e88468bd76d",
+          "size": 5717,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 7781,
+          "path": "onnxruntime/transformers/models/stable_diffusion/pipeline_stable_diffusion.py",
+          "sha256": "8c13a911adf833fab7dd41e681ae1eb0fca36c8ee767aac45a64b7b054d3ada8",
+          "size": 33198,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 197,
+          "path": "onnxruntime/transformers/models/stable_diffusion/trt_utilities.py",
+          "sha256": "f021e0208c01ae2ab24748142d53c5235b85d6b6c01f8f7f88c3d4750bce9c02",
+          "size": 420,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 195,
+          "path": "onnxruntime/transformers/models/t5/__init__.py",
+          "sha256": "07046f69491f612ac655dcf64fa8c28be707f2047d503deadc6aed32d9092fcc",
+          "size": 483,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 2642,
+          "path": "onnxruntime/transformers/models/t5/convert_to_onnx.py",
+          "sha256": "5e4137f86b1c1424ea112e7cabff4ef30f59a44067f1ab8bb0ad7920f51b813a",
+          "size": 10192,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 3713,
+          "path": "onnxruntime/transformers/models/t5/t5_decoder.py",
+          "sha256": "1bd3d552645993ba05b79377c6bd21218d259cb96fa9af959906c3a96da48477",
+          "size": 16751,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 765,
+          "path": "onnxruntime/transformers/models/t5/t5_encoder.py",
+          "sha256": "aa1b2052dd60f47057c9229cb6ece6c2b7395bb206d65a68cd41c1dc48457a4e",
+          "size": 2249,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 3417,
+          "path": "onnxruntime/transformers/models/t5/t5_encoder_decoder_init.py",
+          "sha256": "de20ee88d092fc02740aa5aa877a7c02db39939bd086a402e83aa43e5aaed72a",
+          "size": 15060,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 3452,
+          "path": "onnxruntime/transformers/models/t5/t5_helper.py",
+          "sha256": "e32a6ceb87503a8cbe9e0676721371fbb3ea96865c0043bd0093a3adac7b6da3",
+          "size": 12626,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 192,
+          "path": "onnxruntime/transformers/models/whisper/__init__.py",
+          "sha256": "c74bfebb1533dfd0926b02c6d5107e26c761f63e57db09614b7289bb0be4dcf8",
+          "size": 478,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 5873,
+          "path": "onnxruntime/transformers/models/whisper/benchmark.py",
+          "sha256": "1dab32f75d0c620f3f8c13d899331de001ba9113e8d758f1da944c1103422fe1",
+          "size": 21862,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 4195,
+          "path": "onnxruntime/transformers/models/whisper/benchmark_all.py",
+          "sha256": "92c9f5373fd3f058ce8b49d907027181b047e33ac1cfb0bc6a4161bed5206f6a",
+          "size": 18842,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 6022,
+          "path": "onnxruntime/transformers/models/whisper/convert_to_onnx.py",
+          "sha256": "be1bf4c8344207a69be3d4d72daca0a8e1d3ad965dd71433a4c041a056dc36a9",
+          "size": 25880,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 3419,
+          "path": "onnxruntime/transformers/models/whisper/whisper_chain.py",
+          "sha256": "39acd2fcd3af084847ab7a0b26cfb9cde0e65fc25ffc7e455394dcbf18fbf513",
+          "size": 14904,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 4785,
+          "path": "onnxruntime/transformers/models/whisper/whisper_decoder.py",
+          "sha256": "d36faa818460ab30528814dc4e063a35df6174d16840f67cdf798e74d33b2fd9",
+          "size": 21428,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1788,
+          "path": "onnxruntime/transformers/models/whisper/whisper_encoder.py",
+          "sha256": "0158fcbcae62cfd8a34a5aa003ab9f7eadb0706bc03dc6ee4b5a7bf93040bfe5",
+          "size": 6208,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 3408,
+          "path": "onnxruntime/transformers/models/whisper/whisper_encoder_decoder_init.py",
+          "sha256": "d7d3eb2ea5ad43f95981c2b5258c4a8eedf74d3cbb7e98e695a77e7d1847e31f",
+          "size": 16461,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 10928,
+          "path": "onnxruntime/transformers/models/whisper/whisper_helper.py",
+          "sha256": "7d60cb6871183becc2a2995d609d3f3317d41782c5aaabb5601ff55c64d99c64",
+          "size": 50551,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 3021,
+          "path": "onnxruntime/transformers/models/whisper/whisper_inputs.py",
+          "sha256": "4471e3b0fec7ebbc471c442ad9baa7774fcf88fb945261778cc0f26057cc9259",
+          "size": 15661,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 5903,
+          "path": "onnxruntime/transformers/models/whisper/whisper_jump_times.py",
+          "sha256": "6e8047b80d209c950a9d47cb544ee351674961af2181c1e664dc512766d8ed09",
+          "size": 19560,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 6103,
+          "path": "onnxruntime/transformers/onnx_exporter.py",
+          "sha256": "05f4a92e2bc9f41fcdaa7151f9fcab540ac7abc6bf68a663e24edb74ff98c2f9",
+          "size": 24621,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 14275,
+          "path": "onnxruntime/transformers/onnx_model.py",
+          "sha256": "39ba61b972b720f8010aec63a258634361e3f54759507cbf8c3ae2fb3c6ff89e",
+          "size": 68593,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1182,
+          "path": "onnxruntime/transformers/onnx_model_bart.py",
+          "sha256": "27a3e965cb9547c24e14429bc88bae29ea6c48b51c355575b3b80bbef45cf1ff",
+          "size": 5406,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 4720,
+          "path": "onnxruntime/transformers/onnx_model_bert.py",
+          "sha256": "34b05c6eed658291cfee831b9ca531643c73041062961145d446a42b4a3a2714",
+          "size": 21425,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 3261,
+          "path": "onnxruntime/transformers/onnx_model_bert_keras.py",
+          "sha256": "8d77db7a7110b6246238df74cd3b6aaa2101ecdecc283442a10011017b755b1c",
+          "size": 18536,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 4720,
+          "path": "onnxruntime/transformers/onnx_model_bert_tf.py",
+          "sha256": "f705bc910c2399d15a84abf8053be718cd4716084bf1cb5c898587d150db5d61",
+          "size": 24915,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 512,
+          "path": "onnxruntime/transformers/onnx_model_clip.py",
+          "sha256": "515d246319365c25806ff26a55f55ad1dda90c86c5b21413db4ef7bbe08822e6",
+          "size": 1352,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 458,
+          "path": "onnxruntime/transformers/onnx_model_conformer.py",
+          "sha256": "f46d7e115655579c53d76f04193c87f4351255d8aa490efe5db3223884e0da51",
+          "size": 1380,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 983,
+          "path": "onnxruntime/transformers/onnx_model_gpt2.py",
+          "sha256": "5c3187b27ebd767670bcfde48c6dea501e1028350b5867815e0fd8789dacb1a7",
+          "size": 3812,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1458,
+          "path": "onnxruntime/transformers/onnx_model_mmdit.py",
+          "sha256": "a57ca17d82a13328e17d5f6a3f65b4867df5dadd79620475871a8c8efce0eebd",
+          "size": 4459,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 5948,
+          "path": "onnxruntime/transformers/onnx_model_phi.py",
+          "sha256": "71b6a69eca1d56a7ae801baf7e8384c029df66a1c52ae42723804b9953216557",
+          "size": 35410,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1305,
+          "path": "onnxruntime/transformers/onnx_model_sam2.py",
+          "sha256": "b6a11e10690cc38244c66886c34c81a359a72907eb7e6865f6bd23799c782f87",
+          "size": 4844,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 6667,
+          "path": "onnxruntime/transformers/onnx_model_t5.py",
+          "sha256": "63577a88d297bf38f68b38535028ae90e9a975591d77d225a128b0682304992f",
+          "size": 37071,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 2108,
+          "path": "onnxruntime/transformers/onnx_model_tnlr.py",
+          "sha256": "85f5a0a560e5aaf1284f6a415d58871f052c4318e8d4180705714e79496bd531",
+          "size": 8179,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 2203,
+          "path": "onnxruntime/transformers/onnx_model_unet.py",
+          "sha256": "f01d23adde61b1519b58131cb12d5427eb5b80c4e522a4e897e1688368bee280",
+          "size": 9255,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 562,
+          "path": "onnxruntime/transformers/onnx_model_vae.py",
+          "sha256": "c4b612ec8c2572e0198ee101fdf5bbe7fffa88e79d5ea55820134bea953da000",
+          "size": 1471,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 695,
+          "path": "onnxruntime/transformers/onnx_utils.py",
+          "sha256": "a6169b72b28fad9719ce8bed5aa0180fcf3e2bdf16a7b16d6646234de9053f8a",
+          "size": 2120,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 6580,
+          "path": "onnxruntime/transformers/optimizer.py",
+          "sha256": "6968664f99de744b4b6d3f77d7d5749d16a912a15828922c4d495466942a69fc",
+          "size": 25163,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1318,
+          "path": "onnxruntime/transformers/past_helper.py",
+          "sha256": "53c32cb13c22b3af8f416ce0836ad14267a2a450b54fe86a3e77da1751b075bc",
+          "size": 6806,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 2775,
+          "path": "onnxruntime/transformers/profile_result_processor.py",
+          "sha256": "c1c37bb949c9cc0e959bee463b2bd3d7e3b8ce8b57f91dc4bcdd98e5e7679fc6",
+          "size": 12582,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 2912,
+          "path": "onnxruntime/transformers/profiler.py",
+          "sha256": "e0f982c312cf0f0efe4a5a29cc0a44a4cc3d992a8400829a853ae241abf29373",
+          "size": 13302,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1015,
+          "path": "onnxruntime/transformers/quantize_helper.py",
+          "sha256": "4994b8d9f4464964dff48bcfbbdfb79f4b42c0cb6ca589f24fbcaec2d7d91ac9",
+          "size": 2931,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1612,
+          "path": "onnxruntime/transformers/shape_infer_helper.py",
+          "sha256": "be0b3f83f491b0b80e94dd1ca11f467ca84d3da51859b9307f17628ca15979b0",
+          "size": 5279,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 3971,
+          "path": "onnxruntime/transformers/shape_optimizer.py",
+          "sha256": "036c6165952ddf9bce303818e5250b9662890a6d0d03ae9e09a1eefd87fc062e",
+          "size": 15068,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 725,
+          "path": "onnxruntime/transformers/torch_onnx_export_helper.py",
+          "sha256": "118390831174cce9ebab27d611d41e78a21595f1f874c10bab163fabd659ca04",
+          "size": 3001,
+          "type": "python",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1200,
+          "path": "onnxruntime_gpu-1.28.0+reachy.jp72.cu132.sm87.dist-info/METADATA",
+          "sha256": "8be2c92a9de180ce2c45fddf687c59cf38856f2ba532fbc45c047fcee2e37c8b",
+          "size": 5929,
+          "type": "wheel-metadata",
+          "unix_mode": "0o644"
+        },
+        {
+          "compressed_size": 15253,
+          "path": "onnxruntime_gpu-1.28.0+reachy.jp72.cu132.sm87.dist-info/RECORD",
+          "sha256": "df3ef7f38f0f1169939a947f1083f078d9ac6eaff37abe2aa74f2d8dfe5bd6d3",
+          "size": 35927,
+          "type": "wheel-metadata",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 102,
+          "path": "onnxruntime_gpu-1.28.0+reachy.jp72.cu132.sm87.dist-info/WHEEL",
+          "sha256": "bf1edac492fed1140b75ac92d9e33324aaf5b0f691fb3b8b1bdd1f7d19951bab",
+          "size": 105,
+          "type": "wheel-metadata",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 56,
+          "path": "onnxruntime_gpu-1.28.0+reachy.jp72.cu132.sm87.dist-info/entry_points.txt",
+          "sha256": "eea2d2e056c65f03d98df7695401a99e693d23a9ba1f90b1127c1c0b1d489a3b",
+          "size": 77,
+          "type": "other",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 1037,
+          "path": "onnxruntime_gpu-1.28.0+reachy.jp72.cu132.sm87.dist-info/licenses/BUILD-AND-LICENSE-NOTICE.txt",
+          "sha256": "d298318d64c9cb5432516905a67171be1ff3d67085d64e30942c60c04420ad8b",
+          "size": 1945,
+          "type": "license-or-notice",
+          "unix_mode": "0o664"
+        },
+        {
+          "compressed_size": 626,
+          "path": "onnxruntime_gpu-1.28.0+reachy.jp72.cu132.sm87.dist-info/licenses/LICENSE",
+          "sha256": "2f07c72751aed99790b8a4869cf2311df85a860b22ded05fa22803587a48922c",
+          "size": 1073,
+          "type": "license-or-notice",
+          "unix_mode": "0o600"
+        },
+        {
+          "compressed_size": 31749,
+          "path": "onnxruntime_gpu-1.28.0+reachy.jp72.cu132.sm87.dist-info/licenses/ThirdPartyNotices.txt",
+          "sha256": "0e07b95f3a8d6230037707c5c4a2b554d12c4cb67369669ac255635528ffcee2",
+          "size": 325054,
+          "type": "license-or-notice",
+          "unix_mode": "0o600"
+        },
+        {
+          "compressed_size": 14,
+          "path": "onnxruntime_gpu-1.28.0+reachy.jp72.cu132.sm87.dist-info/top_level.txt",
+          "sha256": "ce4fdf2447a4ad39bd0cbc57d8bc067a0a2456a3fa6e5a8f845a0c22e87436ff",
+          "size": 12,
+          "type": "other",
+          "unix_mode": "0o664"
+        }
+      ],
+      "metadata": {
+        "generator": "setuptools (84.0.0)",
+        "license": "MIT License",
+        "license_files": [
+          "BUILD-AND-LICENSE-NOTICE.txt",
+          "LICENSE",
+          "ThirdPartyNotices.txt"
+        ],
+        "name": "onnxruntime-gpu",
+        "requires_dist": [
+          "flatbuffers",
+          "ml_dtypes; extra == \"quantization\"",
+          "numpy>=1.21.6",
+          "nvidia-cuda-nvrtc~=13.0; extra == \"cuda\"",
+          "nvidia-cuda-runtime~=13.0; extra == \"cuda\"",
+          "nvidia-cudnn-cu13~=9.0; extra == \"cudnn\"",
+          "nvidia-cufft~=12.0; extra == \"cuda\"",
+          "nvidia-curand~=10.0; extra == \"cuda\"",
+          "packaging",
+          "protobuf>=4.25.8",
+          "sympy; extra == \"symbolic\""
+        ],
+        "requires_python": ">=3.11",
+        "version": "1.28.0+reachy.jp72.cu132.sm87",
+        "wheel_tags": [
+          "cp312-cp312-linux_aarch64"
+        ]
+      },
+      "native_member_count": 4,
+      "nvidia_library_reference_strings": [
+        "libcublas.so.13",
+        "libcublasLt.so.13",
+        "libcuda.so.1",
+        "libcudart.so",
+        "libcudart.so.12",
+        "libcudart.so.13",
+        "libcudnn.so",
+        "libcudnn.so.9",
+        "libcufft.so.12",
+        "libnvrtc.so",
+        "libnvrtc.so.12",
+        "libnvrtc.so.13"
+      ],
+      "nvidia_runtime_dependencies": [
+        {
+          "dpkg_owner": "libcublas-13-2",
+          "inside_wheel": false,
+          "member": "onnxruntime/capi/libonnxruntime_providers_cuda.so",
+          "needed": "libcublas.so.13",
+          "resolved": "/usr/local/cuda-13.2/targets/sbsa-linux/lib/libcublas.so.13.4.0.1"
+        },
+        {
+          "dpkg_owner": "libcublas-13-2",
+          "inside_wheel": false,
+          "member": "onnxruntime/capi/libonnxruntime_providers_cuda.so",
+          "needed": "libcublasLt.so.13",
+          "resolved": "/usr/local/cuda-13.2/targets/sbsa-linux/lib/libcublasLt.so.13.4.0.1"
+        },
+        {
+          "dpkg_owner": "cuda-cudart-13-2",
+          "inside_wheel": false,
+          "member": "onnxruntime/capi/libonnxruntime_providers_cuda.so",
+          "needed": "libcudart.so.13",
+          "resolved": "/usr/local/cuda-13.2/targets/sbsa-linux/lib/libcudart.so.13.2.75"
+        }
+      ],
+      "path": "/tmp/reachy-wheelhouse.40giZ7/onnxruntime_gpu-1.28.0+reachy.jp72.cu132.sm87-cp312-cp312-linux_aarch64.whl",
+      "sha256": "a4dd9c97ba19eaaeb33a00a3ac8e7ada4da35cd935be15800dbbc56437126ba5",
+      "size": 55961323,
+      "source": {
+        "commit": "da9b5e364c465de65c49d91e696cd6485270757f",
+        "modified": true,
+        "patch": {
+          "path": "patches/onnxruntime-v1.28.0-jp72.patch",
+          "sha256": "035b1afa6e81e216351d1449186a2f2b9485ef5bed5cbfa1685dbb7119bf5786"
+        },
+        "repository": "https://github.com/microsoft/onnxruntime.git",
+        "tag": "v1.28.0"
+      },
+      "static_library_or_object_count": 0
+    }
+  ]
+}

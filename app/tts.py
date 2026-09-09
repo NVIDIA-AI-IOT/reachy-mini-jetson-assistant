@@ -13,12 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# TTS — subprocess-isolated Kokoro TTS.
+# TTS — subprocess-based Kokoro TTS.
 #
 # kokoro-onnx depends on phonemizer-fork (GPL-3.0) and espeak-ng (GPL-3.0).
-# To avoid loading GPL code into the same process as NVIDIA CUDA libraries,
-# synthesis runs in a separate subprocess (app/tts_worker.py) that
-# communicates via JSON lines over stdin/stdout.
+# Synthesis runs in a separate subprocess (app/tts_worker.py) that communicates
+# via JSON lines over stdin/stdout. See README and THIRD-PARTY-NOTICES.md for
+# distribution/OSRB guidance.
 
 import sys
 import json
@@ -79,7 +79,7 @@ def _download_kokoro_models_if_missing() -> bool:
 
 
 class KokoroTTS:
-    """Kokoro TTS client — synthesis runs in a subprocess for GPL isolation."""
+    """Kokoro TTS client backed by a JSON-lines worker subprocess."""
 
     def __init__(self, voice: str = "af_sarah", speed: float = 1.0, lang: str = "en-us"):
         self.voice = voice

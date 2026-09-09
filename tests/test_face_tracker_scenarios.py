@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright (c) 2023-2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
 import time
 import unittest
 
@@ -58,6 +61,17 @@ def make_tracker(**overrides):
 
 
 class FaceTrackerScenarioTests(unittest.TestCase):
+    def test_motion_disabled_keeps_telemetry_without_motor_commands(self):
+        tracker, manager = make_tracker(motion_enabled=False)
+
+        tracker._servo(FAR_RIGHT_FACE, FRAME_SHAPE)
+
+        self.assertTrue(tracker.face_detected)
+        self.assertEqual(manager.targets, [])
+        self.assertEqual(manager.holds, 0)
+        self.assertEqual(tracker.target_yaw_deg, 0.0)
+        self.assertGreater(tracker.error_x, 0.0)
+
     def test_no_face_starts_a_slow_bounded_search(self):
         tracker, manager = make_tracker()
 
@@ -105,13 +119,33 @@ class FaceTrackerScenarioTests(unittest.TestCase):
         self.assertEqual(tracker.target_yaw_deg, 1.4)
         self.assertEqual(tracker.target_body_yaw_deg, 0.7)
 
-    def test_centered_face_moving_left_uses_gentle_head_only_first(self):
+    def test_locked_face_holds_until_it_crosses_reacquire_zone(self):
         tracker, manager = make_tracker()
         tracker._servo(CENTER_FACE, FRAME_SHAPE)
+        holds_after_lock = manager.holds
+
+        tracker._servo(MODERATE_LEFT_FACE, FRAME_SHAPE)
+
+        self.assertTrue(tracker.pose_locked)
+        self.assertEqual(manager.targets, [])
+        self.assertEqual(manager.holds, holds_after_lock + 1)
+
+    def test_initial_moderate_face_uses_gentle_head_only(self):
+        tracker, manager = make_tracker()
 
         tracker._servo(MODERATE_LEFT_FACE, FRAME_SHAPE)
 
         self.assertEqual(manager.targets[-1], (0.0, 0.0, 0.75))
+
+    def test_target_at_limit_is_not_republished_every_detector_frame(self):
+        tracker, manager = make_tracker(body_enabled=False)
+        tracker._yaw = 12.0
+
+        tracker._servo(MODERATE_LEFT_FACE, FRAME_SHAPE)
+        tracker._servo(MODERATE_LEFT_FACE, FRAME_SHAPE)
+
+        self.assertEqual(tracker.target_yaw_deg, 12.0)
+        self.assertEqual(manager.targets, [])
 
     def test_far_edge_commands_remain_bounded(self):
         tracker, manager = make_tracker()

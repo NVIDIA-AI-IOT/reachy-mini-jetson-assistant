@@ -38,7 +38,7 @@ class LLMConfig:
 class STTConfig:
     model: str = "base.en"
     device: str = "cuda"
-    compute_type: str = "int8"
+    compute_type: str = "float16"
     language: str = "en"
     beam_size: int = 1
 
@@ -97,10 +97,13 @@ class ReachyConfig:
     automatic_body_yaw: bool = False
     wake_on_start: bool = True
     sleep_on_exit: bool = False
-    antenna_rest_position: List[float] = field(default_factory=lambda: [0.0, 0.0])
+    antenna_rest_position: List[float] = field(
+        default_factory=lambda: [-0.1745, 0.1745]
+    )
     daemon_retry_attempts: int = 3
     daemon_startup_wait: float = 15.0
     face_tracking: bool = True
+    tracking_motion_enabled: bool = True
     tracking_fps: float = 15.0
     tracking_dead_zone: float = 0.12
     tracking_lock_zone: float = 0.18
@@ -180,19 +183,24 @@ class Config:
 
     @classmethod
     def load(cls, config_path: Optional[str] = None) -> "Config":
-        if config_path is None:
-            config_path = Path(__file__).parent.parent / "config" / "settings.yaml"
+        default_path = Path(__file__).parent.parent / "config" / "settings.yaml"
+        profile_path = config_path or os.environ.get("REACHY_ASSISTANT_CONFIG")
+        config_paths = [default_path]
+        if profile_path and Path(profile_path).resolve() != default_path.resolve():
+            config_paths.append(Path(profile_path))
+
         config = cls()
-        if not os.path.exists(config_path):
-            return config
         try:
-            with open(config_path) as f:
-                data = yaml.safe_load(f) or {}
-            for yaml_key, attr_name, _ in _SECTIONS:
-                section_obj = getattr(config, attr_name)
-                for k, v in data.get(yaml_key, {}).items():
-                    if hasattr(section_obj, k):
-                        setattr(section_obj, k, v)
+            for path in config_paths:
+                if not path.exists():
+                    continue
+                with path.open() as f:
+                    data = yaml.safe_load(f) or {}
+                for yaml_key, attr_name, _ in _SECTIONS:
+                    section_obj = getattr(config, attr_name)
+                    for k, v in data.get(yaml_key, {}).items():
+                        if hasattr(section_obj, k):
+                            setattr(section_obj, k, v)
         except Exception as e:
             print(f"Error loading config: {e}")
         return config

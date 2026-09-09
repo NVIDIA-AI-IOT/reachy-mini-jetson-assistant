@@ -275,6 +275,7 @@ def main():
             console.print(f"  ✓ Face detection ({face_detector.backend})")
             movement_manager = MovementManager(
                 reachy,
+                antenna_rest_position=config.reachy.antenna_rest_position,
                 pose_smoothing=config.reachy.tracking_pose_smoothing,
                 pose_max_step_deg=config.reachy.tracking_pose_max_step_deg,
             )
@@ -304,6 +305,7 @@ def main():
                 min_face_size=config.reachy.tracking_min_face_size,
                 stable_frames=config.reachy.tracking_stable_frames,
                 face_lost_delay=config.reachy.tracking_face_lost_delay,
+                motion_enabled=config.reachy.tracking_motion_enabled,
                 head_yaw_max_deg=config.reachy.tracking_head_yaw_max_deg,
                 head_yaw_gain=config.reachy.tracking_head_yaw_gain,
                 head_yaw_step=config.reachy.tracking_head_yaw_step,
@@ -321,7 +323,10 @@ def main():
                 scan_speed_deg_per_sec=config.reachy.tracking_scan_speed_deg_per_sec,
             )
             face_tracker.start()
-            console.print(f"  ✓ Face tracking ({config.reachy.tracking_fps:.0f} Hz)")
+            if config.reachy.tracking_motion_enabled:
+                console.print(f"  ✓ Face tracking ({config.reachy.tracking_fps:.0f} Hz)")
+            else:
+                console.print("  ✓ Face detection telemetry (head motion disabled)")
         else:
             console.print("  ⚠ Face detector unavailable")
             face_detector = None
@@ -339,7 +344,11 @@ def main():
         cam.close()
         return
 
-    broadcaster.configure_speakers(mic.speaker_state, mic.select_speaker)
+    broadcaster.configure_speakers(
+        mic.speaker_state,
+        mic.select_speaker,
+        mic.set_speaker_volume,
+    )
 
     # ── Start web server + background threads ────────────────────
     web_thread = start_web_server(broadcaster, host=web_host, port=web_port)
@@ -513,6 +522,17 @@ def main():
                             first_tts_sent = True
 
             dt_llm = time.perf_counter() - t_llm
+            if not full_resp.strip():
+                fallback_response = (
+                    "I lost connection to my vision model. "
+                    "Please try again in a moment."
+                )
+                console.print(fallback_response, end="")
+                broadcaster.send({"type": "status", "stage": "speaking"})
+                broadcaster.send({"type": "token", "text": fallback_response})
+                full_resp = fallback_response
+                tts_buf = fallback_response
+
 
             if tts_q is not None:
                 if tts_buf.strip():

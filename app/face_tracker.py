@@ -71,6 +71,8 @@ class FaceTracker:
         stable_frames: consecutive good frames required before capture is stable.
         face_lost_delay: seconds to hold before easing back to neutral
                          (only used when return_to_neutral is True).
+        motion_enabled:  publish tracking commands to the motors. When false,
+                         face detection and dashboard telemetry remain active.
         body_max_deg:    optional body_yaw travel limit (degrees).
         invert_body:     flip body_yaw direction. Enabled by default for
                          this robot because measured behavior showed that
@@ -100,6 +102,7 @@ class FaceTracker:
         min_face_size: float = 0.06,
         stable_frames: int = 2,
         face_lost_delay: float = 3.0,
+        motion_enabled: bool = True,
         head_yaw_max_deg: float = 20.0,
         head_yaw_gain: float = 18.0,
         head_yaw_step: float = 1.0,
@@ -128,6 +131,7 @@ class FaceTracker:
         self._min_face_size = max(0.0, min_face_size)
         self._stable_frames_required = max(1, stable_frames)
         self._face_lost_delay = face_lost_delay
+        self._motion_enabled = motion_enabled
         self._head_yaw_max = head_yaw_max_deg
         self._head_yaw_gain = head_yaw_gain
         self._head_yaw_step = head_yaw_step
@@ -285,7 +289,11 @@ class FaceTracker:
             self._last_face_time = now
             self._tracking_active = True
             self._scanning = False
-            self._servo(box, frame.shape, apply_motion=not self._motion_frozen)
+            self._servo(
+                box,
+                frame.shape,
+                apply_motion=self._motion_enabled and not self._motion_frozen,
+            )
             return
 
         with self._state_lock:
@@ -296,10 +304,11 @@ class FaceTracker:
             self._stable = False
             self._stable_count = 0
         self._tracking_active = False
-        if not self._motion_frozen:
+        if self._motion_enabled and not self._motion_frozen:
             self._handle_face_lost(now)
 
     def _servo(self, box: FaceBox, frame_shape, *, apply_motion: bool = True) -> None:
+        motion_allowed = apply_motion and self._motion_enabled
         h, w = frame_shape[:2]
         cx = (box[0] + box[2]) / 2.0
         cy = (box[1] + box[3]) / 2.0
@@ -349,16 +358,25 @@ class FaceTracker:
         if not action_needed:
             apply_motion = False
             self._pose_locked = True
-            if not self._motion_frozen:
+            if motion_allowed:
                 rebalanced = self._rebalance_head_into_body()
                 if not rebalanced:
                     self._manager.hold_current()
+        elif self._pose_locked and not self._reacquiring:
+            # Keep the pose locked through ordinary detector jitter. Motion
+            # resumes only after the face crosses the wider reacquire zone;
+            # otherwise small fluctuations around the good-frame boundary
+            # repeatedly alternate between hold and correction commands.
+            apply_motion = False
+            if motion_allowed:
+                self._manager.hold_current()
 
         # Update each axis independently, then publish one coherent target.
         # A far vertical error must not grant extra yaw/body authority when
         # horizontal framing is already good.
-        if apply_motion and action_needed:
+        if motion_allowed and apply_motion and action_needed:
             actions = []
+            previous_targets = (self._body, self._pitch, self._yaw)
 
             if not good_x:
                 yaw_limit = (
@@ -406,14 +424,17 @@ class FaceTracker:
                 )
                 actions.append("pitch")
 
-            self._manager.set_targets(self._body, self._pitch, self._yaw)
+            next_targets = (self._body, self._pitch, self._yaw)
+            targets_changed = next_targets != previous_targets
+            if targets_changed:
+                self._manager.set_targets(*next_targets)
             self._log_tracking(
                 err_x,
                 err_y,
                 face_size,
                 frame_good,
                 reacquire,
-                "+".join(actions) if actions else "hold",
+                "+".join(actions) if targets_changed else "hold-limit",
             )
         elif rebalanced:
             self._log_tracking(

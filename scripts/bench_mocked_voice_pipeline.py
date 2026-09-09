@@ -1,0 +1,175 @@
+#!/usr/bin/env python3
+# SPDX-FileCopyrightText: Copyright (c) 2023-2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+"""Measure the Reachy voice path with real AI stages and mocked robot I/O.
+
+The robot microphone/camera/speaker/motion hardware is deliberately out of
+scope.  The test generates a valid speech waveform with the same Kokoro TTS
+client used by the app, runs it through the app STT class, calls the app's
+streaming LLM client, and begins TTS on the first speakable response chunk.
+"""
+import argparse
+import json
+import sys
+import time
+from pathlib import Path
+
+import numpy as np
+
+# Make direct invocation from the project root work without PYTHONPATH=.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from app.llm import LLM
+from app.pipeline import SILERO_CHUNK_SAMPLES, SileroVAD
+from app.stt import STT
+from app.tts import KokoroTTS
+
+
+def ms(seconds):
+    return round(seconds * 1000, 1)
+
+
+def resample_linear(audio, src_rate, dst_rate=16000):
+    n = round(len(audio) * dst_rate / src_rate)
+    return np.interp(np.linspace(0, len(audio) - 1, n), np.arange(len(audio)), audio).astype(np.float32)
+
+
+def run_silero_vad(vad, audio):
+    """Run the production Silero wrapper over one in-memory utterance."""
+    pcm = (np.clip(audio, -1.0, 1.0) * 32767).astype(np.int16)
+    remainder = len(pcm) % SILERO_CHUNK_SAMPLES
+    if remainder:
+        pcm = np.pad(pcm, (0, SILERO_CHUNK_SAMPLES - remainder))
+    probabilities = [
+        vad(pcm[start:start + SILERO_CHUNK_SAMPLES].tobytes())
+        for start in range(0, len(pcm), SILERO_CHUNK_SAMPLES)
+    ]
+    vad.reset()
+    return max(probabilities, default=0.0)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--base-url", default="http://127.0.0.1:18080")
+    parser.add_argument("--runs", type=int, default=3)
+    parser.add_argument("--out", type=Path, required=True)
+    args = parser.parse_args()
+
+    prompt_text = "What is the capital of France?"
+    system = "You are Reachy Mini. Answer in one short spoken sentence."
+    tts = KokoroTTS()
+    t0 = time.perf_counter()
+    if not tts.load():
+        raise SystemExit("Kokoro could not load")
+    if tts.provider != "CUDAExecutionProvider":
+        raise SystemExit(f"Kokoro is not using CUDA: {tts.provider}")
+    tts_load_s = time.perf_counter() - t0
+    seed = tts.synthesize(prompt_text)
+    if seed.get("audio") is None:
+        raise SystemExit(f"Kokoro seed speech failed: {seed.get('error')}")
+    utterance = resample_linear(seed["audio"].astype(np.float32) / 32768.0, seed["sample_rate"])
+
+    t0 = time.perf_counter()
+    silero = SileroVAD()
+    vad_load_s = time.perf_counter() - t0
+
+    stt = STT(model="small.en", device="cuda", compute_type="float16", language="en", beam_size=1)
+    t0 = time.perf_counter()
+    if not stt.load():
+        raise SystemExit("STT could not load")
+    if stt.device != "cuda":
+        raise SystemExit(f"STT fell back to {stt.device}; benchmark requires CUDA")
+    stt_load_s = time.perf_counter() - t0
+
+    llm = LLM(base_url=args.base_url, backend="openai", max_tokens=32, temperature=0.0, system_prompt=system)
+    if not llm.load():
+        raise SystemExit("LLM server is not ready")
+
+    # Warm every executable stage, but do not include this in reported latency.
+    run_silero_vad(silero, utterance)
+    warm_transcript = stt.transcribe(utterance, 16000)
+    if not warm_transcript.get("text"):
+        raise SystemExit(f"STT warmup failed: {warm_transcript}")
+    list(llm.generate_stream(prompt=prompt_text))
+    tts.synthesize("Paris is the capital of France.")
+
+    results = []
+    for i in range(args.runs):
+        start = time.perf_counter()
+        # Feed the generated speech through the same chunking and Silero model
+        # wrapper used by the production mic loop. Real-time capture is mocked.
+        vad_start = time.perf_counter()
+        rms = float(np.sqrt(np.mean(utterance ** 2)))
+        speech_probability = run_silero_vad(silero, utterance)
+        vad_s = time.perf_counter() - vad_start
+
+        stt_start = time.perf_counter()
+        transcript = stt.transcribe(utterance, 16000)
+        stt_s = time.perf_counter() - stt_start
+        if not transcript.get("text"):
+            raise SystemExit(f"STT failed: {transcript}")
+
+        llm_start = time.perf_counter()
+        ttft_s = None
+        first_tts_done_s = None
+        response = ""
+        pending = ""
+        tts_calls = 0
+        tts_compute_s = 0.0
+        for content, _meta in llm.generate_stream(prompt=transcript["text"]):
+            if not content:
+                continue
+            if ttft_s is None:
+                ttft_s = time.perf_counter() - llm_start
+            response += content
+            pending += content
+            if len(pending.split()) >= 3 and first_tts_done_s is None:
+                tts_start = time.perf_counter()
+                audio = tts.synthesize(pending.strip())
+                tts_compute_s += time.perf_counter() - tts_start
+                if audio.get("audio") is None:
+                    raise SystemExit(f"TTS failed: {audio.get('error')}")
+                tts_calls += 1
+                pending = ""
+                first_tts_done_s = time.perf_counter() - start
+        if ttft_s is None or not response.strip():
+            raise SystemExit("LLM returned no streamed response")
+
+        llm_s = time.perf_counter() - llm_start
+        if pending.strip():
+            tts_start = time.perf_counter()
+            audio = tts.synthesize(pending.strip())
+            tts_compute_s += time.perf_counter() - tts_start
+            if audio.get("audio") is None:
+                raise SystemExit(f"TTS failed: {audio.get('error')}")
+            tts_calls += 1
+        total_s = time.perf_counter() - start
+        results.append({
+            "run": i + 1, "silero_vad_ms": ms(vad_s), "rms": rms,
+            "speech_probability_max": round(speech_probability, 4),
+            "stt_ms": ms(stt_s), "llm_ttft_ms": ms(ttft_s or 0),
+            "llm_stream_ms": ms(llm_s), "tts_compute_ms": ms(tts_compute_s),
+            "first_audio_ready_ms": ms(first_tts_done_s or total_s),
+            "pipeline_complete_ms": ms(total_s), "tts_calls": tts_calls,
+            "transcript": transcript["text"], "response": response.strip(),
+        })
+
+    report = {
+        "benchmark": "reachy-mini-jetson-assistant mocked voice pipeline",
+        "hardware_mocked": ["Reachy microphone", "camera", "speaker playback", "USB motion controller"],
+        "real_stages": ["Silero VAD", "faster-whisper STT", "llama.cpp streaming LLM", "Kokoro TTS"],
+        "vad_provider": silero._session.get_providers()[0],
+        "stt_backend": stt.get_info(), "tts_provider": tts.provider,
+        "onnxruntime_available_providers": __import__("onnxruntime").get_available_providers(),
+        "cold_load_ms": {"vad": ms(vad_load_s), "stt": ms(stt_load_s), "tts": ms(tts_load_s)},
+        "runs": results,
+    }
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    args.out.write_text(json.dumps(report, indent=2) + "\n")
+    print(json.dumps(report, indent=2))
+    tts.unload()
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,18 @@
+diff --git a/cmake/onnxruntime_providers_cuda.cmake b/cmake/onnxruntime_providers_cuda.cmake
+index c5fc0fd..f743ff4 100644
+--- a/cmake/onnxruntime_providers_cuda.cmake
++++ b/cmake/onnxruntime_providers_cuda.cmake
+@@ -211,2 +211,2 @@
+-  # Work around a CUDA 13.3 cudafe++ (EDG front-end) regression that mis-parses CCCL's
++  # Work around a CUDA 13.2/13.3 cudafe++ (EDG front-end) regression that mis-parses CCCL's
+   # global-qualified partial specializations, e.g. in <cub/device/device_transform.cuh>:
+@@ -420,2 +420,2 @@
+-          if (UNIX AND CMAKE_CUDA_COMPILER_VERSION VERSION_GREATER_EQUAL 13.3 AND CMAKE_CUDA_COMPILER_VERSION VERSION_LESS 13.4)
++          if (UNIX AND CMAKE_CUDA_COMPILER_VERSION VERSION_GREATER_EQUAL 13.2 AND CMAKE_CUDA_COMPILER_VERSION VERSION_LESS 13.4)
+             # Generate cudafe++-parseable copies of the CCCL headers that contain global-qualified
+@@ -606,2 +606,5 @@
+             SOURCES ${onnxruntime_cuda_llm_srcs})
++          # The Reachy voice pipeline does not use ORT's LLM/MoE operators. Keep the
++          # link-compatible quick-build variants and avoid exhaustive CUTLASS instantiations.
++          target_compile_definitions(onnxruntime_providers_cuda_llm PRIVATE ORT_QUICK_BUILD=1)
+         endif()

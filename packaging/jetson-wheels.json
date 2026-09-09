@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "platforms": {
+    "jp72-l4t39.2-cu13.2-py3.12-sm87": {
+      "architecture": "aarch64",
+      "l4t": "39.2.0",
+      "cuda": "13.2",
+      "python": "3.12",
+      "gpu_family": "orin",
+      "compute_capability": "8.7",
+      "wheel_tag": "cp312-cp312-linux_aarch64",
+      "release": {
+        "published": true,
+        "tag": "native-jp72-cu132-py312-sm87-r1",
+        "base_url": "https://github.com/NVIDIA-AI-IOT/reachy-mini-jetson-assistant/releases/download/native-jp72-cu132-py312-sm87-r1"
+      },
+      "wheels": {
+        "ctranslate2": {
+          "distribution": "ctranslate2",
+          "version": "4.8.1+reachy.jp72.cu132.sm87",
+          "filename": "ctranslate2-4.8.1+reachy.jp72.cu132.sm87-cp312-cp312-linux_aarch64.whl",
+          "sha256": "cd553ca1932127d16e4c2d2e38599b2e70a2a4ee8b7d06b1ec0eb37a1d38185a",
+          "size": 17999182,
+          "license": "MIT",
+          "source": {
+            "repository": "https://github.com/OpenNMT/CTranslate2.git",
+            "tag": "v4.8.1",
+            "tag_object": "399239a790ad0da4e4363e0dcbb83495b5abd742",
+            "commit": "0d8bcd362ac75ef860ef161d6f0efad0ae439ff0",
+            "modified": true,
+            "modifications": "Downstream wheel packaging and local version only; the CTranslate2 C++ source is unmodified."
+          },
+          "required_member_sha256": {
+            "ctranslate2-4.8.1+reachy.jp72.cu132.sm87.dist-info/licenses/LICENSES/CTranslate2-MIT.txt": "54aa79d9fe3c09e67a16dcd95b9e88676405a6ec174efda31036983cf7672ecb"
+          }
+        },
+        "onnxruntime_gpu": {
+          "distribution": "onnxruntime-gpu",
+          "version": "1.28.0+reachy.jp72.cu132.sm87",
+          "filename": "onnxruntime_gpu-1.28.0+reachy.jp72.cu132.sm87-cp312-cp312-linux_aarch64.whl",
+          "sha256": "a4dd9c97ba19eaaeb33a00a3ac8e7ada4da35cd935be15800dbbc56437126ba5",
+          "size": 55961323,
+          "license": "MIT",
+          "source": {
+            "repository": "https://github.com/microsoft/onnxruntime.git",
+            "tag": "v1.28.0",
+            "commit": "da9b5e364c465de65c49d91e696cd6485270757f",
+            "modified": true,
+            "patch": {
+              "path": "patches/onnxruntime-v1.28.0-jp72.patch",
+              "sha256": "035b1afa6e81e216351d1449186a2f2b9485ef5bed5cbfa1685dbb7119bf5786"
+            }
+          },
+          "required_member_sha256": {
+            "onnxruntime_gpu-1.28.0+reachy.jp72.cu132.sm87.dist-info/licenses/LICENSE": "2f07c72751aed99790b8a4869cf2311df85a860b22ded05fa22803587a48922c",
+            "onnxruntime_gpu-1.28.0+reachy.jp72.cu132.sm87.dist-info/licenses/ThirdPartyNotices.txt": "0e07b95f3a8d6230037707c5c4a2b554d12c4cb67369669ac255635528ffcee2"
+          }
+        }
+      }
+    }
+  }
+}

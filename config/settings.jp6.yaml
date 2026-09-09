@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: Copyright (c) 2023-2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+# Legacy JetPack 6 compatibility overlay.
+# Select with:
+#   REACHY_ASSISTANT_CONFIG=config/settings.jp6.yaml python3 run_web_vision_chat.py
+# Values not listed here are inherited from the JetPack 7.2 default config.
+
+stt:
+  device: "cuda"
+  compute_type: "int8"
+
+audio:
+  input_device: "Reachy Mini Audio"
+  output_device: "Anker PowerConf"
+  echo_cancellation: true

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright (c) 2023-2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
 """Full range-of-motion diagnostic for Reachy Mini.
 
 Runs a labeled, smooth sequence to check visible flexibility:

@@ -91,6 +91,21 @@ def kill_stale_camera_holders(device: int, console: Console) -> None:
         pass
 
 
+def disable_sdk_background_motion(reachy) -> list[str]:
+    """Disable daemon-owned motion features when the SDK provides them."""
+    disabled = []
+    for method_name in ("disable_wobbling", "stop_head_tracking"):
+        method = getattr(reachy, method_name, None)
+        if not callable(method):
+            continue
+        try:
+            method()
+        except Exception:
+            continue
+        disabled.append(method_name)
+    return disabled
+
+
 def connect(config, console: Console) -> Optional["ReachyMini"]:
     """Connect to Reachy Mini using config.reachy settings.
 
@@ -123,6 +138,11 @@ def connect(config, console: Console) -> Optional["ReachyMini"]:
                 automatic_body_yaw=rcfg.automatic_body_yaw,
             )
 
+            disabled = disable_sdk_background_motion(reachy)
+            if disabled:
+                console.print(
+                    "  ✓ SDK background motion disabled: " + ", ".join(disabled)
+                )
             reachy.enable_motors()
             if rcfg.wake_on_start:
                 if daemon_already_running:

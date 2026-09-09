@@ -1,0 +1,20 @@
+CTranslate2 4.8.1 downstream binary build for Reachy Mini on JetPack 7.2
+
+Upstream source: https://github.com/OpenNMT/CTranslate2
+Upstream tag: v4.8.1
+Upstream commit: 0d8bcd362ac75ef860ef161d6f0efad0ae439ff0
+Build target: Linux aarch64, Python 3.12, CUDA 13.2, SM 8.7
+
+This wheel bundles the CTranslate2 shared library and its Python extension.
+It does not bundle NVIDIA CUDA, cuBLAS, or cuDNN libraries. Compatible
+JetPack-provided runtime libraries are required on the target system and are
+governed by NVIDIA's applicable licenses.
+
+Compiled-in permissively licensed components include CTranslate2 (MIT),
+spdlog (MIT), fmt (MIT), CUTLASS (BSD-3-Clause), Thrust/CUB/libcu++
+(Apache-2.0 with LLVM and GCC runtime exceptions), pybind11 (BSD-3-Clause),
+half_float (MIT), nlohmann/json (MIT), BS::thread_pool (MIT), and
+neon_mathfun (zlib). Their notices are included in this LICENSES directory.
+
+The build disabled RUY, OpenBLAS, MKL, tensor-parallel/NCCL, CLI tools, and
+tests. No copyleft dependency was identified in the compiled artifact path.

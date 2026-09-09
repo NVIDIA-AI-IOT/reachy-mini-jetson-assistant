@@ -1,0 +1,31 @@
+ONNX Runtime 1.28.0 downstream GPU wheel for Reachy Mini on JetPack 7.2
+
+Upstream source: https://github.com/microsoft/onnxruntime
+Upstream tag: v1.28.0
+Upstream commit: da9b5e364c465de65c49d91e696cd6485270757f
+Build target: Linux aarch64, JetPack 7.2/L4T 39.2, CUDA 13.2, SM 8.7
+Python ABI: CPython 3.12
+
+Downstream source changes relative to v1.28.0:
+- Enable the upstream CUDA 13.3 CCCL-header workaround for CUDA 13.2.
+- Enable ORT_QUICK_BUILD for unused CUDA LLM/MoE operator instantiations.
+
+This wheel bundles ONNX Runtime core, Python bindings, and the CUDA execution
+provider. It does not bundle NVIDIA CUDA, cuBLAS, cuDNN, cuFFT, cuRAND, NVRTC,
+or NVIDIA driver libraries. Compatible JetPack-provided runtime libraries are
+required on the target and remain governed by NVIDIA's applicable EULA.
+
+Licensing and source-availability notes:
+- ONNX Runtime is MIT licensed; its LICENSE is included in this wheel.
+- Complete upstream ThirdPartyNotices.txt is included without modification.
+- Eigen is covered by MPL-2.0 and is compiled into ONNX Runtime. The exact
+  fetched Eigen source pin is 1d8b82b0740839c0de7f1242a3585e3390ff5f33:
+  https://github.com/eigen-mirror/eigen/archive/1d8b82b0740839c0de7f1242a3585e3390ff5f33.zip
+- Reachy-specific changes do not modify Eigen source. ONNX Runtime's upstream
+  Eigen patch files remain available in the v1.28.0 source tree.
+- If this executable wheel is redistributed, make the corresponding MPL-2.0
+  Covered Source available by reasonable means, tell recipients how to obtain
+  it, and preserve all license notices. A release source archive containing
+  the exact v1.28.0 source, downstream diff, and dependency pins is preferred.
+- The included third-party notice file is intentionally over-inclusive; the
+  wheel inventory identifies the libraries present in the linked binary.
