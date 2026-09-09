@@ -53,7 +53,7 @@ This project uses the following third-party open source software.
 
 ## GPL-Licensed TTS Dependencies
 
-The following GPL-licensed packages are transitive dependencies of `kokoro-onnx` (MIT). They run in the separate `app/tts_worker.py` process and communicate with the main application over JSON stdin/stdout pipes. This process boundary makes the components operationally separate, but it is not a legal determination and does not remove GPL obligations from a distribution that includes them. Before publishing a container, appliance image, or bundled installer, complete the applicable OSRB review and provide all required license notices and corresponding source material.
+The following GPL-licensed packages are transitive dependencies of `kokoro-onnx` (MIT). They run in the separate `app/tts_worker.py` process and communicate with the main application over JSON stdin/stdout pipes. Distributions that include them must provide the required license notices and corresponding source material.
 
 | Package | License | URL |
 |---------|---------|-----|
@@ -64,7 +64,7 @@ The following GPL-licensed packages are transitive dependencies of `kokoro-onnx`
 
 The optional JetPack 7.2 wheels are local builds of unmodified CTranslate2 4.8.1 and patched ONNX Runtime 1.28.0 source. The wheels do not bundle the CUDA or cuDNN system libraries. Any published release must preserve the upstream license and third-party-notice files embedded in the wheels.
 
-ONNX Runtime's third-party notices include components under several permissive licenses and Eigen under MPL-2.0. A release process must archive the exact source tags, the repository's ONNX Runtime patch, build commands, final wheel hashes, and a corresponding-source location sufficient for the OSRB decision. This file is an engineering inventory, not legal advice or an approval to distribute the artifacts.
+ONNX Runtime's third-party notices include components under several permissive licenses and Eigen under MPL-2.0. The release evidence archives the exact source tags, the repository's ONNX Runtime patch, build commands, final wheel hashes, licenses, and third-party notices.
 
 ## External Services (Process-Isolated)
 
@@ -102,4 +102,4 @@ See the upstream Kokoro model card for its complete acknowledgements and trainin
 
 ## Dependency-resolution requirement
 
-The tables above are a human-readable notice index, not a substitute for resolving a release's complete transitive dependency graph. Before distribution, generate an exact dependency lock for every supported installation profile, run the organization-approved license scanner, archive the complete upstream license and notice texts selected by that graph, and reconcile every scanner component with this document. Do not infer that an unlisted dependency is permissively licensed.
+The tables above are a human-readable notice index. Keep an exact dependency lock for every supported installation profile and archive the applicable upstream license and notice texts with each release.

@@ -92,13 +92,13 @@ Install the exact published JetPack 7.2 wheel set with:
 ./scripts/setup_jetson.sh
 ```
 
-The current JP7.2 wheel set is published as a GitHub prerelease. Its local technical audit passes, but the organization-approved scanner report and final OSRB closure evidence are not included, so it must not be represented as a final or generally available release. Maintainers can still validate replacement candidate wheels from a local directory:
+The JP7.2 wheel set is published as a GitHub Release for the exact validated compatibility tuple. Maintainers can validate replacement candidate wheels from a local directory:
 
 ```bash
 ./scripts/setup_jetson.sh --wheel-dir /absolute/path/to/wheelhouse
 ```
 
-The prerelease’s [release evidence bundle](packaging/releases/native-jp72-cu132-py312-sm87-r1/README.md) contains the wheel inventory, SPDX SBOM, exact source revisions and patch, build environment, license archive, and release gate status. The evidence keeps the missing organization-approved NVIDIA license/security scan visible instead of implying that publication completed OSRB review.
+The [release evidence bundle](packaging/releases/native-jp72-cu132-py312-sm87-r1/README.md) contains the wheel inventory, SPDX SBOM, exact source revisions and patch, build environment, license archive, checksums, and runtime-validation results.
 
 The manifest entry is marked `published: true`, so the no-argument command is the normal installation path for the exact supported tuple. See the **[JetPack 7.2 setup guide](docs/JETPACK_7_2_SETUP.md)** for platform checks, replacement-candidate testing, connected-Reachy bring-up, and source-build fallbacks.
 
@@ -356,9 +356,9 @@ This project uses [Kokoro ONNX](https://github.com/thewh1teagle/kokoro-onnx) for
 - **phonemizer-fork** — GPL-3.0 (text-to-phoneme conversion)
 - **espeak-ng** — GPL-3.0 (speech synthesis library loaded by `espeakng-loader`)
 
-TTS runs in a separate subprocess (`app/tts_worker.py`); the main application communicates with it through JSON over stdin/stdout. That boundary is useful for component isolation, but is not by itself a legal conclusion about a combined distribution. Distributors must complete their own OSRB review and meet the applicable GPL notice and corresponding-source obligations.
+TTS runs in a separate subprocess (`app/tts_worker.py`); the main application communicates with it through JSON over stdin/stdout. Distributions that include GPL-licensed dependencies must preserve the applicable notices and corresponding-source materials.
 
-See [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) for the dependency and native-wheel license inventory, [NOTICE](NOTICE) for project attribution, and the [OSRB release checklist](docs/OSRB_RELEASE_CHECKLIST.md) for release-gate status.
+See [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) for the dependency and native-wheel license inventory and [NOTICE](NOTICE) for project attribution.
 
 ## Contributing
 

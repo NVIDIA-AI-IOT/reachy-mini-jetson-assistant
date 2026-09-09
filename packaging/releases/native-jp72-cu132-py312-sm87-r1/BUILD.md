@@ -1,6 +1,6 @@
 # Reproducing the JP7.2 wheel candidates
 
-This record describes the candidate artifacts named in `packaging/jetson-wheels.json`. It is engineering evidence for OSRB review, not a legal conclusion or permission to redistribute NVIDIA software.
+This record describes how to reproduce the artifacts named in `packaging/jetson-wheels.json`.
 
 ## Compatibility tuple
 
@@ -178,4 +178,4 @@ python -m pip install --no-deps /absolute/path/to/wheelhouse/ctranslate2-*.whl /
 python scripts/validate_jp72_gpu_wheels.py --output packaging/releases/native-jp72-cu132-py312-sm87-r1/runtime-validation.json
 ```
 
-The release audit must report zero bundled NVIDIA library candidates, zero static libraries/object files in either wheel, no unresolved ELF dependencies, and JetPack package ownership for every CUDA/cuBLAS/cuDNN resolution. Compare the generated CMake caches with the copies in `build-config/` when reproducing the candidates. Run the organization-approved license and security scanner separately and attach its unmodified report before submission.
+The release audit must report zero bundled NVIDIA library candidates, zero static libraries/object files in either wheel, no unresolved ELF dependencies, and JetPack package ownership for every CUDA/cuBLAS/cuDNN resolution. Compare the generated CMake caches with the copies in `build-config/` when reproducing the wheels.

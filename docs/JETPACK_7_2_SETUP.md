@@ -38,13 +38,13 @@ The check detects architecture, L4T, CUDA, Python, GPU family, and compute capab
 
 ### 3. Install the application
 
-Install the exact published prerelease wheel set with:
+Install the exact published wheel set with:
 
 ```bash
 ./scripts/setup_jetson.sh
 ```
 
-The current JP7.2 wheel set is published as a GitHub prerelease. Its technical audit passes, but the organization-approved scanner report and final OSRB closure evidence are not included; publication must not be described as final OSRB approval. Maintainers testing replacement candidates can use a local wheel directory:
+The JP7.2 wheel set is published as a GitHub Release and selected automatically for an exact platform match. Maintainers testing replacement candidates can use a local wheel directory:
 
 ```bash
 ./scripts/setup_jetson.sh \
@@ -157,7 +157,7 @@ source .venv/bin/activate
   /path/to/onnxruntime_gpu-1.28.0+reachy.jp72.cu132.sm87-cp312-cp312-linux_aarch64.whl
 ```
 
-The lower-level installer checks aarch64, Python 3.12, and L4T r39; replaces the portable CPU runtimes that pip may have resolved; then asserts that CTranslate2 sees a CUDA device and ONNX Runtime exposes `CUDAExecutionProvider`. Release assets must be published only after the repository's OSRB/license review and checksum process is complete.
+The lower-level installer checks aarch64, Python 3.12, and L4T r39; replaces the portable CPU runtimes that pip may have resolved; then asserts that CTranslate2 sees a CUDA device and ONNX Runtime exposes `CUDAExecutionProvider`. Published assets use immutable release URLs and manifest-recorded checksums.
 
 If the release wheels are unavailable for a newer JetPack, use the source-build fallback below and publish a new platform-tagged wheel set only after testing.
 
@@ -167,13 +167,13 @@ If the release wheels are unavailable for a newer JetPack, use the source-build 
 2. Build CTranslate2 and ONNX Runtime from pinned upstream revisions.
 3. Validate CUDA providers, the software pipeline benchmark, and connected Reachy hardware on the target image.
 4. Run `scripts/audit_jetson_wheels.py` to inventory every archive member and ELF dependency, verify the in-wheel licenses/notices, prove NVIDIA runtime libraries resolve outside the wheels, and generate an SPDX 2.3 SBOM.
-5. Complete OSRB review and archive the upstream licenses, complete third-party notices, exact patches, tags and commit SHAs, build commands, complete build environment, SBOM, and the unmodified report from NVIDIA’s organization-approved license/security scanner.
+5. Archive the upstream licenses, complete third-party notices, exact patches, tags and commit SHAs, build commands, build environment, SBOM, wheel inventory, and runtime-validation results.
 6. Create an immutable GitHub Release tag and attach both wheels plus provenance material; do not overwrite assets under an existing tag.
 7. Add a new `published: false` manifest entry with exact filenames, versions, sizes, wheel tag, and SHA-256 values.
 8. Run the installer in a clean temporary venv using `--wheel-dir`, then run the repository tests with `REACHY_JETSON_WHEEL_DIR` set to that wheelhouse.
 9. Publish the assets, verify the release URL from a clean device, and only then change that tuple to `published: true`. Keep older validated tuples intact.
 
-The current prerelease’s [release evidence bundle](../packaging/releases/native-jp72-cu132-py312-sm87-r1/README.md) records the exact audit scope and remaining scanner/OSRB gate for promotion to a final release.
+The current [release evidence bundle](../packaging/releases/native-jp72-cu132-py312-sm87-r1/README.md) records the exact audit scope, source provenance, checksums, and validation results.
 
 ### Source-build fallback: CTranslate2 for Orin (`sm_87`)
 

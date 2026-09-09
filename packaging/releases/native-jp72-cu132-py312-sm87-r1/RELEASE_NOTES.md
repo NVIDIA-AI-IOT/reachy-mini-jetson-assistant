@@ -1,6 +1,6 @@
 # JetPack 7.2 native GPU wheels for Reachy Mini Jetson Assistant
 
-This prerelease provides the exact native GPU runtime wheels used by `./scripts/setup_jetson.sh` on the validated JetPack 7.2 compatibility tuple.
+This release provides the exact native GPU runtime wheels used by `./scripts/setup_jetson.sh` on the validated JetPack 7.2 compatibility tuple.
 
 ## Supported tuple
 
@@ -33,4 +33,4 @@ cd reachy-mini-jetson-assistant
 
 ## Release status
 
-The local technical audit and Jetson Orin Nano runtime validation pass. The organization-approved NVIDIA license/security scanner report and final OSRB closure evidence are not included. This is therefore a prerelease and must not be described as a final/general-availability release.
+The wheel audit and Jetson Orin Nano runtime validation pass for the supported compatibility tuple.

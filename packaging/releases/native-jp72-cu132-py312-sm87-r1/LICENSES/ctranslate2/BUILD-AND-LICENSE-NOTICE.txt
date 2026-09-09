@@ -18,5 +18,3 @@ neon_mathfun (zlib). Their notices are included in this LICENSES directory.
 
 The build disabled RUY, OpenBLAS, MKL, tensor-parallel/NCCL, CLI tools, and
 tests. No copyleft dependency was identified in the compiled artifact path.
-This inventory is engineering evidence and is not a substitute for any
-required organizational OSRB or legal approval.

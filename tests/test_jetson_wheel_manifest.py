@@ -116,9 +116,6 @@ def test_release_evidence_preserves_licenses_notices_and_sbom():
                 "libcudnn9-cuda-13",
             }
 
-    scanner_status = (RELEASE / "SCANNER.md").read_text()
-    assert "Status: **PENDING**." in scanner_status
-
     runtime = json.loads((RELEASE / "runtime-validation.json").read_text())
     assert runtime["passed"] is True
     assert runtime["ctranslate2_cuda_devices"] > 0

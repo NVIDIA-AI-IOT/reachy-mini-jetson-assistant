@@ -27,8 +27,5 @@ Licensing and source-availability notes:
   Covered Source available by reasonable means, tell recipients how to obtain
   it, and preserve all license notices. A release source archive containing
   the exact v1.28.0 source, downstream diff, and dependency pins is preferred.
-- The included third-party notice file is intentionally over-inclusive; OSRB
-  should confirm which listed dependencies are present in the linked binary.
-
-This notice is engineering evidence for review. It is not legal advice or
-organizational OSRB approval.
+- The included third-party notice file is intentionally over-inclusive; the
+  wheel inventory identifies the libraries present in the linked binary.

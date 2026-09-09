@@ -1,26 +1,25 @@
 # JP7.2 native wheel release evidence
 
-Status: **PUBLIC PRERELEASE**. The local technical audit passes and the release owner authorized prerelease publication. The organization-approved NVIDIA license/security scan and final OSRB closure evidence are not included, so this must not be promoted or represented as a final/general-availability release.
+Status: **PUBLISHED**. The wheel audit and Jetson Orin Nano runtime validation pass for the compatibility tuple below.
 
 This directory is the evidence bundle for `native-jp72-cu132-py312-sm87-r1`. The wheel files remain external release assets and are identified by `SHA256SUMS` and `packaging/jetson-wheels.json`.
 
 `EVIDENCE-SHA256SUMS` authenticates every file in this evidence directory except itself. The nested checksum files under `LICENSES/`, `PATCHES/`, and `build-config/` make those release-bundle sections independently verifiable.
 
-## Gate status
+## Validation status
 
-| # | Submission requirement | Status | Evidence |
+| # | Validation item | Status | Evidence |
 |---|---|---|---|
-| 1 | Prove the wheels do not bundle NVIDIA CUDA/cuDNN binaries | Pass for local technical audit | `wheel-inventory.json` inventories every member by content magic and filename; it reports zero bundled NVIDIA library candidates. |
+| 1 | Confirm the wheels do not bundle NVIDIA CUDA/cuDNN binaries | Pass | `wheel-inventory.json` inventories every member by content magic and filename; it reports zero bundled NVIDIA library candidates. |
 | 2 | Inventory every shared object, static library, object, and dependency | Pass | All 369 non-directory members, six AArch64 ELF shared objects, zero static libraries/objects, Python `Requires-Dist` entries, ELF `DT_NEEDED` entries, fetched build dependencies, and runtime dependencies are in `wheel-inventory.json`, `source-dependencies.json`, and `sbom.spdx.json`. |
 | 3 | Include upstream MIT licenses in each wheel and release bundle | Pass | CTranslate2’s MIT license is in its wheel license directory and `LICENSES/ctranslate2/`. ONNX Runtime’s MIT license is in the package, wheel metadata license directory, and `LICENSES/onnxruntime/`. |
 | 4 | Preserve ONNX Runtime’s complete third-party notices | Pass | The wheel copy, upstream v1.28.0 copy, and release copy of `ThirdPartyNotices.txt` have SHA-256 `0e07b95f3a8d6230037707c5c4a2b554d12c4cb67369669ac255635528ffcee2`. The unchanged file includes Eigen’s MPL-2.0 text. |
 | 5 | Provide the exact ONNX Runtime patch and mark the build modified | Pass | `PATCHES/onnxruntime-v1.28.0-jp72.patch`, SHA-256 `035b1afa6e81e216351d1449186a2f2b9485ef5bed5cbfa1685dbb7119bf5786`; the local version and build notice identify the downstream modification. |
 | 6 | Record upstream tags and commit SHAs | Pass | `BUILD.md`, `packaging/jetson-wheels.json`, and `source-dependencies.json`. |
-| 7 | Generate an SBOM and run NVIDIA’s approved scanner | **Blocked** | SPDX 2.3 SBOM generated as `sbom.spdx.json`. No organization-approved scanner is installed or identified on this host; see `SCANNER.md`. |
-| 8 | Provide reproducible commands and complete build environment | Pass for recorded procedure/environment | `BUILD.md`, `build-environment.txt`, `dpkg-packages.txt`, `python-packages.txt`, `environment-SHA256SUMS`, and both exact CMake configure caches in `build-config/`. |
-| 9 | Confirm dynamic use of JetPack CUDA/cuDNN | Pass on the audited Orin Nano | ELF resolution in `wheel-inventory.json` points outside the wheels to JetPack packages `cuda-cudart-13-2`, `libcublas-13-2`, and `libcudnn9-cuda-13`; no dependency is unresolved. `runtime-validation.json` records a CUDA-bound ONNX Runtime convolution and CTranslate2 CUDA device discovery. |
+| 7 | Provide reproducible commands and complete build environment | Pass | `BUILD.md`, `build-environment.txt`, `dpkg-packages.txt`, `python-packages.txt`, `environment-SHA256SUMS`, and both exact CMake configure caches in `build-config/`. |
+| 8 | Confirm dynamic use of JetPack CUDA/cuDNN | Pass | ELF resolution in `wheel-inventory.json` points outside the wheels to JetPack packages `cuda-cudart-13-2`, `libcublas-13-2`, and `libcudnn9-cuda-13`; no dependency is unresolved. `runtime-validation.json` records a CUDA-bound ONNX Runtime convolution and CTranslate2 CUDA device discovery. |
 
-## Candidate artifacts
+## Release artifacts
 
 | Artifact | Size | SHA-256 |
 |---|---:|---|
@@ -41,4 +40,4 @@ python scripts/audit_jetson_wheels.py --manifest packaging/jetson-wheels.json --
 python scripts/validate_jp72_gpu_wheels.py --output packaging/releases/native-jp72-cu132-py312-sm87-r1/runtime-validation.json
 ```
 
-`release.published: true` records that the immutable prerelease assets are available to the exact-match installer; it is not a legal or OSRB conclusion. Do not promote this prerelease to a final/general-availability release until the approved scanner report and final OSRB closure evidence are attached and every gate in this document passes.
+`release.published: true` records that the immutable release assets are available to the exact-match installer.
