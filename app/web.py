@@ -51,6 +51,7 @@ class Broadcaster:
         self._ptt.set()
         self._speaker_getter: Optional[Callable[[], dict]] = None
         self._speaker_setter: Optional[Callable[[str], dict]] = None
+        self._speaker_volume_setter: Optional[Callable[[int], dict]] = None
 
     def set_loop(self, loop: asyncio.AbstractEventLoop):
         self._loop = loop
@@ -83,10 +84,12 @@ class Broadcaster:
         self,
         getter: Callable[[], dict],
         setter: Callable[[str], dict],
+        volume_setter: Optional[Callable[[int], dict]] = None,
     ):
-        """Attach live speaker state and selection callbacks."""
+        """Attach live speaker state, selection, and volume callbacks."""
         self._speaker_getter = getter
         self._speaker_setter = setter
+        self._speaker_volume_setter = volume_setter
 
     def get_speaker_state(self) -> dict:
         if not self._speaker_getter:
@@ -111,6 +114,21 @@ class Broadcaster:
         else:
             try:
                 state = self._speaker_setter(sink_id)
+            except Exception as exc:
+                state = {**self.get_speaker_state(), "error": str(exc)}
+                state.pop("type", None)
+        self.send({"type": "speaker_state", **state})
+
+    def set_speaker_volume(self, volume: int):
+        if not self._speaker_volume_setter:
+            state = {
+                **self.get_speaker_state(),
+                "error": "Speaker volume control is not initialized",
+            }
+            state.pop("type", None)
+        else:
+            try:
+                state = self._speaker_volume_setter(volume)
             except Exception as exc:
                 state = {**self.get_speaker_state(), "error": str(exc)}
                 state.pop("type", None)
@@ -198,6 +216,15 @@ def create_app(broadcaster: Broadcaster) -> FastAPI:
                             if isinstance(sink_id, str) and sink_id:
                                 await asyncio.to_thread(
                                     broadcaster.select_speaker, sink_id,
+                                )
+                        elif msg.get("type") == "set_speaker_volume":
+                            volume = msg.get("volume")
+                            if (
+                                isinstance(volume, (int, float))
+                                and not isinstance(volume, bool)
+                            ):
+                                await asyncio.to_thread(
+                                    broadcaster.set_speaker_volume, int(volume),
                                 )
                     except (ValueError, KeyError):
                         pass

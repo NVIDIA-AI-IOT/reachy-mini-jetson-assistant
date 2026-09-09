@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Test different system prompts + user prompts against the live VLM (Cosmos-Reason2-2B).
+"""Test different system prompts and user prompts against the configured live VLM.
 
 Sends the same camera frame with each combo and prints the full response.
 Requires: VLM server running on localhost:8080, a frame at /tmp/test_frame.b64.
@@ -73,7 +73,7 @@ TESTS = {
         "few_shot": [],
     },
 
-    # -- Few-shot as multi-turn messages (proper chat format for Qwen3-VL) --
+    # -- Few-shot examples as model-agnostic multi-turn chat messages --
     "E_fewshot_multiturn": {
         "system": (
             "You are Reachy Mini, a robot with a camera.\n"

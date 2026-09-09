@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright (c) 2023-2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
 import sys, time, threading
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))

@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: Copyright (c) 2023-2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
 """Measure the Reachy voice path with real AI stages and mocked robot I/O.
 
 The robot microphone/camera/speaker/motion hardware is deliberately out of
@@ -59,6 +62,8 @@ def main():
     t0 = time.perf_counter()
     if not tts.load():
         raise SystemExit("Kokoro could not load")
+    if tts.provider != "CUDAExecutionProvider":
+        raise SystemExit(f"Kokoro is not using CUDA: {tts.provider}")
     tts_load_s = time.perf_counter() - t0
     seed = tts.synthesize(prompt_text)
     if seed.get("audio") is None:
@@ -73,6 +78,8 @@ def main():
     t0 = time.perf_counter()
     if not stt.load():
         raise SystemExit("STT could not load")
+    if stt.device != "cuda":
+        raise SystemExit(f"STT fell back to {stt.device}; benchmark requires CUDA")
     stt_load_s = time.perf_counter() - t0
 
     llm = LLM(base_url=args.base_url, backend="openai", max_tokens=32, temperature=0.0, system_prompt=system)
@@ -126,6 +133,9 @@ def main():
                 tts_calls += 1
                 pending = ""
                 first_tts_done_s = time.perf_counter() - start
+        if ttft_s is None or not response.strip():
+            raise SystemExit("LLM returned no streamed response")
+
         llm_s = time.perf_counter() - llm_start
         if pending.strip():
             tts_start = time.perf_counter()
@@ -149,7 +159,7 @@ def main():
         "benchmark": "reachy-mini-jetson-assistant mocked voice pipeline",
         "hardware_mocked": ["Reachy microphone", "camera", "speaker playback", "USB motion controller"],
         "real_stages": ["Silero VAD", "faster-whisper STT", "llama.cpp streaming LLM", "Kokoro TTS"],
-        "vad_provider": silero._model.session.get_providers()[0],
+        "vad_provider": silero._session.get_providers()[0],
         "stt_backend": stt.get_info(), "tts_provider": tts.provider,
         "onnxruntime_available_providers": __import__("onnxruntime").get_available_providers(),
         "cold_load_ms": {"vad": ms(vad_load_s), "stt": ms(stt_load_s), "tts": ms(tts_load_s)},

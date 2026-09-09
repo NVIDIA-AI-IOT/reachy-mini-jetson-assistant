@@ -57,6 +57,10 @@ You can do this automatically with `git commit -s`.
 **By signing off, you confirm that you have the right to submit this work under
 the Apache 2.0 license used by this project.**
 
+## NVIDIA Maintainer IP Review
+
+Before merging a contribution, NVIDIA maintainers must complete the required internal [IP review process](https://nv/ip_review_process). The review must cover source provenance, applicable licenses, retained copyright and attribution notices, third-party code or assets, dependency changes, and any corresponding-source or redistribution obligations. External contributors are not expected to have access to NVIDIA's internal review system.
+
 ## How to Contribute
 
 1. **Fork** the repository and create a feature branch from `main`.

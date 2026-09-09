@@ -38,45 +38,55 @@ header{display:flex;align-items:center;justify-content:space-between;
   padding:8px 20px;background:var(--card);border-bottom:1px solid var(--border);flex-shrink:0}
 .logo{font-size:1.1rem;font-weight:700;display:flex;align-items:center;gap:8px}
 .logo span{color:var(--accent)}
-.conn-status{font-size:.8rem;padding:3px 10px;border-radius:12px;display:flex;align-items:center;gap:5px}
+.conn-status{font-size:.9rem;padding:3px 10px;border-radius:12px;display:flex;align-items:center;gap:5px}
 .conn-status.ok{background:#1a3d00;color:var(--accent)}
 .conn-status.err{background:#3d1010;color:var(--danger)}
 .conn-dot{width:7px;height:7px;border-radius:50%;display:inline-block}
 .conn-status.ok .conn-dot{background:var(--accent)}
 .conn-status.err .conn-dot{background:var(--danger)}
 .header-right{display:flex;align-items:center;gap:12px}
-.badge{font-size:.75rem;padding:2px 8px;border-radius:4px;background:var(--border);color:var(--dim)}
-.client-count{font-size:.75rem;color:var(--dim)}
+.badge{font-size:.85rem;padding:2px 8px;border-radius:4px;background:var(--border);color:var(--dim)}
+.client-count{font-size:.85rem;color:var(--dim)}
 
 .main{display:flex;flex:1;overflow:hidden}
-.left{width:40%;min-width:300px;display:flex;flex-direction:column;gap:8px;padding:8px;overflow-y:auto;border-right:1px solid var(--border)}
-.right{flex:1;display:flex;flex-direction:column;padding:8px;overflow:hidden;gap:8px}
+.left{flex:0 0 48%;min-width:260px;display:flex;flex-direction:column;gap:8px;padding:8px;overflow-y:auto}
+.right{flex:1 1 0;min-width:340px;display:flex;flex-direction:column;padding:8px;overflow:hidden;gap:8px}
+.splitter{position:relative;flex:0 0 9px;cursor:col-resize;touch-action:none;outline:none;background:transparent}
+.splitter::before{content:'';position:absolute;top:0;bottom:0;left:4px;width:1px;background:var(--border);transition:background .15s,width .15s,left .15s}
+.splitter:hover::before,.splitter:focus-visible::before,.splitter.dragging::before{left:2px;width:5px;background:#58a6ff}
+.splitter::after{content:'⋮';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:var(--dim);font-size:18px;line-height:1}
+body.resizing{cursor:col-resize;user-select:none}
+body.resizing iframe,body.resizing img{pointer-events:none}
+
+@media(min-width:769px){
+  .left,.right{transition:min-width .1s}
+}
 
 .panel{background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden}
-.panel-hdr{padding:6px 12px;font-size:.8rem;font-weight:600;color:var(--dim);
+.panel-hdr{padding:7px 12px;font-size:.95rem;font-weight:600;color:var(--dim);
   display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
 
 /* Camera */
-.cam-panel{flex-shrink:0}
-.cam-wrap{position:relative;background:#000;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center}
+.cam-panel{flex:1 1 auto;min-height:220px;display:flex;flex-direction:column}
+.cam-wrap{position:relative;background:#000;flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
 .cam-wrap img{width:100%;height:100%;object-fit:contain;display:block}
-.cam-placeholder{color:var(--dim);font-size:.9rem}
-.live-badge{font-size:.6rem;padding:2px 6px;border-radius:3px;font-weight:700;letter-spacing:.5px}
+.cam-placeholder{color:var(--dim);font-size:1rem}
+.live-badge{font-size:.7rem;padding:2px 6px;border-radius:3px;font-weight:700;letter-spacing:.5px}
 .live-badge.on{background:#c00;color:#fff;animation:pulse 2s infinite}
 .live-badge.off{background:var(--border);color:var(--dim)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-.cam-info{padding:3px 12px;font-size:.65rem;color:var(--dim);text-align:center}
+.cam-info{padding:4px 12px;font-size:.75rem;color:var(--dim);text-align:center}
 .cam-overlay{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
 
-/* Face tracking panel (right top) */
+/* Face tracking panel */
 .face-panel{flex-shrink:0}
 .face-body{display:flex;gap:14px;padding:10px 12px;min-height:120px}
 .face-crop-wrap{width:120px;height:120px;flex-shrink:0;background:#000;border-radius:6px;overflow:hidden;
   display:flex;align-items:center;justify-content:center;border:1px solid var(--border)}
 .face-crop-wrap canvas{width:100%;height:100%;object-fit:contain}
-.face-crop-placeholder{color:var(--dim);font-size:.7rem;text-align:center;padding:8px}
+.face-crop-placeholder{color:var(--dim);font-size:.8rem;text-align:center;padding:8px}
 .face-info{flex:1;display:flex;flex-direction:column;gap:8px;min-width:0;justify-content:center}
-.track-badge{font-size:.6rem;padding:2px 7px;border-radius:10px;font-weight:700;letter-spacing:.5px}
+.track-badge{font-size:.7rem;padding:2px 7px;border-radius:10px;font-weight:700;letter-spacing:.5px}
 .track-badge.on{background:#1a3d00;color:var(--accent)}
 .track-badge.off{background:var(--border);color:var(--dim)}
 .track-status-row{display:flex;align-items:center;gap:8px}
@@ -84,89 +94,98 @@ header{display:flex;align-items:center;justify-content:space-between;
 .track-dot.searching{background:var(--warn);animation:pulse 1.2s infinite}
 .track-dot.tracking{background:#58a6ff}
 .track-dot.centered{background:var(--accent);box-shadow:0 0 6px var(--accent)}
-.track-label{font-size:1rem;font-weight:700}
-.track-stats{font-size:.7rem;color:var(--dim)}
+.track-label{font-size:1.05rem;font-weight:700}
+.track-stats{font-size:.8rem;color:var(--dim)}
 .track-axes{display:flex;flex-direction:column;gap:5px}
-.axis-row{display:flex;align-items:center;gap:6px;font-size:.62rem;color:var(--dim)}
+.axis-row{display:flex;align-items:center;gap:6px;font-size:.72rem;color:var(--dim)}
 .axis-cap{width:14px;flex-shrink:0;text-transform:uppercase}
 .axis-bar{position:relative;flex:1;height:5px;background:var(--bg);border-radius:3px;overflow:hidden}
 .axis-bar::before{content:'';position:absolute;left:50%;top:0;width:1px;height:100%;background:var(--border)}
 .axis-fill{position:absolute;top:0;height:100%;background:#58a6ff;border-radius:3px;transition:left .15s,width .15s}
 .axis-fill.centered{background:var(--accent)}
 
-/* Pipeline compact */
+/* Pipeline */
 .pipe-panel{flex-shrink:0}
-.pipe-row{display:flex;align-items:center;gap:6px;padding:6px 12px}
-.pipe-stages{display:flex;gap:3px;flex:1}
-.stage{font-size:.7rem;padding:3px 8px;border-radius:12px;background:var(--bg);color:var(--dim);transition:all .3s;white-space:nowrap}
+.pipe-row{display:flex;align-items:center;gap:14px;padding:12px 16px 10px;flex-wrap:wrap}
+.pipe-stages{display:flex;align-items:center;gap:10px;flex:1;flex-wrap:wrap;min-width:min(500px,100%)}
+.flow-step{display:flex;align-items:center;gap:10px}
+.flow-arrow{color:#58a6ff;font-size:1.25rem;font-weight:700;line-height:1;opacity:.9}
+.stage{font-size:1rem;padding:7px 14px;border-radius:18px;background:var(--bg);color:var(--dim);transition:all .3s;white-space:nowrap}
 .stage.active{background:var(--accent-dim);color:var(--accent);font-weight:600}
-.pipe-status{font-size:.7rem;color:var(--dim);white-space:nowrap}
-.ptt-btn{display:flex;align-items:center;gap:4px;padding:4px 12px;border-radius:5px;
-  border:1px solid;cursor:pointer;font-size:.7rem;font-weight:600;font-family:inherit;transition:all .2s;outline:none;flex-shrink:0}
-.ptt-btn svg{width:13px;height:13px;flex-shrink:0}
-.ptt-btn.muted{background:#21262d;border-color:var(--border);color:var(--dim)}
-.ptt-btn.muted:hover{background:#30363d;color:var(--text)}
-.ptt-btn.live{background:#1a4a6e;border-color:#58a6ff;color:#fff}
-.audio-route{display:flex;align-items:center;gap:8px;padding:0 12px 7px;font-size:.7rem}
-.audio-route label{color:var(--dim);white-space:nowrap}
-.speaker-select{min-width:0;flex:1;background:var(--bg);color:var(--text);border:1px solid var(--border);
-  border-radius:5px;padding:4px 7px;font:inherit;outline:none}
+.pipe-status{display:flex;align-items:center;gap:7px;font-size:.95rem;color:var(--dim);white-space:nowrap;margin-left:auto}
+.pipe-status::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--dim);flex-shrink:0}
+.pipe-status.live::before{background:var(--accent);box-shadow:0 0 6px var(--accent)}
+.pipe-status.busy::before{background:#58a6ff;box-shadow:0 0 6px #58a6ff}
+.pipe-status.muted::before{background:#8b949e}
+.ptt-btn{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:6px;
+  border:1px solid;cursor:pointer;font-size:.95rem;font-weight:600;font-family:inherit;transition:all .2s;outline:none;flex-shrink:0}
+.ptt-btn svg{width:16px;height:16px;flex-shrink:0}
+.ptt-btn.live{background:#21262d;border-color:var(--border);color:var(--text)}
+.ptt-btn.live:hover{background:#3a2024;border-color:var(--danger);color:#ffb4ac}
+.ptt-btn.muted{background:#1a4a6e;border-color:#58a6ff;color:#fff}
+.ptt-btn.muted:hover{background:#215d89}
+.ptt-btn:disabled{cursor:not-allowed;opacity:.55}
+.audio-route{display:grid;grid-template-columns:auto minmax(120px,1fr) auto;align-items:center;gap:12px;padding:4px 16px 11px;font-size:.9rem}
+.audio-route label,.volume-route label{color:var(--dim);white-space:nowrap}
+.speaker-select{min-width:0;width:100%;background:var(--bg);color:var(--text);border:1px solid var(--border);
+  border-radius:6px;padding:7px 10px;font:inherit;outline:none}
 .speaker-select:focus{border-color:#58a6ff}
 .speaker-select:disabled{color:var(--dim);opacity:.7}
-.speaker-status{color:var(--accent);font-size:.65rem;white-space:nowrap}
+.speaker-status{color:var(--accent);font-size:.85rem;white-space:nowrap}
 .speaker-status.err{color:var(--danger)}
+.volume-route{display:grid;grid-template-columns:auto 34px minmax(90px,1fr) 50px 34px;align-items:center;gap:10px;padding:2px 16px 13px;font-size:.9rem}
+.volume-btn{height:32px;border:1px solid var(--border);border-radius:6px;background:#21262d;color:var(--text);cursor:pointer;font:600 1.05rem/1 inherit}
+.volume-btn:hover:not(:disabled){border-color:#58a6ff;background:#30363d}
+.volume-btn:disabled{cursor:not-allowed;color:var(--dim);opacity:.55}
+.volume-slider{width:100%;height:6px;accent-color:var(--accent);cursor:pointer}
+.volume-slider:disabled{cursor:not-allowed;opacity:.5}
+.volume-value{font-variant-numeric:tabular-nums;text-align:right;color:var(--text);font-weight:600}
 
 /* System compact */
 .sys-panel{flex-shrink:0}
-.sys-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:2px 8px;padding:6px 10px;font-size:.7rem}
+.sys-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px 10px;padding:8px 12px;font-size:.82rem}
 .sys-grid .label{color:var(--dim)}
-.sys-grid .val{text-align:right}
+.sys-grid .val{text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* System resources */
+.resource-panel{flex-shrink:0}
+.resource-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:7px;padding:8px 10px}
+.resource-stat{min-width:0;padding:6px 8px;background:var(--bg);border:1px solid #21262d;border-radius:6px}
+.resource-top{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:5px;font-size:.8rem}
+.resource-label{color:var(--dim);font-weight:600}
+.resource-value{color:var(--text);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat-bar{height:6px;background:#21262d;border-radius:4px;overflow:hidden}
+.stat-bar-fill{height:100%;border-radius:4px;transition:width .5s}
+.stat-bar-fill.green{background:var(--accent)}
+.stat-bar-fill.amber{background:var(--warn)}
+.stat-bar-fill.red{background:var(--danger)}
+.platform-stat .resource-top{margin-bottom:0;height:17px}
 
 /* Conversation */
 .conv-panel{flex:1;display:flex;flex-direction:column;overflow:hidden}
 .messages{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px}
-.msg{padding:8px 12px;border-radius:8px;max-width:95%;font-size:.85rem;line-height:1.45;word-wrap:break-word}
+.msg{padding:8px 12px;border-radius:8px;max-width:95%;font-size:.95rem;line-height:1.45;word-wrap:break-word}
 .msg.user{background:var(--user-bg);align-self:flex-start;border-left:3px solid var(--accent)}
 .msg.assistant{background:var(--assist-bg);align-self:flex-end;border-right:3px solid var(--assist-border)}
-.msg .meta{font-size:.6rem;color:var(--dim);margin-top:3px}
+.msg .meta{font-size:.7rem;color:var(--dim);margin-top:3px}
 .msg .content{white-space:pre-wrap}
 .cursor-blink::after{content:'';display:inline-block;width:7px;height:13px;background:var(--accent);
   margin-left:2px;vertical-align:text-bottom;animation:blink .7s step-end infinite}
 @keyframes blink{50%{opacity:0}}
-.empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--dim);font-size:.85rem;text-align:center;padding:16px}
-
-
-/* Config */
-.config-panel{flex-shrink:0}
-.config-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px 8px;padding:6px 10px;font-size:.7rem}
-.config-grid .label{color:var(--dim)}
-.config-grid .val{text-align:right}
-
-/* Footer */
-footer{display:flex;align-items:center;gap:14px;padding:5px 20px;background:var(--card);
-  border-top:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
-.stat{font-size:.7rem;color:var(--dim);display:flex;align-items:center;gap:5px;white-space:nowrap}
-.stat-label{color:var(--dim)}
-.stat-val{color:var(--text);font-weight:500}
-.stat-bar{width:50px;height:5px;background:var(--bg);border-radius:3px;overflow:hidden;flex-shrink:0}
-.stat-bar-fill{height:100%;border-radius:3px;transition:width .5s}
-.stat-bar-fill.green{background:var(--accent)}
-.stat-bar-fill.amber{background:var(--warn)}
-.stat-bar-fill.red{background:var(--danger)}
-.stat-sep{width:1px;height:14px;background:var(--border)}
-.model-badge{font-size:.65rem;padding:2px 6px;border-radius:4px;background:var(--accent-dim);color:var(--accent)}
-
+.empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--dim);font-size:.95rem;text-align:center;padding:16px}
 @media(max-width:768px){
   .main{flex-direction:column}
-  .left{width:100%;min-width:0;border-right:none;border-bottom:1px solid var(--border);max-height:50vh}
-  .right{min-height:35vh}
+  .left{flex:0 0 auto;flex-basis:auto!important;width:100%;min-width:0;border-bottom:1px solid var(--border);max-height:50vh}
+  .right{min-width:0;min-height:35vh}
+  .splitter{display:none}
 }
+  .cam-panel{min-height:260px}
 </style>
 </head>
 <body>
 
 <header>
-  <div class="logo">&#129302; Reachy Mini <span>Vision Chat</span> <span style="color:var(--dim);font-weight:400;font-size:.85rem">&mdash; on <span id="headerPlatform">Jetson</span></span></div>
+  <div class="logo">&#129302; Reachy Mini <span>Vision Chat</span> <span style="color:var(--dim);font-weight:400;font-size:.95rem">&mdash; on <span id="headerPlatform">Jetson</span></span></div>
   <div class="header-right">
     <span class="client-count" id="clientCount"></span>
     <span class="badge" id="platformBadge">Jetson</span>
@@ -175,7 +194,7 @@ footer{display:flex;align-items:center;gap:14px;padding:5px 20px;background:var(
 </header>
 
 <div class="main">
-  <!-- Left: camera + pipeline + system -->
+  <!-- Left: robot camera, face tracking, and resource metrics -->
   <div class="left">
     <div class="panel cam-panel">
       <div class="panel-hdr">
@@ -189,52 +208,6 @@ footer{display:flex;align-items:center;gap:14px;padding:5px 20px;background:var(
       </div>
       <div class="cam-info" id="camInfo">No frames yet</div>
     </div>
-
-    <div class="panel pipe-panel">
-      <div class="pipe-row">
-        <div class="pipe-stages" id="pipeStages">
-          <div class="stage active" data-stage="listening">&#127908; Listen</div>
-          <div class="stage" data-stage="transcribing">&#128221; STT</div>
-          <div class="stage" data-stage="thinking">&#129504; VLM</div>
-          <div class="stage" data-stage="speaking">&#128266; TTS</div>
-        </div>
-        <span class="pipe-status" id="pipeStatus">Muted</span>
-        <button class="ptt-btn muted" id="pttBtn" title="Toggle microphone">
-          <svg id="micIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/><line id="micSlash" x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="2.5"/></svg>
-          <span id="pttLabel">Unmute</span>
-        </button>
-      </div>
-      <div class="audio-route">
-        <label for="speakerSelect">Speaker</label>
-        <select class="speaker-select" id="speakerSelect" disabled>
-          <option>Detecting outputs...</option>
-        </select>
-        <span class="speaker-status" id="speakerStatus"></span>
-      </div>
-    </div>
-
-    <div class="panel sys-panel">
-      <div class="panel-hdr"><span>System</span></div>
-      <div class="sys-grid">
-        <span class="label">STT</span><span class="val" id="modelSTT">--</span>
-        <span class="label">Status</span><span class="val" id="robotConn">--</span>
-        <span class="label">VLM</span><span class="val" id="modelVLM">--</span>
-        <span class="label">Motors</span><span class="val" id="robotMotors">--</span>
-        <span class="label">TTS</span><span class="val" id="modelTTS">--</span>
-        <span class="label">Head</span><span class="val" id="robotHead">--</span>
-        <span class="label">VAD</span><span class="val" id="modelVAD">--</span>
-        <span class="label">Tracking</span><span class="val" id="robotTracking">--</span>
-      </div>
-    </div>
-
-    <div class="panel config-panel" id="configPanel" style="display:none">
-      <div class="panel-hdr"><span>Config</span></div>
-      <div class="config-grid" id="configGrid"></div>
-    </div>
-  </div>
-
-  <!-- Right: face tracking (top) + conversation (bottom) -->
-  <div class="right">
     <div class="panel face-panel">
       <div class="panel-hdr">
         <span>Face Tracking</span>
@@ -259,52 +232,122 @@ footer{display:flex;align-items:center;gap:14px;padding:5px 20px;background:var(
       </div>
     </div>
 
+    <div class="panel resource-panel">
+      <div class="panel-hdr"><span>System Resources</span></div>
+      <div class="resource-grid">
+        <div class="resource-stat">
+          <div class="resource-top">
+            <span class="resource-label">CPU</span>
+            <span class="resource-value" id="cpuVal">--%</span>
+          </div>
+          <div class="stat-bar"><div class="stat-bar-fill green" id="cpuBar" style="width:0%"></div></div>
+        </div>
+        <div class="resource-stat" id="gpuStat">
+          <div class="resource-top">
+            <span class="resource-label">GPU</span>
+            <span class="resource-value" id="gpuVal">--%</span>
+          </div>
+          <div class="stat-bar"><div class="stat-bar-fill green" id="gpuBar" style="width:0%"></div></div>
+        </div>
+        <div class="resource-stat">
+          <div class="resource-top">
+            <span class="resource-label">RAM</span>
+            <span class="resource-value" id="ramVal">--</span>
+          </div>
+          <div class="stat-bar"><div class="stat-bar-fill green" id="ramBar" style="width:0%"></div></div>
+        </div>
+        <div class="resource-stat platform-stat">
+          <div class="resource-top">
+            <span class="resource-label">Platform</span>
+            <span class="resource-value" id="platformFooter">Jetson</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="splitter" id="layoutSplitter" role="separator"
+    aria-label="Resize camera and controls" aria-orientation="vertical"
+    aria-valuemin="25" aria-valuemax="70" aria-valuenow="48"
+    tabindex="0" title="Drag to resize; double-click to reset"></div>
+
+
+  <!-- Right: pipeline controls, system details, and conversation -->
+  <div class="right">
+    <div class="panel pipe-panel">
+      <div class="pipe-row">
+        <div class="pipe-stages" id="pipeStages">
+          <div class="stage active" data-stage="listening">&#127908; Listen</div>
+          <div class="flow-step">
+            <span class="flow-arrow" aria-hidden="true">&#8594;</span>
+            <div class="stage" data-stage="transcribing">&#128221; STT</div>
+          </div>
+          <div class="flow-step">
+            <span class="flow-arrow" aria-hidden="true">&#8594;</span>
+            <div class="stage" data-stage="thinking">&#129504; VLM</div>
+          </div>
+          <div class="flow-step">
+            <span class="flow-arrow" aria-hidden="true">&#8594;</span>
+            <div class="stage" data-stage="speaking">&#128266; TTS</div>
+          </div>
+        </div>
+        <span class="pipe-status" id="pipeStatus" role="status" aria-live="polite">Connecting...</span>
+        <button class="ptt-btn live" id="pttBtn" title="Waiting for microphone state" aria-label="Microphone control" disabled>
+          <svg id="micIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/><line id="micSlash" x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="2.5"/></svg>
+          <span id="pttLabel">Connecting...</span>
+        </button>
+      </div>
+      <div class="audio-route">
+        <label for="speakerSelect">Speaker</label>
+        <select class="speaker-select" id="speakerSelect" disabled>
+          <option>Detecting outputs...</option>
+        </select>
+        <span class="speaker-status" id="speakerStatus"></span>
+      </div>
+      <div class="volume-route">
+        <label for="speakerVolume">Volume</label>
+        <button class="volume-btn" id="volumeDown" type="button" aria-label="Decrease speaker volume" disabled>&minus;</button>
+        <input class="volume-slider" id="speakerVolume" type="range" min="0" max="100" step="1" value="50" aria-label="Speaker volume" disabled>
+        <output class="volume-value" id="volumeValue" for="speakerVolume">--%</output>
+        <button class="volume-btn" id="volumeUp" type="button" aria-label="Increase speaker volume" disabled>+</button>
+      </div>
+    </div>
+
+    <div class="panel sys-panel">
+      <div class="panel-hdr"><span>System</span></div>
+      <div class="sys-grid">
+        <span class="label">STT</span><span class="val" id="modelSTT">--</span>
+        <span class="label">Status</span><span class="val" id="robotConn">--</span>
+        <span class="label">VLM</span><span class="val" id="modelVLM">--</span>
+        <span class="label">Motors</span><span class="val" id="robotMotors">--</span>
+        <span class="label">TTS</span><span class="val" id="modelTTS">--</span>
+        <span class="label">Head</span><span class="val" id="robotHead">--</span>
+        <span class="label">VAD</span><span class="val" id="modelVAD">--</span>
+        <span class="label">Tracking</span><span class="val" id="robotTracking">--</span>
+      </div>
+    </div>
+
     <div class="panel conv-panel">
       <div class="panel-hdr">
         <span>Conversation</span>
-        <span style="font-size:.7rem;color:var(--dim)" id="msgCount"></span>
+        <span style="font-size:.8rem;color:var(--dim)" id="msgCount"></span>
       </div>
       <div class="messages" id="messages">
         <div class="empty-state" id="emptyState">
           <div>Speak to Reachy Mini to start a conversation.</div>
-          <div style="font-size:.7rem;margin-top:6px;color:var(--dim)">The robot listens, sees via camera, and responds via VLM + TTS.</div>
+          <div style="font-size:.8rem;margin-top:6px;color:var(--dim)">The robot listens, sees via camera, and responds via VLM + TTS.</div>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<footer>
-  <div class="stat">
-    <span class="stat-label">CPU</span>
-    <div class="stat-bar"><div class="stat-bar-fill green" id="cpuBar" style="width:0%"></div></div>
-    <span class="stat-val" id="cpuVal">--%</span>
-  </div>
-  <div class="stat-sep"></div>
-  <div class="stat" id="gpuStat" style="display:none">
-    <span class="stat-label">GPU</span>
-    <div class="stat-bar"><div class="stat-bar-fill green" id="gpuBar" style="width:0%"></div></div>
-    <span class="stat-val" id="gpuVal">--%</span>
-  </div>
-  <div class="stat-sep" id="gpuSep" style="display:none"></div>
-  <div class="stat">
-    <span class="stat-label">RAM</span>
-    <div class="stat-bar"><div class="stat-bar-fill green" id="ramBar" style="width:0%"></div></div>
-    <span class="stat-val" id="ramVal">--</span>
-  </div>
-  <div class="stat-sep"></div>
-  <div class="stat">
-    <span class="stat-label">Platform</span>
-    <span class="model-badge" id="platformFooter">Jetson</span>
-  </div>
-</footer>
-
 <script>
 (function(){
   const $ = id => document.getElementById(id);
 
   let ws = null, frameCount = 0, msgIdx = 0, currentAssistant = null;
-  let reconnectTimer = null, pttActive = false, faceBoxTimer = null;
+  let reconnectTimer = null, pttActive = null, pipelineStage = 'connecting', faceBoxTimer = null;
   const camNatural = {w:640, h:480};
   let lastFaceBox = null, lastCentered = false, trackingEnabled = false;
   let faceHoldTimer = null;
@@ -323,7 +366,17 @@ footer{display:flex;align-items:center;gap:14px;padding:5px 20px;background:var(
       $('connStatus').className = 'conn-status err';
       $('connStatus').innerHTML = '<span class="conn-dot"></span> Disconnected';
       $('liveBadge').className = 'live-badge off';
+      pttActive = null;
+      pipelineStage = 'connecting';
+      renderPipelineStatus();
+      $('pttBtn').disabled = true;
+      $('pttBtn').className = 'ptt-btn live';
+      $('pttBtn').title = 'Waiting for microphone state';
+      $('pttLabel').textContent = 'Connecting...';
+      $('micSlash').style.display = 'none';
       $('speakerSelect').disabled = true;
+      setVolumeControls(false);
+      $('volumeValue').textContent = '--%';
       $('speakerStatus').textContent = 'Offline';
       reconnectTimer = setTimeout(connect, 3000);
     };
@@ -471,11 +524,32 @@ footer{display:flex;align-items:center;gap:14px;padding:5px 20px;background:var(
   }
 
   /* ── Pipeline / transcript / chat ── */
+  function renderPipelineStatus(){
+    let stage = pipelineStage;
+    if(pttActive === false && (stage === 'connecting' || stage === 'muted' || stage === 'listening' || stage === 'recording')){
+      stage = 'muted';
+    } else if(pttActive === true && (stage === 'connecting' || stage === 'muted')){
+      stage = 'listening';
+    }
+
+    const labels = {
+      connecting:'Connecting...', muted:'Mic muted', listening:'Listening...',
+      recording:'Recording...', transcribing:'Transcribing...',
+      thinking:'Thinking...', speaking:'Speaking...'
+    };
+    const status = $('pipeStatus');
+    status.textContent = labels[stage] || stage;
+    status.className = 'pipe-status ' + (
+      stage === 'muted' ? 'muted' : stage === 'listening' ? 'live' :
+      stage === 'connecting' ? '' : 'busy'
+    );
+  }
+
   function onStatus(msg){
-    const stages = $('pipeStages').children;
+    const stages = $('pipeStages').querySelectorAll('.stage');
     for(let s of stages) s.classList.toggle('active', s.dataset.stage === msg.stage);
-    const labels = {muted:'Muted', listening:'Listening...', recording:'Recording...', transcribing:'Transcribing...', thinking:'Thinking...', speaking:'Speaking...'};
-    $('pipeStatus').textContent = labels[msg.stage] || msg.stage;
+    pipelineStage = msg.stage;
+    renderPipelineStatus();
   }
 
   function onTranscript(msg){
@@ -520,14 +594,22 @@ footer{display:flex;align-items:center;gap:14px;padding:5px 20px;background:var(
 
   /* ── Stats / Robot / Info ────── */
   function onStats(msg){
-    setBar('cpu', msg.cpu);
-    const rp = msg.ram_total ? (msg.ram_used/msg.ram_total*100) : 0;
-    $('ramBar').style.width = rp.toFixed(0)+'%';
-    barColor($('ramBar'), rp);
-    $('ramVal').textContent = msg.ram_used.toFixed(1)+' / '+msg.ram_total.toFixed(1)+' GB';
-    if(msg.gpu != null){ $('gpuStat').style.display=''; $('gpuSep').style.display=''; setBar('gpu', msg.gpu); }
+    if(Number.isFinite(msg.cpu)) setBar('cpu', msg.cpu);
+    if(Number.isFinite(msg.gpu)) setBar('gpu', msg.gpu);
+    if(Number.isFinite(msg.ram_used) && Number.isFinite(msg.ram_total) && msg.ram_total > 0){
+      const ramPercent=msg.ram_used/msg.ram_total*100;
+      $('ramBar').style.width=Math.min(100, ramPercent).toFixed(0)+'%';
+      barColor($('ramBar'), ramPercent);
+      $('ramVal').textContent=msg.ram_used.toFixed(1)+' / '+msg.ram_total.toFixed(1)+' GB';
+      $('ramVal').title=$('ramVal').textContent;
+    }
     if(msg.models) updateModels(msg.models);
-    if(msg.platform){ $('platformBadge').textContent=msg.platform; $('headerPlatform').textContent=msg.platform; }
+    if(msg.platform){
+      $('platformBadge').textContent=msg.platform;
+      $('platformFooter').textContent=msg.platform;
+      $('platformFooter').title=msg.platform;
+      $('headerPlatform').textContent=msg.platform;
+    }
     if(msg.clients != null) $('clientCount').textContent = msg.clients+' viewer'+(msg.clients!==1?'s':'');
   }
 
@@ -556,18 +638,7 @@ footer{display:flex;align-items:center;gap:14px;padding:5px 20px;background:var(
 
   function onInfo(msg){
     if(msg.models) updateModels(msg.models);
-    if(msg.platform){ $('platformBadge').textContent=msg.platform; $('platformFooter').textContent=msg.platform; $('headerPlatform').textContent=msg.platform; }
-    if(msg.config) updateConfig(msg.config);
-  }
-
-  function updateConfig(cfg){
-    const g = $('configGrid'); g.innerHTML = '';
-    const items = [['Max Tokens',cfg.max_tokens],['Temperature',cfg.temperature],['Resolution',cfg.resolution],
-      ['JPEG Quality',cfg.jpeg_quality],['VLM Frames',cfg.vision_frames],['Capture FPS',cfg.capture_fps],
-      ['UI FPS',cfg.ui_fps],['Beam Size',cfg.beam_size]];
-    if(cfg.silero_threshold != null) items.push(['Silero Thresh', cfg.silero_threshold]);
-    for(const [l,v] of items){ if(v==null) continue; g.innerHTML += `<span class="label">${l}</span><span class="val">${v}</span>`; }
-    $('configPanel').style.display = '';
+    if(msg.platform){ $('platformBadge').textContent=msg.platform; $('platformFooter').textContent=msg.platform; $('platformFooter').title=msg.platform; $('headerPlatform').textContent=msg.platform; }
   }
 
   function updateModels(m){
@@ -578,14 +649,29 @@ footer{display:flex;align-items:center;gap:14px;padding:5px 20px;background:var(
   }
 
   function onPttState(msg){
-    pttActive = msg.active;
+    pttActive = Boolean(msg.active);
     const btn=$('pttBtn'), lbl=$('pttLabel'), slash=$('micSlash');
-    if(pttActive){ btn.className='ptt-btn live'; lbl.textContent='Mute'; slash.style.display='none'; }
-    else { btn.className='ptt-btn muted'; lbl.textContent='Unmute'; slash.style.display=''; }
+    btn.disabled=false;
+    if(pttActive){
+      btn.className='ptt-btn live';
+      btn.title='Mute the microphone';
+      btn.setAttribute('aria-label', 'Mute microphone');
+      btn.setAttribute('aria-pressed', 'false');
+      lbl.textContent='Mute mic';
+      slash.style.display='none';
+    } else {
+      btn.className='ptt-btn muted';
+      btn.title='Unmute the microphone';
+      btn.setAttribute('aria-label', 'Unmute microphone');
+      btn.setAttribute('aria-pressed', 'true');
+      lbl.textContent='Unmute mic';
+      slash.style.display='';
+    }
+    renderPipelineStatus();
   }
 
   function onSpeakerState(msg){
-    const select=$('speakerSelect'), status=$('speakerStatus');
+    const select=$('speakerSelect'), status=$('speakerStatus'), volume=$('speakerVolume');
     const speakers=Array.isArray(msg.speakers) ? msg.speakers : [];
     select.replaceChildren();
 
@@ -594,6 +680,8 @@ footer{display:flex;align-items:center;gap:14px;padding:5px 20px;background:var(
       option.textContent='No speaker outputs found';
       select.appendChild(option);
       select.disabled=true;
+      setVolumeControls(false);
+      $('volumeValue').textContent='--%';
       status.textContent=msg.error || '';
       status.className='speaker-status err';
       return;
@@ -607,22 +695,102 @@ footer{display:flex;align-items:center;gap:14px;padding:5px 20px;background:var(
       select.appendChild(option);
     }
     select.disabled=false;
+    if(Number.isFinite(msg.volume)){
+      const value=clampVolume(msg.volume);
+      volume.value=value;
+      $('volumeValue').textContent=value+'%';
+      setVolumeControls(true);
+    } else {
+      setVolumeControls(false);
+      $('volumeValue').textContent='--%';
+    }
     status.textContent=msg.error || (msg.aec_enabled ? 'AEC Active' : 'Direct');
     status.className='speaker-status' + (msg.error ? ' err' : '');
   }
 
   $('pttBtn').addEventListener('click', function(){
-    if(!ws || ws.readyState !== WebSocket.OPEN) return;
+    if(!ws || ws.readyState !== WebSocket.OPEN || pttActive === null) return;
+    this.disabled=true;
     ws.send(JSON.stringify({type:'ptt', active:!pttActive}));
   });
 
   $('speakerSelect').addEventListener('change', function(){
     if(!ws || ws.readyState !== WebSocket.OPEN) return;
     this.disabled=true;
+    setVolumeControls(false);
     $('speakerStatus').textContent='Switching...';
     $('speakerStatus').className='speaker-status';
     ws.send(JSON.stringify({type:'set_speaker', sink:this.value}));
   });
+
+  let volumeTimer=null;
+  function clampVolume(value){ return Math.max(0, Math.min(100, Math.round(Number(value)||0))); }
+  function setVolumeControls(enabled){
+    $('speakerVolume').disabled=!enabled;
+    $('volumeDown').disabled=!enabled;
+    $('volumeUp').disabled=!enabled;
+  }
+  function sendVolume(value){
+    if(!ws || ws.readyState !== WebSocket.OPEN) return;
+    ws.send(JSON.stringify({type:'set_speaker_volume', volume:clampVolume(value)}));
+  }
+  function setVolumeFromUi(value, sendNow){
+    const volume=clampVolume(value);
+    $('speakerVolume').value=volume;
+    $('volumeValue').textContent=volume+'%';
+    if(volumeTimer){ clearTimeout(volumeTimer); volumeTimer=null; }
+    if(sendNow) sendVolume(volume);
+    else volumeTimer=setTimeout(()=>{ volumeTimer=null; sendVolume(volume); }, 100);
+  }
+  $('speakerVolume').addEventListener('input', function(){ setVolumeFromUi(this.value, false); });
+  $('speakerVolume').addEventListener('change', function(){ setVolumeFromUi(this.value, true); });
+  $('volumeDown').addEventListener('click', ()=>setVolumeFromUi(Number($('speakerVolume').value)-5, true));
+  $('volumeUp').addEventListener('click', ()=>setVolumeFromUi(Number($('speakerVolume').value)+5, true));
+
+  /* ── Resizable camera/control split ── */
+  const splitKey='reachy-layout-split';
+  const splitter=$('layoutSplitter'), leftPane=document.querySelector('.left'), main=document.querySelector('.main');
+  function setSplit(percent, persist){
+    if(window.innerWidth <= 768) return;
+    const width=main.getBoundingClientRect().width;
+    const splitterWidth=splitter.getBoundingClientRect().width;
+    const minPercent=Math.max(25, 260/width*100);
+    const maxPercent=Math.min(70, (width-340-splitterWidth)/width*100);
+    const value=Math.max(minPercent, Math.min(maxPercent, Number(percent)||48));
+    leftPane.style.flexBasis=value+'%';
+    splitter.setAttribute('aria-valuenow', Math.round(value));
+    if(persist) localStorage.setItem(splitKey, value.toFixed(2));
+  }
+  function splitFromPointer(event){
+    const bounds=main.getBoundingClientRect();
+    setSplit((event.clientX-bounds.left)/bounds.width*100, true);
+  }
+  splitter.addEventListener('pointerdown', event=>{
+    splitter.setPointerCapture(event.pointerId);
+    splitter.classList.add('dragging');
+    document.body.classList.add('resizing');
+    splitFromPointer(event);
+  });
+  splitter.addEventListener('pointermove', event=>{
+    if(splitter.hasPointerCapture(event.pointerId)) splitFromPointer(event);
+  });
+  function endSplit(event){
+    if(splitter.hasPointerCapture(event.pointerId)) splitter.releasePointerCapture(event.pointerId);
+    splitter.classList.remove('dragging');
+    document.body.classList.remove('resizing');
+  }
+  splitter.addEventListener('pointerup', endSplit);
+  splitter.addEventListener('pointercancel', endSplit);
+  splitter.addEventListener('dblclick', ()=>setSplit(48, true));
+  splitter.addEventListener('keydown', event=>{
+    if(event.key!=='ArrowLeft' && event.key!=='ArrowRight') return;
+    event.preventDefault();
+    const current=parseFloat(leftPane.style.flexBasis)||48;
+    setSplit(current+(event.key==='ArrowRight'?2:-2), true);
+  });
+  const savedSplit=parseFloat(localStorage.getItem(splitKey));
+  setSplit(Number.isFinite(savedSplit) ? savedSplit : 48, false);
+  window.addEventListener('resize', ()=>setSplit(parseFloat(leftPane.style.flexBasis)||48, false));
 
   /* ── Drawing helpers ───────────── */
   function drawFaceBox(box, centered){
@@ -663,11 +831,19 @@ footer{display:flex;align-items:center;gap:14px;padding:5px 20px;background:var(
     if(faceBoxTimer){ clearTimeout(faceBoxTimer); faceBoxTimer=null; }
   }
 
-  function setBar(p, pct){ const b=$(p+'Bar'); b.style.width=pct.toFixed(0)+'%'; barColor(b,pct); $(p+'Val').textContent=pct.toFixed(0)+'%'; }
-  function barColor(el, pct){ el.className='stat-bar-fill '+(pct>90?'red':pct>70?'amber':'green'); }
   function scrollChat(){ const m=$('messages'); m.scrollTop=m.scrollHeight; }
   function hideEmpty(){ const e=$('emptyState'); if(e) e.remove(); }
   function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+  function setBar(prefix, percent){
+    const value=Math.max(0, Math.min(100, Number(percent)));
+    const bar=$(prefix+'Bar');
+    bar.style.width=value.toFixed(0)+'%';
+    barColor(bar, value);
+    $(prefix+'Val').textContent=value.toFixed(0)+'%';
+  }
+  function barColor(element, percent){
+    element.className='stat-bar-fill '+(percent>90?'red':percent>70?'amber':'green');
+  }
   function updateMsgCount(){ $('msgCount').textContent=msgIdx+' message'+(msgIdx!==1?'s':''); }
 
   connect();

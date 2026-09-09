@@ -80,7 +80,7 @@ vision:
   capture_fps: 10.0                   # shared camera capture rate (frames/sec)
   system_prompt: |
     You are Reachy Mini, a friendly robot made by Pollen Robotics, running on an NVIDIA Jetson Orin Nano.
-    You use the Cosmos Reason2 vision-language model for understanding what you see.
+    You use a local vision-language model for understanding what you see.
     An image is always attached. Only use the image when the user asks about what you see, colors, objects, or the scene.
     Otherwise ignore the image completely and respond naturally.
     Answer in one short sentence. No markdown or formatting.
@@ -106,11 +106,12 @@ reachy:
   automatic_body_yaw: false           # app owns body yaw; prevents SDK IK from exceeding app limits
   wake_on_start: true                 # call wake_up() on fresh daemon start
   sleep_on_exit: true                 # call goto_sleep() on exit (blocks ~4s)
-  antenna_rest_position: [0.0, 0.0]   # antenna target after wake-up
+  antenna_rest_position: [-0.1745, 0.1745] # ~10 deg bias avoids idle gearbox-backlash shake
   daemon_retry_attempts: 3            # connection retries
   daemon_startup_wait: 15.0           # seconds to wait before retry
   # Face tracking — quickly frame a face, then hold still for stable VLM images.
   face_tracking: true                 # set false to disable face tracking
+  tracking_motion_enabled: true       # false keeps face telemetry but sends no motor commands
   tracking_fps: 15.0                  # high-rate detection + control loop (Hz)
   tracking_dead_zone: 0.12            # normalized error below which the face is near center
   tracking_lock_zone: 0.18            # freeze once face is inside the central 18% normalized offset
@@ -138,8 +139,8 @@ reachy:
   tracking_scan_speed_deg_per_sec: 5.0 # slow head sweep; body scans at 35% of this speed
   tracking_capture_settle_secs: 0.35  # freeze motion this long before VLM image capture
   tracking_capture_acquire_timeout_secs: 0.4 # max wait for a stable face before VLM capture
-  # Speaking personality — one short official Pollen gesture per TTS reply.
-  speaking_movements_enabled: true    # starts only when the first playable TTS audio begins
+  # Speaking gestures are opt-in so the robot remains still between tracking corrections.
+  speaking_movements_enabled: false
   speaking_movement_excitement_probability: 0.4 # 40% energetic, 60% friendly/interactive
 
 web:

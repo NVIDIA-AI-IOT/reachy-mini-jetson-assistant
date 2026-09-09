@@ -11,16 +11,14 @@ psutil>=5.9.0
 # Audio I/O
 sounddevice>=0.4.6
 
-# VAD — Silero neural voice activity detection (much better than energy-only)
-silero-vad>=5.1
-
 # LLM client (OpenAI-compatible API)
 httpx>=0.24.0
 
-# STT — faster-whisper (requires CTranslate2 with CUDA, see README)
-faster-whisper>=1.0.0
+# STT + VAD model asset — requires CUDA CTranslate2, see the JP7.2 guide
+# Pin because app.pipeline uses the bundled Silero v6 streaming ONNX interface.
+faster-whisper==1.2.1
 
-# TTS — Kokoro (GPU via ONNX Runtime, runs in subprocess for GPL isolation)
+# TTS — Kokoro (GPU via ONNX Runtime; see README license notes)
 kokoro-onnx>=0.4.0
 
 # Face tracking — YuNet face detection via OpenCV (cv2.FaceDetectorYN)
@@ -41,5 +39,6 @@ uvicorn>=0.24.0
 
 # Jetson-specific GPU runtimes (install separately):
 #   JetPack 6: pip install onnxruntime-gpu --extra-index-url https://pypi.jetson-ai-lab.io/jp6/cu126
-#   JetPack 7.2: build CTranslate2 and ONNX Runtime for CUDA 13.2/sm_87;
-#                 see docs/JETPACK_7_2_SETUP.md
+#   JetPack 7.2: run scripts/setup_jetson.sh for exact manifest selection,
+#                 checksum verification, and GPU validation; source-build
+#                 fallback is documented in docs/JETPACK_7_2_SETUP.md

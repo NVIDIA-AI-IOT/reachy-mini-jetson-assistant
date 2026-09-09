@@ -1,0 +1,19 @@
+{
+  "created": "2026-09-09T00:59:00Z",
+  "platform_id": "jp72-l4t39.2-cu13.2-py3.12-sm87",
+  "ctranslate2_version": "4.8.1+reachy.jp72.cu132.sm87",
+  "ctranslate2_cuda_devices": 1,
+  "onnxruntime_version": "1.28.0+reachy.jp72.cu132.sm87",
+  "onnxruntime_providers": [
+    "CUDAExecutionProvider",
+    "CPUExecutionProvider"
+  ],
+  "onnxruntime_output_device": "cuda",
+  "onnxruntime_output_shape": [
+    1,
+    8,
+    32,
+    32
+  ],
+  "passed": true
+}

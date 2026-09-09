@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright (c) 2023-2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
 # JetPack 7.2 software bring-up overlay.
 # Select with:
 #   REACHY_ASSISTANT_CONFIG=config/settings.jp72-no-reachy.yaml python3 run_voice_chat.py --no-rag

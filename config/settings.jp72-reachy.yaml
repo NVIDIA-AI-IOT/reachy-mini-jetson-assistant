@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright (c) 2023-2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
 # Optional conservative hardware bring-up overlay for JetPack 7.2.
 # The base config already defaults to JetPack 7.2. Use this profile to disable
 # body assist and scanning during initial connected-Reachy validation.
@@ -17,11 +20,20 @@ reachy:
   wake_on_start: true
   sleep_on_exit: true
   face_tracking: true
-  # Keep initial hardware validation conservative: head tracking is enabled,
-  # but body scanning/assistance is disabled until the complete flow passes.
+  # Keep face detection/dashboard telemetry active without driving the motors.
+  tracking_motion_enabled: false
+  # Faster head-only visual tracking for Orin Nano. The camera remains at the
+  # base 10 FPS; larger bounded corrections improve motion without repeatedly
+  # processing duplicate frames or changing the conservative travel limits.
+  tracking_head_yaw_gain: 24.0
+  tracking_head_yaw_step: 2.0
+  tracking_soft_center_head_yaw_step: 1.1
+  tracking_pose_smoothing: 0.28
+  # Motion tuning remains available for opt-in tracking, but body scanning and
+  # assistance stay disabled for conservative hardware operation.
   tracking_body_enabled: false
   tracking_scan_enabled: false
-  speaking_movements_enabled: true
+  speaking_movements_enabled: false
 
 rag:
   enabled: false

@@ -1,0 +1,71 @@
+captured_utc=2026-09-09T00:31:30Z
+uname=Linux localhost.localdomain 6.8.12-1021-tegra #1 SMP PREEMPT Mon Jun  1 13:25:46 PDT 2026 aarch64 aarch64 aarch64 GNU/Linux
+machine=aarch64
+python=Python 3.12.3
+
+[os-release]
+PRETTY_NAME="Ubuntu 24.04.4 LTS"
+NAME="Ubuntu"
+VERSION_ID="24.04"
+VERSION="24.04.4 LTS (Noble Numbat)"
+VERSION_CODENAME=noble
+ID=ubuntu
+ID_LIKE=debian
+HOME_URL="https://www.ubuntu.com/"
+SUPPORT_URL="https://help.ubuntu.com/"
+BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
+PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
+UBUNTU_CODENAME=noble
+LOGO=ubuntu-logo
+
+[l4t]
+# R39 (release), REVISION: 2.0, GCID: 45755727, BOARD: generic, EABI: aarch64, DATE: Mon Jun  1 09:28:48 PM UTC 2026
+# KERNEL_VARIANT: oot
+TARGET_USERSPACE_LIB_DIR=nvidia
+TARGET_USERSPACE_LIB_DIR_PATH=usr/lib/aarch64-linux-gnu/nvidia
+
+[device]
+NVIDIA Jetson Orin Nano Engineering Reference Developer Kit Super
+
+[cuda]
+nvcc: NVIDIA (R) Cuda compiler driver
+Copyright (c) 2005-2026 NVIDIA Corporation
+Built on Thu_Mar_19_11:11:41_PM_PDT_2026
+Cuda compilation tools, release 13.2, V13.2.78
+Build cuda_13.2.r13.2/compiler.37668154_0
+
+[compilers]
+gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+GNU ld (GNU Binutils for Ubuntu) 2.42
+cmake version 3.28.3
+1.11.1
+ldd (Ubuntu GLIBC 2.39-0ubuntu8.7) 2.39
+
+[python-build-tools]
+Name: pip
+Version: 26.2.1
+Name: setuptools
+Version: 84.0.0
+Name: wheel
+Version: 0.48.0
+Name: build
+Version: 1.5.0
+Name: pybind11
+Version: 3.1.0
+Name: numpy
+Version: 2.5.2
+
+[jetpack-runtime-packages]
+cuda-cudart-13-2	13.2.75-1
+cuda-toolkit-13-2	13.2.1-1
+libcublas-13-2	13.4.0.1-1
+libcudnn9-cuda-13	9.20.0.46-1
+libcudnn9-dev-cuda-13	9.20.0.46-1
+nvidia-l4t-core	39.2.0-20260601141651
+
+[power-mode-capture]
+NV Power Mode: MAXN_SUPER
+2
+SOC family:tegra234  Machine:NVIDIA Jetson Orin Nano Engineering Reference Developer Kit Super
+Error: Run this script(/usr/bin/jetson_clocks) as a root user

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright (c) 2023-2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
 from pathlib import Path
 
 from app.config import Config
@@ -17,6 +20,7 @@ def test_default_config_targets_jetpack_72(monkeypatch):
     assert config.audio.input_device == "Reachy Mini Audio"
     assert config.audio.output_device == "Reachy Mini Audio"
     assert config.reachy.enabled is True
+    assert config.reachy.antenna_rest_position == [-0.1745, 0.1745]
 
 
 def test_jetpack_6_overlay_restores_legacy_runtime():
@@ -45,8 +49,10 @@ def test_conservative_reachy_overlay_limits_motion():
 
     assert config.stt.compute_type == "float16"
     assert config.reachy.enabled is True
+    assert config.reachy.tracking_motion_enabled is False
     assert config.reachy.tracking_body_enabled is False
     assert config.reachy.tracking_scan_enabled is False
+    assert config.reachy.speaking_movements_enabled is False
 
 
 def test_environment_selects_overlay(monkeypatch):

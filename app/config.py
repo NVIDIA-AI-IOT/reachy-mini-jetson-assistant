@@ -97,10 +97,13 @@ class ReachyConfig:
     automatic_body_yaw: bool = False
     wake_on_start: bool = True
     sleep_on_exit: bool = False
-    antenna_rest_position: List[float] = field(default_factory=lambda: [0.0, 0.0])
+    antenna_rest_position: List[float] = field(
+        default_factory=lambda: [-0.1745, 0.1745]
+    )
     daemon_retry_attempts: int = 3
     daemon_startup_wait: float = 15.0
     face_tracking: bool = True
+    tracking_motion_enabled: bool = True
     tracking_fps: float = 15.0
     tracking_dead_zone: float = 0.12
     tracking_lock_zone: float = 0.18

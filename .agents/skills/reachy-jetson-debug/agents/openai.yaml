@@ -1,0 +1,7 @@
+# SPDX-FileCopyrightText: Copyright (c) 2023-2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+interface:
+  display_name: "Reachy Jetson Debug"
+  short_description: "Diagnose Reachy pipeline failures safely"
+  default_prompt: "Use $reachy-jetson-debug to diagnose this Reachy assistant failure."

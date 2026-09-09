@@ -179,6 +179,7 @@ def main():
             console.print(f"  ✓ Face detection ({face_detector.backend})")
             movement_manager = MovementManager(
                 reachy,
+                antenna_rest_position=config.reachy.antenna_rest_position,
                 pose_smoothing=config.reachy.tracking_pose_smoothing,
                 pose_max_step_deg=config.reachy.tracking_pose_max_step_deg,
             )
@@ -195,6 +196,7 @@ def main():
                 min_face_size=config.reachy.tracking_min_face_size,
                 stable_frames=config.reachy.tracking_stable_frames,
                 face_lost_delay=config.reachy.tracking_face_lost_delay,
+                motion_enabled=config.reachy.tracking_motion_enabled,
                 head_yaw_max_deg=config.reachy.tracking_head_yaw_max_deg,
                 head_yaw_gain=config.reachy.tracking_head_yaw_gain,
                 head_yaw_step=config.reachy.tracking_head_yaw_step,
@@ -212,7 +214,10 @@ def main():
                 scan_speed_deg_per_sec=config.reachy.tracking_scan_speed_deg_per_sec,
             )
             face_tracker.start()
-            console.print(f"  ✓ Face tracking ({config.reachy.tracking_fps:.0f} Hz)")
+            if config.reachy.tracking_motion_enabled:
+                console.print(f"  ✓ Face tracking ({config.reachy.tracking_fps:.0f} Hz)")
+            else:
+                console.print("  ✓ Face detection telemetry (head motion disabled)")
         else:
             console.print("  ⚠ Face detector unavailable")
             face_detector = None

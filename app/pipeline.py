@@ -157,6 +157,26 @@ def get_default_pa_sink() -> Optional[str]:
         return None
 
 
+def get_pa_sink_volume(sink_name: str) -> Optional[int]:
+    """Return the average PulseAudio sink volume as a percentage."""
+    try:
+        r = subprocess.run(
+            ["pactl", "get-sink-volume", sink_name],
+            capture_output=True, text=True, timeout=5,
+        )
+        if r.returncode != 0:
+            return None
+        percentages = []
+        for token in r.stdout.replace("/", " ").replace(",", " ").split():
+            if token.endswith("%") and token[:-1].isdigit():
+                percentages.append(int(token[:-1]))
+        if percentages:
+            return round(sum(percentages) / len(percentages))
+    except Exception:
+        pass
+    return None
+
+
 class SpeakerSelector:
     """Thread-safe, live-selectable PulseAudio output routing."""
 
@@ -192,10 +212,15 @@ class SpeakerSelector:
             return self._state_unlocked()
 
     def _state_unlocked(self) -> dict:
-        return {
+        state = {
             "speakers": [dict(speaker) for speaker in self._speakers],
             "selected": self._sink,
         }
+        if self._sink:
+            volume = get_pa_sink_volume(self._sink)
+            if volume is not None:
+                state["volume"] = volume
+        return state
 
     def state(self) -> dict:
         return self.refresh()
@@ -230,6 +255,31 @@ class SpeakerSelector:
             self._speakers = speakers
             self._sink = sink_id
             return self._state_unlocked()
+
+    def set_volume(self, volume: int) -> dict:
+        """Set the selected physical sink volume and return refreshed state."""
+        volume = max(0, min(100, int(volume)))
+        sink_id = self.get_sink()
+        if not sink_id:
+            state = self.refresh()
+            state["error"] = "No speaker output is selected"
+            return state
+
+        try:
+            result = subprocess.run(
+                ["pactl", "set-sink-volume", sink_id, f"{volume}%"],
+                capture_output=True, text=True, timeout=5,
+            )
+            if result.returncode != 0:
+                state = self.refresh()
+                state["error"] = result.stderr.strip() or "Could not set speaker volume"
+                return state
+        except Exception as exc:
+            state = self.refresh()
+            state["error"] = str(exc)
+            return state
+
+        return self.refresh()
 
 
 class PulseAudioAEC:
@@ -392,26 +442,56 @@ def tts_player(
 # ── Silero VAD ────────────────────────────────────────────────────
 
 class SileroVAD:
-    """Thin wrapper around the Silero VAD ONNX model."""
+    """Stateful streaming wrapper for faster-whisper's Silero VAD model."""
 
     def __init__(self):
-        from silero_vad import load_silero_vad
-        import torch
-        self._model = load_silero_vad(onnx=True)
-        self._torch = torch
+        import onnxruntime as ort
+        from faster_whisper.utils import get_assets_path
+
+        model_path = Path(get_assets_path()) / "silero_vad_v6.onnx"
+        if not model_path.is_file():
+            raise RuntimeError(
+                f"faster-whisper does not contain {model_path.name}; "
+                "install faster-whisper==1.2.1"
+            )
+
+        session_options = ort.SessionOptions()
+        session_options.inter_op_num_threads = 1
+        session_options.intra_op_num_threads = 1
+        session_options.enable_cpu_mem_arena = False
+        session_options.log_severity_level = 4
+        self._session = ort.InferenceSession(
+            str(model_path),
+            sess_options=session_options,
+            providers=["CPUExecutionProvider"],
+        )
+        self.reset()
 
     def __call__(self, raw_audio: bytes) -> float:
         """Return speech probability for raw int16 PCM audio at 16 kHz."""
         pcm = np.frombuffer(raw_audio, dtype=np.int16).astype(np.float32) / 32768.0
-        tensor = self._torch.from_numpy(pcm)
-        return self._model(tensor, SAMPLE_RATE).item()
+        if pcm.size != SILERO_CHUNK_SAMPLES:
+            raise ValueError(
+                f"Silero VAD expects {SILERO_CHUNK_SAMPLES} samples, got {pcm.size}"
+            )
+
+        frame = pcm.reshape(1, -1)
+        model_input = np.concatenate((self._context, frame), axis=1)
+        output, self._h, self._c = self._session.run(
+            ["speech_probs", "hn", "cn"],
+            {"input": model_input, "h": self._h, "c": self._c},
+        )
+        self._context = model_input[:, -64:]
+        return float(output.reshape(-1)[0])
 
     def reset(self):
-        self._model.reset_states()
+        self._h = np.zeros((1, 1, 128), dtype=np.float32)
+        self._c = np.zeros((1, 1, 128), dtype=np.float32)
+        self._context = np.zeros((1, 64), dtype=np.float32)
 
 
 def load_silero(console: Optional[Console] = None) -> SileroVAD:
-    """Load Silero VAD. Raises if unavailable (silero-vad is required)."""
+    """Load the Silero ONNX model bundled with faster-whisper."""
     t0 = time.perf_counter()
     vad = SileroVAD()
     dt = time.perf_counter() - t0
@@ -634,6 +714,16 @@ class MicRecorder:
             state["error"] = "Could not restart microphone after speaker switch"
         return self._add_aec_state(state)
 
+    def set_speaker_volume(self, volume: int) -> dict:
+        if not self.speaker_selector:
+            return {
+                "speakers": [],
+                "selected": None,
+                "aec_enabled": False,
+                "error": "Speaker routing is not initialized",
+            }
+        return self._add_aec_state(self.speaker_selector.set_volume(volume))
+
     def _reader(self, proc: subprocess.Popen):
         while self.alive and proc.poll() is None:
             raw = proc.stdout.read(self.chunk_bytes)
@@ -688,7 +778,7 @@ def vad_loop(
     each segment (so audio stays paused during STT/LLM/TTS).
     """
     if silero is None:
-        raise RuntimeError("Silero VAD is required (pip install silero-vad)")
+        raise RuntimeError("Silero VAD is required (installed with faster-whisper)")
 
     cfg = vad_cfg or VADConfig()
     chunk_ms = cfg.chunk_ms

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright (c) 2023-2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
 # Legacy JetPack 6 compatibility overlay.
 # Select with:
 #   REACHY_ASSISTANT_CONFIG=config/settings.jp6.yaml python3 run_web_vision_chat.py

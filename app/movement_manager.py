@@ -11,7 +11,7 @@ priority and continues to follow the person throughout the gesture.
 from collections import deque
 import threading
 import time
-from typing import Optional
+from typing import Optional, Sequence
 
 import numpy as np
 
@@ -36,7 +36,7 @@ _GESTURE_LEAVE_SECS = 0.65
 _FINAL_BODY_LIMIT_RAD = np.deg2rad(50.0)
 
 _NEUTRAL_HEAD = np.eye(4, dtype=np.float64)
-_NEUTRAL_ANTENNAS = np.array([0.0, 0.0], dtype=np.float64)
+_DEFAULT_ANTENNA_REST_POSITION = (-0.1745, 0.1745)
 
 
 class MovementManager:
@@ -46,6 +46,7 @@ class MovementManager:
         self,
         reachy,
         *,
+        antenna_rest_position: Sequence[float] = _DEFAULT_ANTENNA_REST_POSITION,
         pose_smoothing: float = 0.18,
         pose_max_step_deg: float = 6.0,
     ):
@@ -53,6 +54,12 @@ class MovementManager:
         self._pose_smoothing = max(0.01, min(1.0, pose_smoothing))
         self._pose_max_step_rad = np.deg2rad(max(0.5, pose_max_step_deg))
         self._lock = threading.Lock()
+        neutral_antennas = np.asarray(tuple(antenna_rest_position), dtype=np.float64)
+        if neutral_antennas.shape != (2,):
+            raise ValueError(
+                "antenna_rest_position must contain exactly two joint angles"
+            )
+        self._neutral_antennas = neutral_antennas.copy()
 
         # Face-tracking targets and smoothed current values, in degrees.
         self._t_body = 0.0
@@ -71,7 +78,7 @@ class MovementManager:
         self._gesture_current: Optional[Move] = None
         self._gesture_start = 0.0
         self._gesture_head = _NEUTRAL_HEAD.copy()
-        self._gesture_antennas = _NEUTRAL_ANTENNAS.copy()
+        self._gesture_antennas = self._neutral_antennas.copy()
         self._gesture_body = 0.0
 
         self._last_sent: Optional[tuple[float, float, float]] = None
@@ -151,7 +158,7 @@ class MovementManager:
                 start_head_pose=end_head,
                 target_head_pose=_NEUTRAL_HEAD.copy(),
                 start_antennas=np.asarray(end_antennas, dtype=np.float64),
-                target_antennas=_NEUTRAL_ANTENNAS.copy(),
+                target_antennas=self._neutral_antennas.copy(),
                 start_body_yaw=float(end_body),
                 target_body_yaw=0.0,
                 duration=_GESTURE_LEAVE_SECS,
@@ -169,7 +176,7 @@ class MovementManager:
             already_neutral = (
                 self._gesture_current is None
                 and np.allclose(self._gesture_head, _NEUTRAL_HEAD, atol=1e-4)
-                and np.allclose(self._gesture_antennas, _NEUTRAL_ANTENNAS, atol=1e-4)
+                and np.allclose(self._gesture_antennas, self._neutral_antennas, atol=1e-4)
                 and abs(self._gesture_body) < 1e-4
             )
             if already_neutral:
@@ -178,7 +185,7 @@ class MovementManager:
                 start_head_pose=self._gesture_head.copy(),
                 target_head_pose=_NEUTRAL_HEAD.copy(),
                 start_antennas=self._gesture_antennas.copy(),
-                target_antennas=_NEUTRAL_ANTENNAS.copy(),
+                target_antennas=self._neutral_antennas.copy(),
                 start_body_yaw=self._gesture_body,
                 target_body_yaw=0.0,
                 duration=_GESTURE_LEAVE_SECS,
@@ -278,7 +285,7 @@ class MovementManager:
                 return
 
         head = create_head_pose(yaw=c_body + c_yaw, pitch=c_pitch, degrees=True)
-        if self._send(head=head, antennas=_NEUTRAL_ANTENNAS, body_yaw=np.radians(c_body)):
+        if self._send(head=head, antennas=self._neutral_antennas, body_yaw=np.radians(c_body)):
             self._last_sent = pose
             self._last_sent_head_pose = None
             self._last_sent_version = target_version
@@ -303,7 +310,9 @@ class MovementManager:
             degrees=True,
         )
         final_head = compose_world_offset(expressive_head, face_offset)
-        final_antennas = gesture_antennas * gesture_scale
+        final_antennas = self._neutral_antennas + (
+            gesture_antennas - self._neutral_antennas
+        ) * gesture_scale
         final_body = gesture_body * gesture_scale + np.radians(tracking_body)
         final_body = float(np.clip(final_body, -_FINAL_BODY_LIMIT_RAD, _FINAL_BODY_LIMIT_RAD))
         self._send(head=final_head, antennas=final_antennas, body_yaw=final_body)
@@ -327,7 +336,7 @@ class MovementManager:
             and np.allclose(next_head_pose, self._last_sent_head_pose, atol=1e-3)
         ):
             return
-        if self._send(head=next_head_pose, antennas=_NEUTRAL_ANTENNAS):
+        if self._send(head=next_head_pose, antennas=self._neutral_antennas):
             self._c_head_pose = next_head_pose
             self._last_sent_head_pose = next_head_pose
             self._last_sent_version = target_version

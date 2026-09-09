@@ -1,10 +1,8 @@
 # Legacy JetPack 6 Setup Guide
 
-> JetPack 7.2 is now the default. New installations should use the
-> [JetPack 7.2 setup guide](docs/JETPACK_7_2_SETUP.md).
+> JetPack 7.2 is now the default. New installations should use the [JetPack 7.2 setup guide](docs/JETPACK_7_2_SETUP.md).
 
-These instructions retain the previous JetPack 6 / L4T r36 / Python 3.10
-installation path for existing deployments.
+These instructions retain the previous JetPack 6 / L4T r36 / Python 3.10 installation path for existing deployments.
 
 ## Prerequisites
 
@@ -258,18 +256,33 @@ kokoro-onnx: OK
 
 ## Select the JetPack 6 runtime
 
-The repository defaults now target JetPack 7.2. In every shell that launches
-the assistant or llama.cpp on JetPack 6, select the legacy configuration and
-r36/CUDA 12.6 container:
+The repository defaults now target JetPack 7.2. In every shell that launches the assistant or llama.cpp on JetPack 6, select the legacy configuration and r36/CUDA 12.6 container:
 
 ```bash
 export REACHY_ASSISTANT_CONFIG=config/settings.jp6.yaml
 export LLAMA_CPP_IMAGE=ghcr.io/nvidia-ai-iot/llama_cpp:b8095-r36.4-tegra-aarch64-cu126-22.04
 ```
 
-The JP6 overlay restores the previous CUDA `int8` STT compute type and Anker
-speaker preference. The normal web UI can then be launched with the same
-commands shown in the README. Keep these variables out of JP7.2 shells.
+The JP6 overlay restores the previous CUDA `int8` STT compute type and Anker speaker preference. Keep these variables out of JetPack 7.2 shells.
+
+### Launch the legacy web assistant
+
+Terminal 1 starts the JetPack 6 llama.cpp container with the VLM retained from the previous `main` setup:
+
+```bash
+export LLAMA_CPP_IMAGE=ghcr.io/nvidia-ai-iot/llama_cpp:b8095-r36.4-tegra-aarch64-cu126-22.04
+NP=1 ./run_llama_cpp.sh Kbenkhaled/Cosmos-Reason2-2B-GGUF:Q4_K_M
+```
+
+Terminal 2 starts the assistant with the legacy Python environment and config:
+
+```bash
+source venv/bin/activate
+export REACHY_ASSISTANT_CONFIG=config/settings.jp6.yaml
+python run_web_vision_chat.py
+```
+
+Stop the assistant with Ctrl-C so Reachy can return to sleep, then stop the model container separately with `docker stop assistant-llm`.
 
 ## Models
 
@@ -319,8 +332,7 @@ wget -O models/emotion/tokenizer.json \
 
 ## Troubleshooting
 
-**PyGObject fails to build while installing Reachy Mini:**
-Install the native Cairo and GObject development packages, then retry the SDK installation:
+**PyGObject fails to build while installing Reachy Mini:** Install the native Cairo and GObject development packages, then retry the SDK installation:
 
 ```bash
 sudo apt-get update
@@ -335,8 +347,7 @@ source venv/bin/activate
 pip install "reachy-mini==1.3.1"
 ```
 
-**CUDA or cuDNN is missing on a minimal-L4T installation:**
-Install the complete JetPack stack and reboot:
+**CUDA or cuDNN is missing on a minimal-L4T installation:** Install the complete JetPack stack and reboot:
 
 ```bash
 sudo apt-get update
@@ -344,8 +355,7 @@ sudo apt-get install -y nvidia-jetpack
 sudo reboot
 ```
 
-**CUDA is installed but `nvcc` is not on `PATH`:**
-Configure only the current shell until the installation path is verified:
+**CUDA is installed but `nvcc` is not on `PATH`:** Configure only the current shell until the installation path is verified:
 
 ```bash
 export CUDA_HOME=/usr/local/cuda
@@ -353,27 +363,21 @@ export PATH="$CUDA_HOME/bin:$PATH"
 export LD_LIBRARY_PATH="$CUDA_HOME/lib64:${LD_LIBRARY_PATH:-}"
 ```
 
-**`CUDAExecutionProvider` not available:**
-Uninstall CPU onnxruntime and reinstall the GPU version:
+**`CUDAExecutionProvider` not available:** Uninstall CPU onnxruntime and reinstall the GPU version:
 ```bash
 pip uninstall onnxruntime
 pip install onnxruntime-gpu --extra-index-url https://pypi.jetson-ai-lab.io/jp6/cu126
 ```
 
-**CTranslate2 not finding CUDA:**
-Make sure the library path is set: `export LD_LIBRARY_PATH=$HOME/.local/lib:$LD_LIBRARY_PATH`
+**CTranslate2 not finding CUDA:** Make sure the library path is set: `export LD_LIBRARY_PATH=$HOME/.local/lib:$LD_LIBRARY_PATH`
 
-**VLM server not responding:**
-Check the Docker container is running: `docker ps`. View logs: `docker logs assistant-llm`
+**VLM server not responding:** Check the Docker container is running: `docker ps`. View logs: `docker logs assistant-llm`
 
-**Process won't exit / robot stays awake after Ctrl+C:**
-The app handles Ctrl+C cleanly — the robot should go to sleep. If the process is stuck, run `pkill -9 -f run_web_vision_chat` and `pkill -f reachy-mini-daemon`.
+**Process won't exit / robot stays awake after Ctrl+C:** The app handles Ctrl+C cleanly — the robot should go to sleep. If the process is stuck, run `pkill -9 -f run_web_vision_chat` and `pkill -f reachy-mini-daemon`.
 
-**Port 8090 already in use:**
-A previous instance is still running. Kill it: `lsof -ti :8090 | xargs kill -9`
+**Port 8090 already in use:** A previous instance is still running. Kill it: `lsof -ti :8090 | xargs kill -9`
 
-**Camera not found:**
-Check the device is available: `ls /dev/video*`. If another process holds it: `fuser -k /dev/video0`
+**Camera not found:** Check the device is available: `ls /dev/video*`. If another process holds it: `fuser -k /dev/video0`
 
 ## Installation-Issue Validation
 

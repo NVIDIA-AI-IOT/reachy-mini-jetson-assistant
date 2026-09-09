@@ -2,18 +2,13 @@
 
 <p align="center">
   <a href="https://www.pollen-robotics.com/reachy-mini/"><img src="docs/images/reachy-icon.svg" alt="Reachy Mini Lite" height="180"/></a>
-  &nbsp;&nbsp;&nbsp;<b>x</b>&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;<b>x</b>&nbsp;&nbsp;&nbsp;
   <a href="https://developer.nvidia.com/embedded/jetson-orin-nano"><img src="docs/images/jetson-family.png" alt="NVIDIA Jetson" height="180"/></a>
 </p>
 
 A low-latency, fully on-device voice and vision assistant for [Reachy Mini Lite](https://www.pollen-robotics.com/reachy-mini/) powered by NVIDIA Jetson. Everything runs locally with GPU acceleration — no cloud, no API keys, no internet required at runtime.
 
-> **Default target:** Jetson Orin Nano 8GB on JetPack 7.2 / L4T r39,
-> Python 3.12, CUDA 13.2, and GPU architecture `sm_87`.
->
-> **Legacy target:** JetPack 6.x / L4T r36 and Python 3.10 remain supported.
->
-> AGX Orin and Thor support is planned — see [Roadmap](#roadmap).
+> **Default target:** Jetson Orin Nano 8GB on JetPack 7.2 / L4T r39, Python 3.12, CUDA 13.2, and GPU architecture `sm_87`. **Legacy target:** JetPack 6.x / L4T r36 and Python 3.10 remain supported. AGX Orin and Thor support is planned — see [Roadmap](#roadmap).
 
 ## What It Does
 
@@ -59,7 +54,7 @@ Face tracking and speaking movements are configurable under the `reachy` section
 
 | Component | Library | Acceleration | Notes |
 |-----------|---------|:---:|-------|
-| **VLM** | llama.cpp (Docker) | GPU | Cosmos-Reason2-2B GGUF, OpenAI-compatible API |
+| **VLM** | llama.cpp (Docker) | GPU | Gemma 4 E2B GGUF, OpenAI-compatible API |
 | **LLM** | llama.cpp (Docker) | GPU | Gemma 3 1B for text-only mode |
 | **STT** | faster-whisper | GPU (CUDA) | CTranslate2 with CUDA, small.en default |
 | **TTS** | Kokoro ONNX | GPU (CUDA) | Natural voices, subprocess-isolated (see [License Notes](#license-notes)) |
@@ -71,20 +66,51 @@ Face tracking and speaking movements are configurable under the `reachy` section
 
 ## Prerequisites
 
-- **NVIDIA Jetson Orin Nano** (8GB) with JetPack 7.2 by default, or JetPack 6.x through the legacy profile
+- **NVIDIA Jetson Orin Nano** (8GB) with JetPack 7.2 / L4T 39.2.0, CUDA 13.2, and Python 3.12 for the default path
+- **Docker with the NVIDIA container runtime** for the llama.cpp VLM server
+- **Internet access during setup and first model download**; inference is local afterward
 - **[Reachy Mini Lite](https://huggingface.co/docs/reachy_mini/platforms/reachy_mini_lite/get_started)** connected via USB (optional for the software-only benchmark)
 - **NVMe SSD** recommended for swap and model storage
 
 ## Setup
 
-| Platform | Status | Setup guide |
-|----------|--------|-------------|
-| **JetPack 7.2 / L4T r39** | Default and validated on Orin Nano 8GB | **[JetPack 7.2 setup](docs/JETPACK_7_2_SETUP.md)** |
-| **JetPack 6.x / L4T r36** | Retained legacy path | [JetPack 6 setup](SETUP.md) |
+### JetPack 7.2 (default)
 
-The base `config/settings.yaml` and `run_llama_cpp.sh` defaults target JetPack
-7.2. JetPack 6 users select `config/settings.jp6.yaml` and the legacy r36
-container as documented in [SETUP.md](SETUP.md).
+Clone the repository and run the non-mutating compatibility check:
+
+```bash
+git clone https://github.com/NVIDIA-AI-IOT/reachy-mini-jetson-assistant.git
+cd reachy-mini-jetson-assistant
+./scripts/setup_jetson.sh --check-only
+```
+
+The script selects one exact compatibility tuple from `packaging/jetson-wheels.json`, installs the system and Python dependencies, downloads only the matching CTranslate2 and ONNX Runtime GPU wheels, verifies their size, SHA-256, metadata, and platform tags, and checks both CUDA backends. Unsupported combinations fail with an error; there is no generic ARM CPU fallback.
+
+Install the exact published JetPack 7.2 wheel set with:
+
+```bash
+./scripts/setup_jetson.sh
+```
+
+The current JP7.2 wheel set is published as a GitHub prerelease. Its local technical audit passes, but the organization-approved scanner report and final OSRB closure evidence are not included, so it must not be represented as a final or generally available release. Maintainers can still validate replacement candidate wheels from a local directory:
+
+```bash
+./scripts/setup_jetson.sh --wheel-dir /absolute/path/to/wheelhouse
+```
+
+The prerelease’s [release evidence bundle](packaging/releases/native-jp72-cu132-py312-sm87-r1/README.md) contains the wheel inventory, SPDX SBOM, exact source revisions and patch, build environment, license archive, and release gate status. The evidence keeps the missing organization-approved NVIDIA license/security scan visible instead of implying that publication completed OSRB review.
+
+The manifest entry is marked `published: true`, so the no-argument command is the normal installation path for the exact supported tuple. See the **[JetPack 7.2 setup guide](docs/JETPACK_7_2_SETUP.md)** for platform checks, replacement-candidate testing, connected-Reachy bring-up, and source-build fallbacks.
+
+### JetPack 6 (legacy, retained)
+
+JetPack 6.x / L4T r36 and Python 3.10 remain supported through the repository's previous installation flow. Follow the complete **[JetPack 6 setup guide](SETUP.md)**, then select `config/settings.jp6.yaml` and the documented r36/CUDA 12.6 llama.cpp image. Do not run `setup_jetson.sh` on JetPack 6; it intentionally rejects platforms without an exact manifest entry.
+
+The base `config/settings.yaml` and `run_llama_cpp.sh` defaults target JetPack 7.2. Silero VAD uses the model bundled with faster-whisper, so the JP7.2 path does not require PyTorch, torchaudio, or a separate `silero-vad` installation.
+
+### Runtime policy
+
+Native CTranslate2 STT and ONNX Runtime Kokoro TTS are the supported default. The setup script verifies GPU execution and stops rather than silently falling back to portable ARM CPU packages. Speaches remains useful as an optional, separately managed compatibility or comparison service, but this application does not install it or automatically route STT/TTS through it.
 
 ## Usage
 
@@ -95,8 +121,10 @@ This is the recommended mode — VLM + camera + voice + browser dashboard:
 **Terminal 1** — Start the VLM server:
 
 ```bash
-NP=1 ./run_llama_cpp.sh Kbenkhaled/Cosmos-Reason2-2B-GGUF:Q4_K_M
+NP=1 ./run_llama_cpp.sh unsloth/gemma-4-E2B-it-GGUF:Q4_K_M
 ```
+
+On Orin Nano 8GB, multimodal models automatically use a 1024-token context and `BATCH=128 UBATCH=128`. These bounds keep enough CUDA-visible memory available for faster-whisper and Kokoro while splitting image tokens into valid chunks. Override the environment variables for larger-memory Jetsons or text-only models. The model container uses Docker's `unless-stopped` restart policy by default; set `RESTART=no` to disable it.
 
 Wait until you see `llama server listening at http://0.0.0.0:8080`.
 
@@ -116,7 +144,7 @@ Press **Ctrl+C** once to exit cleanly (robot will go to sleep position).
 Same pipeline without the web UI:
 
 ```bash
-NP=1 ./run_llama_cpp.sh Kbenkhaled/Cosmos-Reason2-2B-GGUF:Q4_K_M
+NP=1 ./run_llama_cpp.sh unsloth/gemma-4-E2B-it-GGUF:Q4_K_M
 # In another terminal:
 source .venv/bin/activate
 python3 run_vision_chat.py
@@ -178,8 +206,7 @@ Access at `http://<jetson-ip>:8090`. The web UI adds minimal overhead (~5 MB RAM
 
 ## Configuration
 
-`config/settings.yaml` is the JetPack 7.2 default. Optional YAML overlays are
-merged on top of it through `REACHY_ASSISTANT_CONFIG`:
+`config/settings.yaml` is the JetPack 7.2 default. Optional YAML overlays are merged on top of it through `REACHY_ASSISTANT_CONFIG`:
 
 ```bash
 export REACHY_ASSISTANT_CONFIG=config/settings.jp72-no-reachy.yaml  # software benchmark
@@ -201,14 +228,13 @@ Unset the variable to return to the normal JetPack 7.2 connected-Reachy configur
 | `web` | UI FPS, host, port |
 | `rag` | Embedding backend, knowledge directory, retrieval settings |
 
-For developers adding new config fields, see `app/config.py` — typed
-dataclasses define schema defaults, the base YAML overrides those defaults,
-and the selected profile overrides only the fields it contains.
+For developers adding new config fields, see `app/config.py` — typed dataclasses define schema defaults, the base YAML overrides those defaults, and the selected profile overrides only the fields it contains.
 
 ## Project Structure
 
 ```
 reachy-mini-jetson-assistant/
+├── .agents/skills/           # Setup, deploy, and debug agent skills
 ├── app/
 │   ├── pipeline.py          # Audio I/O, VAD, TTS streaming, mic recording
 │   ├── config.py            # Configuration dataclasses + YAML loader
@@ -234,12 +260,16 @@ reachy-mini-jetson-assistant/
 │   ├── settings.jp72-reachy.yaml    # Conservative hardware bring-up
 │   └── settings.jp72-no-reachy.yaml # Software-only benchmark
 ├── docs/
-│   └── JETPACK_7_2_SETUP.md # Default JP7.2 source-build guide
+│   └── JETPACK_7_2_SETUP.md # Default JP7.2 wheel/source-build guide
 ├── patches/
 │   └── onnxruntime-v1.28.0-jp72.patch
+├── packaging/
+│   └── jetson-wheels.json # Exact wheel compatibility/checksum manifest
 ├── static/
 │   └── index.html           # Web UI (single-file HTML/CSS/JS)
 ├── scripts/
+│   ├── setup_jetson.sh    # Detect, install, and validate a supported Jetson
+│   ├── install_jp72_gpu_wheels.sh # Validate/install JP7.2 CUDA wheels
 │   ├── bench_ttft.py        # VLM TTFT benchmark
 │   ├── bench_mocked_voice_pipeline.py # Software-only latency benchmark
 │   ├── test_reachy_movement.py   # Robot movement test
@@ -258,29 +288,20 @@ reachy-mini-jetson-assistant/
 
 ## Performance Notes (Orin Nano 8GB)
 
-JetPack 7.2 software-only measurements used CUDA `float16` faster-whisper,
-a GPU llama.cpp text model, and Kokoro on `CUDAExecutionProvider`. Median warm
-latencies over three runs were:
+JetPack 7.2 software-only measurements used CUDA `float16` faster-whisper, a GPU llama.cpp text model, and Kokoro on `CUDAExecutionProvider`. Median warm latencies over three runs were:
 
 | Stage | JP7.2 median |
 |-------|-------------:|
-| Silero VAD compute | 48 ms |
-| STT | 494 ms |
-| LLM time to first token | 400 ms |
-| TTS compute | 665 ms |
-| First audio ready | 1.45 s |
-| Pipeline complete | 1.88 s |
+| Silero VAD compute | 26 ms |
+| STT | 444 ms |
+| LLM time to first token | 206 ms |
+| TTS compute | 595 ms |
+| First audio ready | 1.07 s |
+| Pipeline complete | 1.34 s |
 
-Those numbers exclude real microphone capture, camera/VLM prefill, speaker
-playback, and robot motion. A controlled connected-Reachy pass separately
-validated the USB motor controller, 1920x1080 camera, GPU STT/VLM/TTS, Reachy
-speaker playback, and an official speaking gesture. Its VLM TTFT was 11.75 s
-with Qwen3.5-2B; the query was injected at the STT boundary, so a human-spoken
-microphone-to-VAD turn remains to be validated.
+Those numbers exclude real microphone capture, camera/VLM prefill, speaker playback, and robot motion. A connected-Reachy human-spoken turn validated the USB motor controller, camera, GPU STT/VLM/TTS, Reachy speaker playback, and an official speaking gesture with Gemma 4 E2B Q4_K_M. That turn measured 0.5 s STT, 1.8 s VLM TTFT, and 2.1 s total VLM time. Ten consecutive live-camera VLM requests then completed in 1.52-1.76 s each with the bounded VLM batch defaults.
 
-Vision encoder prefill is the primary bottleneck on Orin Nano. Flash attention
-is enabled in `run_llama_cpp.sh`; llama.cpp automatically disables cache reuse
-when it is unsupported by the selected multimodal model.
+Vision encoder prefill is the primary bottleneck on Orin Nano. Flash attention is enabled in `run_llama_cpp.sh`; llama.cpp automatically disables cache reuse when it is unsupported by the selected multimodal model. The launcher disables hidden reasoning by default so the short response budget is returned as speakable `content`, and sets llama.cpp's prompt-cache RAM limit to zero to preserve memory for CUDA STT and TTS. Advanced users can override these safeguards with `REASONING` and `CACHE_RAM`.
 
 ## Development and Validation
 
@@ -290,10 +311,12 @@ Jetson Device Skills supported hardware inspection, [JetPack](https://developer.
 
 Jetson Device Skills are development and validation tools only. They are not packaged with this application and are not required to install or run the Reachy Mini assistant.
 
+The repository also includes three focused project skills under `.agents/skills`: `reachy-jetson-setup`, `reachy-jetson-deploy`, and `reachy-jetson-debug`. They give compatible coding agents the same fail-closed setup, safe launch, and evidence-first troubleshooting workflows used for this application.
+
 ## Roadmap
 
 - [x] Orin Nano 8GB — JP7.2 GPU pipeline and controlled Reachy output path validated
-- [ ] Complete a human-spoken microphone → Silero VAD hardware turn on JP7.2
+- [x] Human-spoken microphone → Silero VAD → GPU STT/VLM/TTS hardware turn on JP7.2
 - [x] Web UI with live camera, conversation log, push-to-talk
 - [x] Kokoro TTS GPU acceleration
 - [x] Silero VAD for robust speech detection
@@ -309,8 +332,7 @@ Contributions for AGX Orin and Thor testing are welcome.
 
 ## Troubleshooting
 
-See the default [JetPack 7.2 setup guide](docs/JETPACK_7_2_SETUP.md) for JP7.2 bring-up.
-JetPack 6 users should use the [legacy troubleshooting guide](SETUP.md#troubleshooting).
+See the default [JetPack 7.2 setup guide](docs/JETPACK_7_2_SETUP.md) for JP7.2 bring-up. JetPack 6 users should use the [legacy troubleshooting guide](SETUP.md#troubleshooting).
 
 ## Reachy Mini Resources
 
@@ -334,9 +356,9 @@ This project uses [Kokoro ONNX](https://github.com/thewh1teagle/kokoro-onnx) for
 - **phonemizer-fork** — GPL-3.0 (text-to-phoneme conversion)
 - **espeak-ng** — GPL-3.0 (speech synthesis library loaded by `espeakng-loader`)
 
-To avoid loading GPL-licensed code into the same process as NVIDIA CUDA libraries, TTS runs in a **separate subprocess** (`app/tts_worker.py`). The main application process never imports `kokoro-onnx`, `phonemizer-fork`, or `espeak-ng` — it communicates with the TTS worker via JSON over stdin/stdout. This is the same process-boundary isolation pattern used by the `llama.cpp` VLM backend (which runs in a separate Docker container).
+TTS runs in a separate subprocess (`app/tts_worker.py`); the main application communicates with it through JSON over stdin/stdout. That boundary is useful for component isolation, but is not by itself a legal conclusion about a combined distribution. Distributors must complete their own OSRB review and meet the applicable GPL notice and corresponding-source obligations.
 
-All other dependencies use permissive licenses (MIT, BSD-3, Apache-2.0). See [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) for the full list.
+See [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) for the dependency and native-wheel license inventory, [NOTICE](NOTICE) for project attribution, and the [OSRB release checklist](docs/OSRB_RELEASE_CHECKLIST.md) for release-gate status.
 
 ## Contributing
 
