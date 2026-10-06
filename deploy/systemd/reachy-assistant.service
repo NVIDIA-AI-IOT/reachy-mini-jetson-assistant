@@ -1,0 +1,35 @@
+[Unit]
+Description=Reachy Mini Thor assistant
+Wants=network-online.target
+After=network-online.target sound.target reachy-vllm.service
+Requires=reachy-vllm.service
+StartLimitIntervalSec=300
+StartLimitBurst=3
+
+[Service]
+Type=simple
+User=jetson
+Group=jetson
+SupplementaryGroups=audio video docker
+WorkingDirectory=/home/jetson/Downloads/reachy-mini-jetson-assistant
+EnvironmentFile=/home/jetson/.config/reachy-assistant/env
+Environment=REACHY_PLATFORM=thor
+ExecStartPre=/usr/bin/timeout 900 /bin/sh -c 'until /usr/bin/curl -fsS http://127.0.0.1:8001/v1/models >/dev/null; do /usr/bin/sleep 5; done'
+ExecStart=/home/jetson/Downloads/reachy-mini-jetson-assistant/run_reachy_thor.sh
+Restart=on-failure
+RestartSec=5
+KillSignal=SIGINT
+KillMode=mixed
+TimeoutStartSec=1000
+TimeoutStopSec=30
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+
+[Install]
+WantedBy=multi-user.target

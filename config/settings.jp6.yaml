@@ -6,6 +6,9 @@
 #   REACHY_ASSISTANT_CONFIG=config/settings.jp6.yaml python3 run_web_vision_chat.py
 # Values not listed here are inherited from the JetPack 7.2 default config.
 
+platform:
+  jetpack: "6.x"
+
 stt:
   device: "cuda"
   compute_type: "int8"

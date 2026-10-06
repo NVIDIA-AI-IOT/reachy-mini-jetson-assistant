@@ -30,6 +30,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from app.config import Config
+from app.audit import AuditLogger
 from app.audio import find_alsa_device
 from app.stt import STT
 from app.llm import LLM
@@ -46,6 +47,16 @@ console = Console()
 def main():
     use_rag = "--no-rag" not in sys.argv
     config = Config.load()
+    try:
+        config.require_valid(require_web_auth=False)
+    except ValueError as exc:
+        console.print(f"[red]{exc}[/red]")
+        raise SystemExit(2)
+    audit = AuditLogger(
+        config.runtime.audit_log_path,
+        max_bytes=config.runtime.audit_max_bytes,
+        backup_count=config.runtime.audit_backup_count,
+    )
     active_system_prompt = config.llm.system_prompt if use_rag else config.llm.system_prompt_no_rag
 
     console.print(Panel.fit(
@@ -84,6 +95,8 @@ def main():
         backend=config.llm.backend, max_tokens=config.llm.max_tokens,
         temperature=config.llm.temperature, timeout=config.llm.timeout,
         system_prompt=active_system_prompt,
+        guardrail_config=config.guardrails,
+        audit_logger=audit,
     )
     llm.load()
     console.print(f"  ✓ LLM ({llm.model})")
@@ -172,6 +185,12 @@ def main():
                 first_chunk_words=config.tts.first_chunk_words,
                 max_chunk_words=config.tts.max_chunk_words,
             )
+            if tts:
+                mic.wait_for_quiet_tail(
+                    config.audio.playback_tail_quiet_ms,
+                    config.audio.playback_tail_max_wait_ms,
+                    config.audio.playback_tail_rms_threshold,
+                )
             console.print()
 
             timing = f"  [dim]STT {dt_stt:.1f}s"

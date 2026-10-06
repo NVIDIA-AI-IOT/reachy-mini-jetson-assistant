@@ -19,17 +19,21 @@
 Tests 8 combinations (2 resolutions x 2 JPEG qualities x 2 system prompts)
 using streaming to measure true time-to-first-token.
 
-Requires: VLM server on localhost:8080, USB camera available.
+Requires: VLM server on localhost:8001, USB camera available.
 """
 
 import base64
 import itertools
+import os
 import time
 
 import cv2
 import httpx
 
-BASE_URL = "http://localhost:8080"
+BASE_URL = os.environ.get("VLM_BASE_URL", "http://localhost:8001")
+MODEL = os.environ.get(
+    "VLM_MODEL", "google/gemma-4-E4B-it"
+)
 USER_PROMPT = "What do you see?"
 MAX_TOKENS = 64
 TEMPERATURE = 0.7
@@ -88,7 +92,7 @@ def measure_ttft(system_prompt, img_b64):
 
     with httpx.Client(timeout=120.0) as client:
         with client.stream("POST", f"{BASE_URL}/v1/chat/completions", json={
-            "model": "", "messages": messages, "stream": True,
+            "model": MODEL, "messages": messages, "stream": True,
             "max_tokens": MAX_TOKENS, "temperature": TEMPERATURE,
         }) as r:
             if r.status_code != 200:

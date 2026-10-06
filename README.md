@@ -8,7 +8,22 @@
 
 A low-latency, fully on-device voice and vision assistant for [Reachy Mini Lite](https://www.pollen-robotics.com/reachy-mini/) powered by NVIDIA Jetson. Everything runs locally with GPU acceleration — no cloud, no API keys, no internet required at runtime.
 
-> **Default target:** Jetson Orin Nano 8GB on JetPack 7.2 / L4T r39, Python 3.12, CUDA 13.2, and GPU architecture `sm_87`. **Legacy target:** JetPack 6.x / L4T r36 and Python 3.10 remain supported. AGX Orin and Thor support is planned — see [Roadmap](#roadmap).
+> **Default target:** Jetson Orin Nano 8GB on JetPack 7.2 / L4T r39, Python 3.12, CUDA 13.2, and GPU architecture `sm_87`. **Legacy target:** JetPack 6.x / L4T r36 and Python 3.10 remain supported. **Thor target:** Jetson AGX Thor on JetPack 7.1 / CUDA 13 uses a separate vLLM runtime and `sm_110` speech build.
+>
+> Jetson AGX Orin has a reserved profile and will fail closed until its runtime
+> is implemented and validated. See [PLATFORMS.md](PLATFORMS.md).
+
+## Platform Profiles
+
+| Platform | Profile | Model server | Status | Setup |
+|----------|---------|--------------|--------|-------|
+| Jetson Orin Nano | `orin_nano` | llama.cpp, port 8080 | JP7.2 default; JP6 legacy overlay | [JP7.2 guide](docs/JETPACK_7_2_SETUP.md), [JP6 guide](SETUP.md) |
+| Jetson AGX Orin | `agx_orin` | Reserved | Architecture only; not runnable | [PLATFORMS.md](PLATFORMS.md) |
+| Jetson AGX Thor | `thor` | vLLM, port 8001 | Runtime profile implemented | [SETUP_THOR.md](SETUP_THOR.md) |
+
+Shared behavior lives in `config/settings.yaml`; hardware and model-server
+differences live in `config/platforms/<profile>.yaml`. Select a profile with a
+platform launcher, `--platform`, or `REACHY_PLATFORM`.
 
 ## What It Does
 
@@ -54,9 +69,9 @@ Face tracking and speaking movements are configurable under the `reachy` section
 
 | Component | Library | Acceleration | Notes |
 |-----------|---------|:---:|-------|
-| **VLM** | llama.cpp (Docker) | GPU | Gemma 4 E2B GGUF, OpenAI-compatible API |
-| **LLM** | llama.cpp (Docker) | GPU | Gemma 3 1B for text-only mode |
-| **STT** | faster-whisper | GPU (CUDA) | CTranslate2 with CUDA, small.en default |
+| **VLM** | llama.cpp (Orin Nano) / vLLM (Thor) | GPU | Gemma 4 E2B GGUF on JP7.2 Orin Nano; Gemma 4 E4B on Thor |
+| **LLM** | OpenAI-compatible local server | GPU | Gemma 3 1B for Orin Nano text mode; selected by the active platform profile |
+| **STT** | faster-whisper | GPU (CUDA) | CTranslate2 with CUDA; small.en on Orin Nano, large-v3 on Thor |
 | **TTS** | Kokoro ONNX | GPU (CUDA) | Natural voices, subprocess-isolated (see [License Notes](#license-notes)) |
 | **VAD** | Silero VAD | CPU | Neural VAD, far better than energy-only |
 | **Camera** | OpenCV V4L2 | CPU | Shared latest-frame buffer, configurable resolution/FPS |
@@ -66,15 +81,15 @@ Face tracking and speaking movements are configurable under the `reachy` section
 
 ## Prerequisites
 
-- **NVIDIA Jetson Orin Nano** (8GB) with JetPack 7.2 / L4T 39.2.0, CUDA 13.2, and Python 3.12 for the default path
-- **Docker with the NVIDIA container runtime** for the llama.cpp VLM server
+- **NVIDIA Jetson Orin Nano** (8GB) with JetPack 7.2 / L4T 39.2.0, CUDA 13.2, and Python 3.12 for the default path, or **Jetson AGX Thor** with its JetPack 7.1 runtime. The legacy Orin Nano setup supports JetPack 6.x / Python 3.10.
+- **Docker with the NVIDIA container runtime** for the platform's VLM server
 - **Internet access during setup and first model download**; inference is local afterward
 - **[Reachy Mini Lite](https://huggingface.co/docs/reachy_mini/platforms/reachy_mini_lite/get_started)** connected via USB (optional for the software-only benchmark)
 - **NVMe SSD** recommended for swap and model storage
 
 ## Setup
 
-### JetPack 7.2 (default)
+### Orin Nano: JetPack 7.2 (default)
 
 Clone the repository and run the non-mutating compatibility check:
 
@@ -108,6 +123,10 @@ JetPack 6.x / L4T r36 and Python 3.10 remain supported through the repository's 
 
 The base `config/settings.yaml` and `run_llama_cpp.sh` defaults target JetPack 7.2. Silero VAD uses the model bundled with faster-whisper, so the JP7.2 path does not require PyTorch, torchaudio, or a separate `silero-vad` installation.
 
+### Jetson AGX Thor
+
+Follow **[SETUP_THOR.md](SETUP_THOR.md)** for the `thor` profile, pinned vLLM/Gemma 4 E4B server, and CUDA 13 speech runtime. The JP7.2 `sm_87` wheel bundle above is for Orin and does not match Thor. See **[PLATFORMS.md](PLATFORMS.md)** for configuration layering and **[PRODUCTION_THOR.md](PRODUCTION_THOR.md)** for optional hardened operation.
+
 ### Runtime policy
 
 Native CTranslate2 STT and ONNX Runtime Kokoro TTS are the supported default. The setup script verifies GPU execution and stops rather than silently falling back to portable ARM CPU packages. Speaches remains useful as an optional, separately managed compatibility or comparison service, but this application does not install it or automatically route STT/TTS through it.
@@ -116,7 +135,7 @@ Native CTranslate2 STT and ONNX Runtime Kokoro TTS are the supported default. Th
 
 ### Quick Start (Vision Chat with Web UI)
 
-This is the recommended mode — VLM + camera + voice + browser dashboard:
+This is the recommended mode — VLM + camera + voice + browser dashboard. The commands below use Orin Nano on JetPack 7.2; Thor uses the launchers in [SETUP_THOR.md](SETUP_THOR.md).
 
 **Terminal 1** — Start the VLM server:
 
@@ -131,8 +150,7 @@ Wait until you see `llama server listening at http://0.0.0.0:8080`.
 **Terminal 2** — Start the assistant:
 
 ```bash
-source .venv/bin/activate
-python3 run_web_vision_chat.py
+./run_reachy_orin_nano.sh
 ```
 
 Open `http://<jetson-ip>:8090` in a browser to see the live UI with camera feed, conversation log, and system stats. The robot listens through its microphone and responds via VLM + TTS.
@@ -206,7 +224,9 @@ Access at `http://<jetson-ip>:8090`. The web UI adds minimal overhead (~5 MB RAM
 
 ## Configuration
 
-`config/settings.yaml` is the JetPack 7.2 default. Optional YAML overlays are merged on top of it through `REACHY_ASSISTANT_CONFIG`:
+`config/settings.yaml` supplies shared settings and JetPack 7.2 defaults. The selected `config/platforms/<profile>.yaml` is merged next, followed by an optional deployment overlay selected with `--config` or `REACHY_ASSISTANT_CONFIG`. Direct commands default to `orin_nano`; use a platform launcher or set `REACHY_PLATFORM=thor` for Thor.
+
+Orin Nano runtime overlays:
 
 ```bash
 export REACHY_ASSISTANT_CONFIG=config/settings.jp72-no-reachy.yaml  # software benchmark
@@ -214,7 +234,7 @@ export REACHY_ASSISTANT_CONFIG=config/settings.jp72-reachy.yaml     # conservati
 export REACHY_ASSISTANT_CONFIG=config/settings.jp6.yaml             # legacy JetPack 6
 ```
 
-Unset the variable to return to the normal JetPack 7.2 connected-Reachy configuration. Edit the base file to tune shared behavior:
+Unset `REACHY_ASSISTANT_CONFIG` to return to the selected platform's normal configuration. The JetPack-specific overlays above are for Orin Nano; use a Thor-specific custom overlay when changing Thor settings. Edit the base file to tune shared behavior:
 
 | Section | What It Controls |
 |---------|-----------------|
@@ -228,7 +248,7 @@ Unset the variable to return to the normal JetPack 7.2 connected-Reachy configur
 | `web` | UI FPS, host, port |
 | `rag` | Embedding backend, knowledge directory, retrieval settings |
 
-For developers adding new config fields, see `app/config.py` — typed dataclasses define schema defaults, the base YAML overrides those defaults, and the selected profile overrides only the fields it contains.
+For developers adding new config fields, see `app/config.py` — typed dataclasses define schema defaults, followed by the base YAML, selected platform profile, deployment overlay, and supported environment overrides. Each layer overrides only the fields it contains.
 
 ## Project Structure
 
@@ -258,7 +278,8 @@ reachy-mini-jetson-assistant/
 │   ├── settings.yaml        # JetPack 7.2 default configuration
 │   ├── settings.jp6.yaml    # Legacy JetPack 6 overlay
 │   ├── settings.jp72-reachy.yaml    # Conservative hardware bring-up
-│   └── settings.jp72-no-reachy.yaml # Software-only benchmark
+│   ├── settings.jp72-no-reachy.yaml # Software-only benchmark
+│   └── platforms/          # Orin Nano, Thor, and reserved AGX Orin profiles
 ├── docs/
 │   └── JETPACK_7_2_SETUP.md # Default JP7.2 wheel/source-build guide
 ├── patches/
@@ -282,6 +303,9 @@ reachy-mini-jetson-assistant/
 ├── run_voice_chat.py        # Voice chat with optional RAG
 ├── run_llama_cpp.sh         # Docker LLM/VLM server launcher
 ├── run_llama_embedding.sh   # Docker embedding server launcher
+├── run_reachy_orin_nano.sh  # Orin Nano profile launcher
+├── run_reachy_thor.sh       # Thor profile launcher with runtime preflight
+├── run_vllm_thor.sh         # Pinned Thor VLM server launcher
 ├── main.py                  # CLI entry point
 └── requirements.txt         # Python dependencies
 ```
@@ -323,16 +347,16 @@ The repository also includes three focused project skills under `.agents/skills`
 - [x] KV cache reuse + flash attention for faster VLM TTFT
 - [x] 15 Hz horizontal and vertical face tracking with bounded search and reacquisition
 - [x] TTS-synchronized head, body, and antenna movements from the official Pollen library
-- [ ] **AGX Orin** — larger models (Cosmos-Reason2-7B, Gemma 3 4B), higher resolution, multi-turn context
-- [ ] **Thor** — real-time VLM, multi-camera, extended context windows
-- [ ] Multi-turn conversation memory
+- [ ] **AGX Orin** — profile architecture complete; runtime/model validation pending
+- [x] **Thor** — vLLM/Gemma 4 E4B, CUDA 13 speech runtime profile, guardrails, and operational controls
+- [x] Five-turn in-memory conversation history for follow-up questions
 - [ ] Multi-language support
 
 Contributions for AGX Orin and Thor testing are welcome.
 
 ## Troubleshooting
 
-See the default [JetPack 7.2 setup guide](docs/JETPACK_7_2_SETUP.md) for JP7.2 bring-up. JetPack 6 users should use the [legacy troubleshooting guide](SETUP.md#troubleshooting).
+See the default [JetPack 7.2 setup guide](docs/JETPACK_7_2_SETUP.md) for Orin Nano JP7.2 bring-up. JetPack 6 users should use the [legacy troubleshooting guide](SETUP.md#troubleshooting), and Thor users should use [SETUP_THOR.md](SETUP_THOR.md).
 
 ## Reachy Mini Resources
 

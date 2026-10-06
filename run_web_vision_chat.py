@@ -37,6 +37,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from app.config import Config
+from app.conversation import ConversationHistory
+from app.audit import AuditLogger
 from app.audio import find_alsa_device
 from app.stt import STT
 from app.llm import LLM
@@ -142,15 +144,33 @@ def main():
     parser = argparse.ArgumentParser(description="Vision Chat with Web UI")
     parser.add_argument("--host", default=None, help="Web server bind address")
     parser.add_argument("--port", type=int, default=None, help="Web server port")
+    parser.add_argument(
+        "--platform",
+        choices=Config.available_platforms(),
+        default=None,
+        help="Jetson platform profile (or set REACHY_PLATFORM)",
+    )
     args = parser.parse_args()
 
-    config = Config.load()
+    config = Config.load(platform=args.platform)
+    try:
+        config.require_valid(require_web_auth=True)
+    except ValueError as exc:
+        console.print(f"[red]{exc}[/red]")
+        raise SystemExit(2)
+    audit = AuditLogger(
+        config.runtime.audit_log_path,
+        max_bytes=config.runtime.audit_max_bytes,
+        backup_count=config.runtime.audit_backup_count,
+    )
+    audit.write("application_start", mode="web_vision_chat")
     web_host = args.host or config.web.host
     web_port = args.port or config.web.port
     broadcaster = Broadcaster()
 
     console.print(Panel.fit(
         "[bold cyan]Web Vision Chat[/bold cyan]\n"
+        f"[dim]Platform: {config.platform.display_name} ({config.platform.profile})[/dim]\n"
         "Speak anytime — camera captures when you speak\n"
         f"[dim]Web UI: http://{{host}}:{web_port}  |  Ctrl-C to quit[/dim]",
         border_style="cyan",
@@ -180,7 +200,7 @@ def main():
     )
     if cam.start():
         console.print(
-            f"  ✓ Camera /dev/video{config.vision.camera_device} "
+            f"  ✓ Camera /dev/video{cam.device} "
             f"({config.vision.width}x{config.vision.height}, "
             f"{config.vision.capture_fps} fps compressed ring buffer)"
         )
@@ -200,6 +220,8 @@ def main():
         if _cleanup_done.is_set():
             return
         _cleanup_done.set()
+        broadcaster.set_ready(False)
+        audit.write("application_stop", mode="web_vision_chat")
         console.print("\n[yellow]Shutting down...[/yellow]")
         if mic:
             try:
@@ -238,7 +260,10 @@ def main():
         compute_type=config.stt.compute_type, language=config.stt.language,
         beam_size=config.stt.beam_size,
     )
-    stt.load()
+    if not stt.load():
+        console.print("[red]  STT failed to load; cannot start the speech pipeline.[/red]")
+        _do_cleanup()
+        return
     console.print(f"  ✓ STT (faster-whisper, {config.stt.model})")
     console.print("    CUDA warmup...", end=" ")
     console.print(f"done ({warmup_stt(stt):.1f}s)")
@@ -247,13 +272,24 @@ def main():
 
     vision_system_prompt = config.vision.system_prompt
     vision_few_shot = config.vision.few_shot or []
+    conversation_history = ConversationHistory(
+        max_turns=config.vision.history_turns,
+    )
     llm = LLM(
         model=config.llm.model, base_url=config.llm.base_url,
         backend=config.llm.backend, max_tokens=config.llm.max_tokens,
         temperature=config.llm.temperature, timeout=config.llm.timeout,
         system_prompt=vision_system_prompt,
+        guardrail_config=config.guardrails,
+        audit_logger=audit,
     )
-    llm.load()
+    if not llm.load():
+        console.print(
+            f"[red]  VLM server is unavailable at {config.llm.base_url}; "
+            "start run_vllm_thor.sh first.[/red]"
+        )
+        _do_cleanup()
+        return
     console.print(f"  ✓ VLM ({llm.model})")
 
     tts = create_tts(
@@ -263,7 +299,9 @@ def main():
     if tts:
         console.print(f"  ✓ TTS ({tts.backend_name}, {tts.voice})")
     else:
-        console.print("  ⚠ TTS unavailable")
+        console.print("[red]  TTS failed to load; cannot start the speech pipeline.[/red]")
+        _do_cleanup()
+        return
 
     face_detector = None
     movement_manager = None
@@ -351,9 +389,32 @@ def main():
     )
 
     # ── Start web server + background threads ────────────────────
-    web_thread = start_web_server(broadcaster, host=web_host, port=web_port)
+    broadcaster.set_ready(
+        True,
+        {
+            "reachy": reachy is not None,
+            "camera": cam.health_check(),
+            "microphone": mic is not None,
+            "stt": stt.health_check(),
+            "vlm": llm.health_check(),
+            "tts": tts.health_check(),
+            "guardrails": config.guardrails.enabled,
+        },
+    )
+    web_thread = start_web_server(
+        broadcaster,
+        host=web_host,
+        port=web_port,
+        api_token=config.web.api_token,
+        require_auth=config.web.require_auth,
+        allowed_hosts=config.web.allowed_hosts,
+        max_clients=config.web.max_clients,
+        audit_logger=audit,
+    )
     time.sleep(0.5)
-    console.print(f"  ✓ Web UI  →  [bold]http://{web_host}:{web_port}[/bold]")
+    console.print(
+        f"  ✓ Web UI  →  [bold]http://{web_host}:{web_port}/?token=<REACHY_WEB_API_TOKEN>[/bold]"
+    )
 
     threading.Thread(
         target=_frame_broadcast_thread,
@@ -385,6 +446,7 @@ def main():
         "resolution": f"{config.vision.width}x{config.vision.height}",
         "silero_threshold": config.vad.silero_threshold,
         "beam_size": config.stt.beam_size,
+        "history_turns": config.vision.history_turns,
     }
     broadcaster.send({
         "type": "info",
@@ -401,7 +463,8 @@ def main():
     console.print(
         f"\n[green bold]Ready — speak anytime! "
         f"({config.vision.capture_fps} fps, {n_frames} frame{'s' if n_frames > 1 else ''} "
-        f"per query{f', {n_fewshot} few-shot pairs' if n_fewshot else ''})[/green bold]\n"
+        f"per query{f', {n_fewshot} few-shot pairs' if n_fewshot else ''}, "
+        f"{config.vision.history_turns}-turn history)[/green bold]\n"
     )
 
     if broadcaster.ptt_active:
@@ -444,13 +507,6 @@ def main():
                 mic.resume()
                 continue
 
-            word_count = len(text.split())
-            if word_count <= 2 and "?" not in text:
-                console.print(f"[dim]  (skipped filler: \"{text}\")[/dim]")
-                broadcaster.send({"type": "status", "stage": "listening"})
-                mic.resume()
-                continue
-
             n_imgs = len(captured_frames)
             console.print(
                 f'  [green]You:[/green] "{text}" '
@@ -472,7 +528,7 @@ def main():
             tts_q = None
             tts_thread = None
             if tts:
-                tts_q = queue.Queue()
+                tts_q = queue.Queue(maxsize=32)
                 tts_thread = threading.Thread(
                     target=tts_player,
                     args=(tts, tts_q),
@@ -499,6 +555,7 @@ def main():
                 prompt=text, system_prompt=vision_system_prompt,
                 images_b64=captured_frames if captured_frames else None,
                 few_shot=vision_few_shot if vision_few_shot else None,
+                history=conversation_history.messages() or None,
             ):
                 content, meta = chunk_data if isinstance(chunk_data, tuple) else (chunk_data, {})
                 if content:
@@ -539,8 +596,21 @@ def main():
                     tts_q.put(tts_buf.strip())
                 tts_q.put(None)
                 tts_thread.join()
+                mic.wait_for_quiet_tail(
+                    config.audio.playback_tail_quiet_ms,
+                    config.audio.playback_tail_max_wait_ms,
+                    config.audio.playback_tail_rms_threshold,
+                )
 
             console.print()
+
+            if full_resp.strip():
+                conversation_history.add_turn(text, full_resp)
+                audit.write(
+                    "conversation_history_updated",
+                    turns=conversation_history.turn_count,
+                    max_turns=conversation_history.max_turns,
+                )
 
             toks = len(full_resp.split())
             stability = "stable" if stable_at_capture else "latest"
@@ -564,8 +634,9 @@ def main():
 
     except (KeyboardInterrupt, SystemExit):
         pass
-    except Exception:
-        pass
+    except Exception as e:
+        console.print(f"\n[red]Pipeline error: {e}[/red]")
+        broadcaster.send({"type": "error", "message": str(e)})
 
     _do_cleanup()
     if face_tracker:

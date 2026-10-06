@@ -25,6 +25,7 @@ import wave
 import subprocess
 import threading
 import queue
+import re
 from collections import deque
 from dataclasses import dataclass
 from typing import Callable, Optional, Iterator, Union
@@ -124,11 +125,15 @@ def _pa_sink_label(sink_name: str) -> str:
     normalized = sink_name.lower()
     if "pollen_robotics_reachy_mini_audio" in normalized:
         return "Reachy Mini"
-    if "anker_powerconf" in normalized:
-        return "Anker PowerConf"
     if "platform-sound" in normalized:
         return "Jetson Audio"
-    return sink_name
+    label = sink_name
+    for prefix in ("alsa_output.usb-", "bluez_output."):
+        if label.startswith(prefix):
+            label = label[len(prefix):]
+            break
+    label = re.split(r"\.(?:analog|digital|a2dp|iec958)[.-]", label, maxsplit=1)[0]
+    return re.sub(r"[_-]+", " ", label).strip() or sink_name
 
 
 def list_pa_sinks() -> list[dict[str, str]]:
@@ -177,6 +182,14 @@ def get_pa_sink_volume(sink_name: str) -> Optional[int]:
     return None
 
 
+def _is_external_sink(sink_id: str) -> bool:
+    normalized = sink_id.lower()
+    return (
+        (".usb-" in normalized or normalized.startswith("bluez_output."))
+        and "pollen_robotics_reachy_mini_audio" not in normalized
+    )
+
+
 class SpeakerSelector:
     """Thread-safe, live-selectable PulseAudio output routing."""
 
@@ -204,8 +217,21 @@ class SpeakerSelector:
         with self._lock:
             selected = self._sink if self._sink in available else None
             selected = selected or self._matching_sink(speakers, self._preferred_hint)
+            external = next(
+                (
+                    speaker["id"] for speaker in speakers
+                    if _is_external_sink(speaker["id"])
+                ),
+                None,
+            )
+            default_available = default_sink if default_sink in available else None
+            default_is_external = bool(
+                default_available and _is_external_sink(default_available)
+            )
+            selected = selected or (default_available if default_is_external else None)
+            selected = selected or external
+            selected = selected or default_available
             selected = selected or self._matching_sink(speakers, self._fallback_hint)
-            selected = selected or (default_sink if default_sink in available else None)
             selected = selected or (speakers[0]["id"] if speakers else None)
             self._speakers = speakers
             self._sink = selected
@@ -523,12 +549,17 @@ class MicRecorder:
         self.chunk_ms = chunk_ms
         self.chunk_samples = int(SAMPLE_RATE * chunk_ms / 1000)
         self.chunk_bytes = self.chunk_samples * CHANNELS * 2
-        self.audio_q: queue.Queue[bytes] = queue.Queue()
+        # Roughly three seconds of audio. Keep the newest samples if a
+        # downstream consumer stalls instead of allowing unbounded growth.
+        self.audio_q: queue.Queue[bytes] = queue.Queue(maxsize=100)
         self.listening = threading.Event()
         self.listening.set()
         self.alive = True
         self._proc: Optional[subprocess.Popen] = None
         self._route_lock = threading.RLock()
+        self._capture_condition = threading.Condition()
+        self._capture_sequence = 0
+        self._latest_capture_rms = 0.0
         self._hw = ""
         self.pa_source: Optional[str] = None
         self.pa_sink: Optional[str] = None
@@ -540,13 +571,9 @@ class MicRecorder:
         hw: str,
         mic_hint: str,
         speaker_hint: Optional[str] = None,
-        echo_cancellation: bool = True,
+        echo_cancellation: bool = False,
     ) -> bool:
         """Start recording. Returns True on success."""
-        subprocess.run(["pkill", "-9", "parecord"], capture_output=True)
-        subprocess.run(["pkill", "-9", "arecord"], capture_output=True)
-        time.sleep(0.3)
-
         self._hw = hw
         self.pa_source = find_pa_source(mic_hint)
         self.speaker_selector = SpeakerSelector(
@@ -569,6 +596,11 @@ class MicRecorder:
                         f"  [yellow]AEC unavailable: {self.aec.last_error}; "
                         "using direct audio[/yellow]"
                     )
+            elif self.pa_sink:
+                self.console.print(
+                    f"  Speaker: [green]{_pa_sink_label(self.pa_sink)}[/green] "
+                    "(adaptive half-duplex)"
+                )
             self.console.print(f"  PA source: {self.pa_source.split('.')[-2]}")
         else:
             self.console.print("  [yellow]PA source not found, using ALSA direct[/yellow]")
@@ -617,13 +649,16 @@ class MicRecorder:
         return False
 
     def _check_capture(self):
-        time.sleep(0.5)
+        # PipeWire can take a moment to activate a previously suspended USB
+        # source. Poll for real PCM instead of treating the first empty read
+        # as success and entering the VAD loop with a dead microphone.
+        deadline = time.monotonic() + 3.0
         test_chunks = []
-        for _ in range(10):
+        while len(test_chunks) < 10 and time.monotonic() < deadline:
             try:
-                test_chunks.append(self.audio_q.get(timeout=0.5))
+                test_chunks.append(self.audio_q.get(timeout=0.25))
             except queue.Empty:
-                break
+                continue
         if test_chunks:
             rms = chunk_rms(b"".join(test_chunks))
             if rms > 0.003:
@@ -733,8 +768,56 @@ class MicRecorder:
                     if err:
                         self.console.print(f"\n  [red]audio capture died: {err}[/red]")
                 break
+            if proc is self._proc:
+                rms = chunk_rms(raw)
+                with self._capture_condition:
+                    self._latest_capture_rms = rms
+                    self._capture_sequence += 1
+                    self._capture_condition.notify_all()
             if proc is self._proc and self.listening.is_set():
-                self.audio_q.put(raw)
+                try:
+                    self.audio_q.put_nowait(raw)
+                except queue.Full:
+                    try:
+                        self.audio_q.get_nowait()
+                    except queue.Empty:
+                        pass
+                    try:
+                        self.audio_q.put_nowait(raw)
+                    except queue.Full:
+                        pass
+
+    def wait_for_quiet_tail(
+        self,
+        quiet_ms: int,
+        max_wait_ms: int,
+        rms_threshold: float,
+    ) -> bool:
+        """Wait while paused until consecutive captured frames are acoustically quiet."""
+        if quiet_ms <= 0 or max_wait_ms <= 0:
+            return True
+        required = max(1, (int(quiet_ms) + self.chunk_ms - 1) // self.chunk_ms)
+        deadline = time.monotonic() + max_wait_ms / 1000.0
+        quiet_chunks = 0
+        with self._capture_condition:
+            seen = self._capture_sequence
+        while time.monotonic() < deadline:
+            with self._capture_condition:
+                remaining = deadline - time.monotonic()
+                self._capture_condition.wait_for(
+                    lambda: self._capture_sequence != seen,
+                    timeout=max(0.0, remaining),
+                )
+                if self._capture_sequence == seen:
+                    break
+                seen = self._capture_sequence
+                rms = self._latest_capture_rms
+            quiet_chunks = quiet_chunks + 1 if rms <= rms_threshold else 0
+            if quiet_chunks >= required:
+                self.flush()
+                return True
+        self.flush()
+        return False
 
     def flush(self):
         while not self.audio_q.empty():
@@ -883,7 +966,7 @@ def stream_and_speak(
     tts_q = None
     tts_thread = None
     if tts_obj:
-        tts_q = queue.Queue()
+        tts_q = queue.Queue(maxsize=32)
         tts_thread = threading.Thread(
             target=tts_player, args=(tts_obj, tts_q, pa_sink), daemon=True,
         )

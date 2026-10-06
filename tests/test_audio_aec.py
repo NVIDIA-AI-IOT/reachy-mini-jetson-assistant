@@ -45,5 +45,5 @@ def test_virtual_aec_sink_is_hidden_from_speaker_selector(monkeypatch):
     )
 
     assert pipeline.list_pa_sinks() == [
-        {"id": "physical-speaker", "label": "physical-speaker"},
+        {"id": "physical-speaker", "label": "physical speaker"},
     ]

@@ -27,6 +27,8 @@ from typing import Optional
 
 from rich.console import Console
 
+from app.camera import resolve_camera_device
+
 try:
     from reachy_mini import ReachyMini
     import psutil
@@ -73,6 +75,7 @@ def kill_daemon(console: Console) -> bool:
 
 def kill_stale_camera_holders(device: int, console: Console) -> None:
     """Kill any process holding /dev/video<device> (except ourselves)."""
+    device = resolve_camera_device(device)
     try:
         r = subprocess.run(
             ["fuser", f"/dev/video{device}"],

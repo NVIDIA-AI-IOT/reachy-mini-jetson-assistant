@@ -21,9 +21,11 @@ capture use the latest buffered frame instead of competing for VideoCapture.
 """
 
 import base64
+import re
 import threading
 import time
 from collections import deque
+from pathlib import Path
 from typing import Optional
 
 import cv2
@@ -41,6 +43,30 @@ MAX_SPEECH_SECS = 16
 PRE_SPEECH_SECS = 0.5
 
 
+def resolve_camera_device(device: int, by_id_dir: Path = Path("/dev/v4l/by-id")) -> int:
+    """Resolve -1 to the Reachy camera's stable V4L index after USB enumeration."""
+    if device >= 0:
+        return device
+
+    try:
+        candidates = sorted(by_id_dir.glob("*Reachy_Mini_Camera*-video-index0"))
+    except OSError:
+        candidates = []
+    for candidate in candidates:
+        try:
+            target = candidate.resolve(strict=True)
+        except OSError:
+            continue
+        match = re.fullmatch(r"video(\d+)", target.name)
+        if match:
+            return int(match.group(1))
+
+    for index in range(8):
+        if Path(f"/dev/video{index}").exists():
+            return index
+    return 0
+
+
 class Camera:
     """V4L2 USB webcam with a background capture thread and timestamped
     ring buffer sized to cover the maximum speech duration plus lookback."""
@@ -53,7 +79,7 @@ class Camera:
         jpeg_quality: int = 80,
         capture_fps: float = 3.0,
     ):
-        self.device = device
+        self.device = resolve_camera_device(device)
         self.width = width
         self.height = height
         self.jpeg_quality = jpeg_quality

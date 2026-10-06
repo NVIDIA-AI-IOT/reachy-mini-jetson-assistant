@@ -1,0 +1,36 @@
+{
+  "platform": {
+    "profile": "thor",
+    "jetpack": "7.1",
+    "cuda": "13.0",
+    "python": "3.12"
+  },
+  "vllm": {
+    "image": "ghcr.io/nvidia-ai-iot/vllm@sha256:570f9a5ffa89a772226abcc98c2d358a56ec3f755c97bc079c7f2396ffe62260",
+    "model": "google/gemma-4-E4B-it",
+    "model_revision": "fee6332c1abaafb77f6f9624236c63aa2f1d0187"
+  },
+  "ctranslate2": {
+    "version": "4.8.1",
+    "source_commit": "0d8bcd362ac75ef860ef161d6f0efad0ae439ff0",
+    "cuda_arch": "sm_110",
+    "validated_wheel_sha256": "1f8f75563229d3e1aa74743a2404d777e8d64f0842e3d1e0cd6504941991f129"
+  },
+  "onnxruntime_gpu": {
+    "version": "1.24.0",
+    "wheel_sha256": "012c10bef23a39f074730d158b72f797a7314f2695c65835a0669b57282422f6"
+  },
+  "python_packages": {
+    "fastapi": "0.139.0",
+    "faster-whisper": "1.2.1",
+    "httpx": "0.28.1",
+    "kokoro-onnx": "0.5.0",
+    "onnxruntime-gpu": "1.24.0",
+    "opencv-python-headless": "5.0.0.93",
+    "pytest": "9.1.1",
+    "reachy-mini": "1.8.4",
+    "silero-vad": "6.2.1",
+    "torch": "2.12.1",
+    "uvicorn": "0.49.0"
+  }
+}

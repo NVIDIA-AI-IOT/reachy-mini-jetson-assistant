@@ -8,7 +8,20 @@ import unittest
 import cv2
 import numpy as np
 
-from app.camera import Camera
+from app.camera import Camera, resolve_camera_device
+
+
+def test_camera_auto_discovery_uses_reachy_video_index_zero(tmp_path):
+    target = tmp_path / "video3"
+    target.touch()
+    link = tmp_path / "usb-SunplusIT_Inc_Reachy_Mini_Camera-unit-video-index0"
+    link.symlink_to(target)
+
+    assert resolve_camera_device(-1, tmp_path) == 3
+
+
+def test_camera_explicit_device_is_preserved(tmp_path):
+    assert resolve_camera_device(5, tmp_path) == 5
 
 
 class CameraBufferTests(unittest.TestCase):

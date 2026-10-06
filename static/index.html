@@ -346,6 +346,12 @@ body.resizing iframe,body.resizing img{pointer-events:none}
 (function(){
   const $ = id => document.getElementById(id);
 
+  const authParams = new URLSearchParams(location.search);
+  const queryToken = authParams.get('token');
+  if(queryToken){ sessionStorage.setItem('reachy_api_token', queryToken); }
+  const apiToken = queryToken || sessionStorage.getItem('reachy_api_token') || '';
+  if(queryToken){ history.replaceState({}, document.title, location.pathname); }
+
   let ws = null, frameCount = 0, msgIdx = 0, currentAssistant = null;
   let reconnectTimer = null, pttActive = null, pipelineStage = 'connecting', faceBoxTimer = null;
   const camNatural = {w:640, h:480};
@@ -356,7 +362,8 @@ body.resizing iframe,body.resizing img{pointer-events:none}
   /* ── WebSocket ──────────────────── */
   function connect(){
     const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-    ws = new WebSocket(`${proto}://${location.host}/ws`);
+    const auth = apiToken ? `?token=${encodeURIComponent(apiToken)}` : '';
+    ws = new WebSocket(`${proto}://${location.host}/ws${auth}`);
     ws.onopen = () => {
       $('connStatus').className = 'conn-status ok';
       $('connStatus').innerHTML = '<span class="conn-dot"></span> Connected';

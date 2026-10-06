@@ -32,6 +32,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from app.config import Config
+from app.audit import AuditLogger
 from app.audio import find_alsa_device
 from app.stt import STT
 from app.llm import LLM
@@ -53,6 +54,16 @@ console = Console()
 
 def main():
     config = Config.load()
+    try:
+        config.require_valid(require_web_auth=False)
+    except ValueError as exc:
+        console.print(f"[red]{exc}[/red]")
+        raise SystemExit(2)
+    audit = AuditLogger(
+        config.runtime.audit_log_path,
+        max_bytes=config.runtime.audit_max_bytes,
+        backup_count=config.runtime.audit_backup_count,
+    )
 
     console.print(Panel.fit(
         "[bold cyan]Vision Chat[/bold cyan]\n"
@@ -85,7 +96,7 @@ def main():
     )
     if cam.start():
         console.print(
-            f"  ✓ Camera /dev/video{config.vision.camera_device} "
+            f"  ✓ Camera /dev/video{cam.device} "
             f"({config.vision.width}x{config.vision.height}, "
             f"{config.vision.capture_fps} fps compressed ring buffer)"
         )
@@ -143,7 +154,10 @@ def main():
         compute_type=config.stt.compute_type, language=config.stt.language,
         beam_size=config.stt.beam_size,
     )
-    stt.load()
+    if not stt.load():
+        console.print("[red]  STT failed to load; cannot start the speech pipeline.[/red]")
+        _do_cleanup()
+        return
     console.print(f"  ✓ STT (faster-whisper, {config.stt.model})")
     console.print("    CUDA warmup...", end=" ")
     console.print(f"done ({warmup_stt(stt):.1f}s)")
@@ -157,8 +171,16 @@ def main():
         backend=config.llm.backend, max_tokens=config.llm.max_tokens,
         temperature=config.llm.temperature, timeout=config.llm.timeout,
         system_prompt=vision_system_prompt,
+        guardrail_config=config.guardrails,
+        audit_logger=audit,
     )
-    llm.load()
+    if not llm.load():
+        console.print(
+            f"[red]  VLM server is unavailable at {config.llm.base_url}; "
+            "start run_vllm_thor.sh first.[/red]"
+        )
+        _do_cleanup()
+        return
     console.print(f"  ✓ VLM ({llm.model})")
 
     tts = create_tts(
@@ -168,7 +190,9 @@ def main():
     if tts:
         console.print(f"  ✓ TTS ({tts.backend_name}, {tts.voice})")
     else:
-        console.print("  ⚠ TTS unavailable")
+        console.print("[red]  TTS failed to load; cannot start the speech pipeline.[/red]")
+        _do_cleanup()
+        return
 
     face_detector = None
     movement_manager = None
@@ -265,12 +289,6 @@ def main():
                 mic.resume()
                 continue
 
-            word_count = len(text.split())
-            if word_count <= 2 and "?" not in text:
-                console.print(f"[dim]  (skipped filler: \"{text}\")[/dim]")
-                mic.resume()
-                continue
-
             n_imgs = len(captured_frames)
             console.print(
                 f'  [green]You:[/green] "{text}" '
@@ -287,6 +305,12 @@ def main():
                 first_chunk_words=config.tts.first_chunk_words,
                 max_chunk_words=config.tts.max_chunk_words,
             )
+            if tts:
+                mic.wait_for_quiet_tail(
+                    config.audio.playback_tail_quiet_ms,
+                    config.audio.playback_tail_max_wait_ms,
+                    config.audio.playback_tail_rms_threshold,
+                )
             console.print()
 
             stability = "stable" if stable_at_capture else "latest"

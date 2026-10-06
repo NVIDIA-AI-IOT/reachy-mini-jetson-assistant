@@ -60,16 +60,28 @@ def main():
         import onnxruntime as ort
 
         available = ort.get_available_providers()
-        if "CUDAExecutionProvider" in available:
-            os.environ["ONNX_PROVIDER"] = "CUDAExecutionProvider"
-        elif "TensorrtExecutionProvider" in available:
-            os.environ["ONNX_PROVIDER"] = "TensorrtExecutionProvider"
+        if "CUDAExecutionProvider" not in available:
+            raise RuntimeError(
+                "GPU-required TTS needs ONNX Runtime CUDAExecutionProvider; "
+                f"available providers: {available}"
+            )
+
+        # kokoro-onnx uses this as its requested primary provider. ORT still
+        # registers CPU for a small number of shape-control nodes in this
+        # exported graph, but CUDA must own the model compute or startup fails.
+        os.environ["ONNX_PROVIDER"] = "CUDAExecutionProvider"
 
         from kokoro_onnx import Kokoro
         kokoro = Kokoro(str(model_path), str(voices_path))
-        provider = kokoro.sess.get_providers()[0]
+        providers = kokoro.sess.get_providers()
+        if not providers or providers[0] != "CUDAExecutionProvider":
+            raise RuntimeError(
+                "Kokoro did not create a CUDA-primary session; "
+                f"session providers: {providers}"
+            )
+        provider = providers[0]
 
-        _log(f"Kokoro TTS loaded — ONNX provider: {provider}")
+        _log(f"Kokoro TTS loaded — ONNX provider: {provider} (required)")
         _respond({"status": "ready", "provider": provider})
 
     except Exception as e:

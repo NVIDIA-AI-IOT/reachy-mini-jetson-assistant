@@ -25,6 +25,7 @@ from rich.prompt import Prompt
 import typer
 
 from app.config import Config
+from app.audit import AuditLogger
 from app.llm import LLM
 from app.rag import KnowledgeBase, RAGRetriever
 from app.monitor import get_system_stats, format_stats
@@ -34,11 +35,18 @@ app = typer.Typer(name="assistant", help="Reachy Mini Jetson Assistant", add_com
 
 
 def _load_llm(config: Config) -> LLM:
+    audit = AuditLogger(
+        config.runtime.audit_log_path,
+        max_bytes=config.runtime.audit_max_bytes,
+        backup_count=config.runtime.audit_backup_count,
+    )
     llm = LLM(
         model=config.llm.model, base_url=config.llm.base_url,
         backend=config.llm.backend, max_tokens=config.llm.max_tokens,
         temperature=config.llm.temperature, timeout=config.llm.timeout,
         system_prompt=config.llm.system_prompt,
+        guardrail_config=config.guardrails,
+        audit_logger=audit,
     )
     if not llm.load():
         console.print("[red]LLM failed to connect[/red]")
@@ -162,6 +170,10 @@ def info():
     s = get_system_stats()
     console.print(f"  {format_stats(s)}\n")
     config = Config.load()
+    console.print(
+        f"  Platform: [cyan]{config.platform.display_name}[/cyan] "
+        f"([dim]{config.platform.profile}, {config.platform.implementation_status}[/dim])\n"
+    )
     try:
         import httpx
         with httpx.Client(timeout=5.0) as c:

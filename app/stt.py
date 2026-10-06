@@ -24,7 +24,7 @@ class STT:
         self,
         model: str = "base.en",
         device: str = "cuda",
-        compute_type: str = "int8",
+        compute_type: str = "float16",
         language: str = "en",
         beam_size: int = 1,
     ):
@@ -37,20 +37,22 @@ class STT:
 
     def load(self) -> bool:
         try:
+            import ctranslate2
             from faster_whisper import WhisperModel
+
+            if self.device != "cuda":
+                raise RuntimeError(
+                    f"GPU-only STT requires device='cuda', got {self.device!r}"
+                )
+            if ctranslate2.get_cuda_device_count() < 1:
+                raise RuntimeError("CTranslate2 cannot see a CUDA device")
+
             self._model = WhisperModel(self.model_name, device=self.device, compute_type=self.compute_type)
             return True
         except Exception as e:
             print(f"faster-whisper load error: {e}")
-            try:
-                from faster_whisper import WhisperModel
-                print("Falling back to CPU...")
-                self._model = WhisperModel(self.model_name, device="cpu", compute_type="int8")
-                self.device = "cpu"
-                return True
-            except Exception as e2:
-                print(f"CPU fallback failed: {e2}")
-                return False
+            self._model = None
+            return False
 
     def transcribe(self, audio: Union[np.ndarray, str], sample_rate: int = 16000) -> Dict[str, Any]:
         if self._model is None:
@@ -63,12 +65,37 @@ class STT:
                 if np.abs(audio).max() > 1.5:
                     audio = audio / 32768.0
 
-            segments, info = self._model.transcribe(
-                audio, language=self.language, beam_size=self.beam_size,
-                no_speech_threshold=0.1, log_prob_threshold=-1.0,
+            segments_iter, info = self._model.transcribe(
+                audio,
+                language=self.language,
+                beam_size=self.beam_size,
+                temperature=0.0,
+                condition_on_previous_text=False,
+                no_speech_threshold=0.6,
+                log_prob_threshold=-0.8,
+                compression_ratio_threshold=2.4,
             )
+            segments = list(segments_iter)
             text = " ".join(s.text for s in segments).strip()
-            return {"text": text, "language": info.language, "duration": info.duration}
+            weights = [max(0.01, float(s.end - s.start)) for s in segments]
+            total_weight = sum(weights)
+            avg_logprob = (
+                sum(float(s.avg_logprob) * weight for s, weight in zip(segments, weights))
+                / total_weight
+                if total_weight else None
+            )
+            no_speech_prob = (
+                sum(float(s.no_speech_prob) * weight for s, weight in zip(segments, weights))
+                / total_weight
+                if total_weight else None
+            )
+            return {
+                "text": text,
+                "language": info.language,
+                "duration": info.duration,
+                "avg_logprob": avg_logprob,
+                "no_speech_prob": no_speech_prob,
+            }
         except Exception as e:
             return {"text": "", "error": str(e)}
 

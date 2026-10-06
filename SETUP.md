@@ -1,8 +1,11 @@
 # Legacy JetPack 6 Setup Guide
 
-> JetPack 7.2 is now the default. New installations should use the [JetPack 7.2 setup guide](docs/JETPACK_7_2_SETUP.md).
+> JetPack 7.2 is now the Orin Nano default. New Orin Nano installations should use the [JetPack 7.2 setup guide](docs/JETPACK_7_2_SETUP.md). Thor uses [SETUP_THOR.md](SETUP_THOR.md).
 
 These instructions retain the previous JetPack 6 / L4T r36 / Python 3.10 installation path for existing deployments.
+
+This guide is specifically for the `orin_nano` profile. For Thor use
+`SETUP_THOR.md`; AGX Orin is intentionally not implemented yet.
 
 ## Prerequisites
 
@@ -21,7 +24,7 @@ If you're new to Reachy Mini, start with the [official getting started guide](ht
 - **Docker** with NVIDIA runtime (`nvidia-container-toolkit`)
 - **PulseAudio** (for mic/speaker multiplexing)
 
-> **Important:** This project requires **Python 3.10** specifically. The Jetson ONNX Runtime GPU wheels, CTranslate2 builds, and Reachy Mini SDK are all built against Python 3.10 on JetPack 6. Using a different Python version will cause compatibility issues.
+> **Important:** This legacy JetPack 6 setup requires **Python 3.10** specifically. The Jetson ONNX Runtime GPU wheels, CTranslate2 builds, and Reachy Mini SDK used by this setup target Python 3.10 on JetPack 6. Use the separate platform guides for Python 3.12 runtimes.
 
 ### Minimal L4T Installations
 
@@ -297,6 +300,16 @@ Models download automatically from HuggingFace on first launch. No manual downlo
 | bge-small-en-v1.5 (Q8) | RAG embeddings | `./run_llama_embedding.sh ggml-org/bge-small-en-v1.5-Q8_0-GGUF:Q8_0` |
 
 Models are cached in `~/.cache/huggingface` and reused across runs.
+
+After starting the legacy llama.cpp VLM, the platform launcher is an alternative
+to the direct Python command. Select the legacy environment and overlay explicitly:
+
+```bash
+REACHY_ASSISTANT_CONFIG=config/settings.jp6.yaml VENV="$PWD/venv" ./run_reachy_orin_nano.sh
+```
+
+Direct Python commands also default to `orin_nano`; they still need the JP6
+overlay because the profile defaults now target JetPack 7.2.
 
 ### TTS Voices
 

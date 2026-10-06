@@ -19,6 +19,8 @@ import httpx
 import json
 from typing import Optional, Iterator, Dict, Any
 
+from app.guardrails import OutputGuardrail
+
 
 class LLM:
     def __init__(
@@ -30,6 +32,8 @@ class LLM:
         temperature: float = 0.7,
         system_prompt: str = "",
         timeout: float = 120.0,
+        guardrail_config: Any = None,
+        audit_logger: Any = None,
     ):
         self.model = model
         self.base_url = base_url.rstrip("/")
@@ -38,6 +42,8 @@ class LLM:
         self.temperature = temperature
         self.system_prompt = system_prompt
         self.timeout = timeout
+        self.guardrail = OutputGuardrail.from_config(guardrail_config)
+        self.audit_logger = audit_logger
         self._loaded = False
 
     def load(self) -> bool:
@@ -70,6 +76,7 @@ class LLM:
     def _messages(
         self, prompt: str, system_prompt: Optional[str] = None,
         few_shot: Optional[list[dict]] = None,
+        history: Optional[list[dict]] = None,
     ) -> list:
         msgs = []
         sp = system_prompt or self.system_prompt
@@ -77,6 +84,8 @@ class LLM:
             msgs.append({"role": "system", "content": sp})
         if few_shot:
             msgs.extend(few_shot)
+        if history:
+            msgs.extend(history)
         msgs.append({"role": "user", "content": prompt})
         return msgs
 
@@ -84,6 +93,7 @@ class LLM:
         self, prompt: str, images_b64: list[str],
         system_prompt: Optional[str] = None,
         few_shot: Optional[list[dict]] = None,
+        history: Optional[list[dict]] = None,
     ) -> list:
         msgs = []
         sp = system_prompt or self.system_prompt
@@ -91,6 +101,8 @@ class LLM:
             msgs.append({"role": "system", "content": sp})
         if few_shot:
             msgs.extend(few_shot)
+        if history:
+            msgs.extend(history)
         content: list[dict] = [{"type": "text", "text": prompt}]
         for b64 in images_b64:
             content.append({
@@ -108,22 +120,71 @@ class LLM:
         temperature: Optional[float] = None,
         images_b64: Optional[list[str]] = None,
         few_shot: Optional[list[dict]] = None,
+        history: Optional[list[dict]] = None,
     ) -> Iterator[tuple]:
-        """Yields (content, metadata) tuples. Pass images_b64 for multimodal VLM requests."""
+        """Yield only output that passed the complete-response guardrail.
+
+        Guarded mode intentionally buffers the backend stream so unsafe early
+        tokens can never reach the display, TTS queue, or another consumer.
+        Pass images_b64 for multimodal VLM requests.
+        """
         if not self._loaded:
             yield ("", {})
             return
         mt = max_tokens or self.max_tokens
         t = temperature if temperature is not None else self.temperature
         if images_b64:
-            msgs = self._messages_multimodal(prompt, images_b64, system_prompt, few_shot)
+            msgs = self._messages_multimodal(
+                prompt, images_b64, system_prompt, few_shot, history
+            )
         else:
-            msgs = self._messages(prompt, system_prompt, few_shot)
+            msgs = self._messages(prompt, system_prompt, few_shot, history)
 
         if self.backend == "openai":
-            yield from self._stream_openai(msgs, mt, t)
+            raw_stream = self._stream_openai(msgs, mt, t)
         else:
-            yield from self._stream_ollama(msgs, mt, t)
+            raw_stream = self._stream_ollama(msgs, mt, t)
+
+        if not self.guardrail.enabled:
+            yield from raw_stream
+            return
+
+        raw_parts: list[str] = []
+        final_metadata: dict[str, Any] = {}
+        for content, metadata in raw_stream:
+            if content:
+                raw_parts.append(content)
+            if metadata:
+                final_metadata.update(metadata)
+
+        raw_text = "".join(raw_parts).strip()
+        if not raw_text:
+            yield ("", final_metadata)
+            return
+
+        result = self.guardrail.apply(raw_text)
+        guardrail_metadata = result.metadata()
+        if self.audit_logger is not None:
+            self.audit_logger.write(
+                "model_response_guardrail",
+                model=self.model,
+                blocked=result.blocked,
+                modified=result.modified,
+                reasons=result.reasons,
+                raw_characters=len(raw_text),
+                safe_characters=len(result.text),
+            )
+        if result.modified:
+            status = "blocked" if result.blocked else "modified"
+            reasons = ", ".join(result.reasons)
+            print(f"\n  [Guardrail {status}: {reasons}]")
+
+        for safe_chunk in self.guardrail.chunks(result.text):
+            yield (safe_chunk, {})
+
+        final_metadata["done"] = True
+        final_metadata["guardrail"] = guardrail_metadata
+        yield ("", final_metadata)
 
     def _stream_openai(self, messages, max_tokens, temperature) -> Iterator[tuple]:
         try:

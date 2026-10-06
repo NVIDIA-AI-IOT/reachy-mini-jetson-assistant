@@ -1,0 +1,34 @@
+[Unit]
+Description=Reachy Mini pinned vLLM service
+Wants=network-online.target
+After=network-online.target docker.service
+Requires=docker.service
+StartLimitIntervalSec=300
+StartLimitBurst=3
+
+[Service]
+Type=simple
+User=jetson
+Group=jetson
+SupplementaryGroups=docker
+WorkingDirectory=/home/jetson/Downloads/reachy-mini-jetson-assistant
+EnvironmentFile=-/home/jetson/.config/reachy-assistant/env
+Environment=DETACH=0
+ExecStartPre=+/usr/bin/sync
+ExecStartPre=+/usr/sbin/sysctl -w vm.drop_caches=3
+ExecStart=/home/jetson/Downloads/reachy-mini-jetson-assistant/run_vllm_thor.sh
+ExecStop=-/usr/bin/docker stop --timeout 30 reachy-vllm
+Restart=on-failure
+RestartSec=10
+TimeoutStartSec=600
+TimeoutStopSec=45
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+
+[Install]
+WantedBy=multi-user.target

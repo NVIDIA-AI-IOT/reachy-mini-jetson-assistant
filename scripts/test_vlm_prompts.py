@@ -17,14 +17,18 @@
 """Test different system prompts and user prompts against the configured live VLM.
 
 Sends the same camera frame with each combo and prints the full response.
-Requires: VLM server running on localhost:8080, a frame at /tmp/test_frame.b64.
+Requires: VLM server running on localhost:8001, a frame at /tmp/test_frame.b64.
 """
 
 import httpx
 import json
+import os
 import time
 
-BASE_URL = "http://localhost:8080"
+BASE_URL = os.environ.get("VLM_BASE_URL", "http://localhost:8001")
+MODEL = os.environ.get(
+    "VLM_MODEL", "google/gemma-4-E4B-it"
+)
 IMG_B64_PATH = "/tmp/test_frame.b64"
 MAX_TOKENS = 128
 TEMPERATURE = 0.7
@@ -147,7 +151,7 @@ def query_vlm(system_prompt: str, few_shot: list, user_prompt: str, img_b64: str
     t0 = time.perf_counter()
     with httpx.Client(timeout=120.0) as client:
         r = client.post(f"{BASE_URL}/v1/chat/completions", json={
-            "model": "", "messages": messages, "stream": False,
+            "model": MODEL, "messages": messages, "stream": False,
             "max_tokens": MAX_TOKENS, "temperature": TEMPERATURE,
         })
     dt = time.perf_counter() - t0
